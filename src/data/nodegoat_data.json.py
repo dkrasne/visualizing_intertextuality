@@ -2,11 +2,7 @@ import sys
 
 import json
 import os
-try:
-    import requests
-except:
-    !pip install requests
-    import requests
+import requests
 
 
 api_token = os.getenv("NODEGOAT_API_TOKEN")
