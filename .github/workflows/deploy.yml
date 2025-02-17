@@ -22,7 +22,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - run: npm ci
-      - run: npm run build
+      - name: build
+        run: |
+          npm run build
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
         env:
           NODEGOAT_API_TOKEN: ${{ secrets.NODEGOAT_API_TOKEN }}
       - name: Deploy to Observable Cloud
