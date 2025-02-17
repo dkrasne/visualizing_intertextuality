@@ -38,7 +38,7 @@ export default {
   
   // MODIFY LIST OF INTERPRETERS:
   interpreters: {
-	".py": ["python"]
+	".py": ["python","python3"]
   },
   
 };
