@@ -17,3 +17,8 @@ const csvSamp = FileAttachment("data/sample_csv_loader.csv").csv({typed: true})
 ```js
 Inputs.table(csvSamp)
 ```
+
+```python
+test_string = "hello world"
+print(f"This is a Python test: {test_string}.")
+```
