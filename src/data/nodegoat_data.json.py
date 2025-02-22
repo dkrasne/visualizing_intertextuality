@@ -76,6 +76,68 @@ if 'obj_list' not in locals():
             # set the obj_ids to those from the backup model
             obj_ids = get_object_ids(model_json)            
 
+# Assign object types to variables for easy reference, and store in dictionary.
+tables_dict = {}
+for objtype in obj_list:
+    for id_num in objtype["objects"]:
+        if objtype["objects"][id_num]["object"]["type_id"] == 21846:
+            word_instance_table = objtype["objects"]
+            tables_dict["word_instance_table"] = word_instance_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 21847:
+            word_lvl_intxt_table = objtype["objects"]
+            tables_dict["word_lvl_intxt_table"] = word_lvl_intxt_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 21853:
+            word_lvl_intxt_grp_table = objtype["objects"]
+            tables_dict["word_lvl_intxt_grp_table"] = word_lvl_intxt_grp_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 21843:
+            author_table = objtype["objects"]
+            tables_dict["author_table"] = author_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 21844:
+            work_table = objtype["objects"]
+            tables_dict["work_table"] = work_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 21854:
+            work_seg_table = objtype["objects"]
+            tables_dict["work_seg_table"] = work_seg_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 21849:
+            match_type_class_table = objtype["objects"]
+            tables_dict["match_type_class_table"] = match_type_class_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 21864:
+            lemma_table = objtype["objects"]
+            tables_dict["lemma_table"] = lemma_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 21879:
+            meter_table = objtype["objects"]
+            tables_dict["meter_table"] = meter_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 21880:
+            meter_pos_len_table = objtype["objects"]
+            tables_dict["meter_pos_len_table"] = meter_pos_len_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 21852:
+            position_class_table = objtype["objects"]
+            tables_dict["position_class_table"] = position_class_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 21856:
+            publication_table = objtype["objects"]
+            tables_dict["publication_table"] = publication_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 21860:
+            pleiades_table = objtype["objects"]
+            tables_dict["pleiades_table"] = pleiades_table
+            break
+        else:
+            pass
+        # end of inner for loop
+    # end of outer for loop
+
+
 # Write current model and object list to backup files
 with open(scriptdir+"/model_json_backup.json", "w") as backup_model:
     json.dump(model_json, backup_model)
@@ -83,5 +145,5 @@ with open(scriptdir+"/objects_json_backup.json", "w") as backup_obj_file:
     json.dump(obj_list, backup_obj_file)
 
 # Output final JSON for Framework page
-json.dump(obj_list, sys.stdout)
+json.dump(tables_dict, sys.stdout)
 
