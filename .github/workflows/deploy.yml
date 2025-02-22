@@ -25,7 +25,7 @@ jobs:
           pip install -r requirements.txt
       - run: npm ci
       - run: npm run build
-        env: |
+        env:
           NODEGOAT_API_TOKEN: ${{ secrets.NODEGOAT_API_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Commit and Push Changes
