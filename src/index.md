@@ -22,3 +22,11 @@ Inputs.table(csvSamp)
 test_string = "hello world"
 print(f"This is a Python test: {test_string}.")
 ```
+
+```js
+const permissionsAnswer = FileAttachment("data/write_check.json").json()
+```
+
+```js
+permissionsAnswer
+```
