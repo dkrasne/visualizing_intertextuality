@@ -24,9 +24,9 @@ print(f"This is a Python test: {test_string}.")
 ```
 
 ```js
-const permissionsAnswer = FileAttachment("data/write_check.json").json()
+const meters = FileAttachment("data/meters.json").json()
 ```
 
 ```js
-permissionsAnswer
+meters
 ```
