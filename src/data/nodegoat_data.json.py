@@ -56,6 +56,7 @@ obj_ids = get_object_ids(model_json)
 
 ## ADD ERROR HANDLING FOR A PROBLEMATIC OBJECT CALL FROM API PARTWAY THROUGH
 ## CHECK WHETHER ANYTHING ELSE NEEDS TO BE CHANGED IF LOADING FROM FILE
+### I think I've done this now?
 
 # if original API call for model succeeded, do another API call for objects
 if 'obj_list' not in locals():
@@ -75,7 +76,7 @@ if 'obj_list' not in locals():
             with open(scriptdir+"/objects_json_backup.json") as backup_file:
                 obj_list = json.load(backup_file)
             # set the obj_ids to those from the backup model
-            obj_ids = get_object_ids(model_json)            
+            obj_ids = get_object_ids(model_json)
 
 # Assign object types to variables for easy reference, and store in dictionary.
 tables_dict = {}
@@ -162,9 +163,19 @@ def table_to_df(table, cols_dict):
                     tdict[str(key)] = None
         dictlist.append(tdict)
     df = pd.DataFrame.from_dict(dictlist)
+
+    # convert numeric IDs to string and remove any trailing decimals
     for col in df:
         if col[-3:] == "_id":
             df[col] = df[col].astype(str)
+    def remove_decimal(id_string):
+        if isinstance(id_string, str) and id_string[-2:] == ".0":
+            return id_string[:-2]
+        return id_string
+    for col in df:
+        if col[-3:] == "_id":
+            df[col] = df[col].apply(remove_decimal)
+
     return df
 
 # Prepare columns for dataframes
@@ -194,6 +205,8 @@ work_seg_cols = {"work_id": {"67408": "refid"},
                  "work_section": {"67410": "objval"},
                  "work_subsection": {"67539": "objval"},
                  "follows_id": {"67525": "refid"},
+                 "first_line": {"68041": "objval"},
+                 "last_line": {"68042": "objval"},
                  "meter_id": {"67531": "refid"},
                  "perseus_url": {"67534": "objval"}}
 lemma_cols = {"lemma": {"67440": "objval"},
@@ -236,7 +249,7 @@ position_class_df = pd.DataFrame.from_dict(position_class_list)
 
 ############ Join tables and make JSON objects###########
 
-# Meter, position, length
+# Meter + position + length extended dataframe
 meter_df.index = meter_df.obj_id
 meter_df_ext = pd.merge(pd.merge(meter_df.drop("obj_id", axis=1), 
                                  meter_pos_len_df, how="left", left_index=True, right_on="meter_id"), 
@@ -265,6 +278,41 @@ with open(scriptdir+"/meters.json", "w") as meters_json:
     json.dump(meters_dict, meters_json)
 
 
+# Word + Lemma + Work + Work Segment + Author
+
+
+
+######## OUTPUT ALL DATAFRAMES IN DICT -> JSON FORMAT ############
+
+tables_list = ['word_instance_table',
+ 'word_lvl_intxt_table',
+ 'word_lvl_intxt_grp_table',
+ 'author_table',
+ 'work_table',
+ 'work_seg_table',
+ 'lemma_table',
+ 'meter_table',
+ 'meter_pos_len_table']
+
+df_list = [word_instance_df,
+           word_lvl_intxt_df,
+           word_lvl_intxt_grp_df,
+           author_df,
+           work_df,
+           work_seg_df,
+           lemma_df,
+           meter_df,
+           meter_pos_len_df]
+
+tables_df_to_dict = {}
+
+for i, df in enumerate(df_list):
+    df_name = tables_list[i]
+    new_dict = df.to_dict(orient='records')
+    tables_df_to_dict[df_name] = new_dict
+
+with open(scriptdir+"/nodegoat_tables.json", "w") as table_json:
+    json.dump(tables_df_to_dict, table_json)
 
 # Write current model and object list to backup files
 with open(scriptdir+"/model_json_backup.json", "w") as backup_model:

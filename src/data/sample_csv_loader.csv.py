@@ -6,6 +6,6 @@ import os
 scriptdir = os.path.dirname(os.path.abspath(__file__))
 
 csv = pd.read_csv(f"{scriptdir}/sample_csv.csv")
-print(csv.head())
+#print(csv.head())
 
-csv.to_csv(sys.stdout)
+csv.to_csv(sys.stdout,index=False, lineterminator='\n')
