@@ -245,6 +245,17 @@ const lineArr = d3.range(lineRange.firstLine, lineRange.lastLine+1);
 
 const wordLvlIntxts = nodegoatTables.word_lvl_intxt_table;
 
+if (wordsFiltered.length === 0) {wordsFiltered.push(
+	{obj_id: "",
+  word: "",
+  lemma_id: "",
+  work_segment_id: "",
+  line_num: 0,
+  line_num_modifier: null,
+  start_pos_id: "",
+  end_pos_id: ""}
+)}
+
 for (let word in wordsFiltered) {
 	wordsFiltered[word].posIDs = [];
 	wordsFiltered[word].directIntertexts = 0;
@@ -254,19 +265,19 @@ for (let word in wordsFiltered) {
 
 // Assign all spanned positions to word
 
-let posMatch = false;
-for (let posn in positions) {
-	if (wordsFiltered[word].start_pos_id === positions[posn].meter_pos_len_id) {
-		posMatch = true;
+	let posMatch = false;
+	for (let posn in positions) {
+		if (wordsFiltered[word].start_pos_id === positions[posn].meter_pos_len_id) {
+			posMatch = true;
+		}
+		if (posMatch === true) {
+			wordsFiltered[word].posIDs.push(positions[posn].meter_pos_len_id);		
+		}
+		if (wordsFiltered[word].end_pos_id === positions[posn].meter_pos_len_id) {
+			posMatch = false;
+			break;
+		}
 	}
-	if (posMatch === true) {
-		wordsFiltered[word].posIDs.push(positions[posn].meter_pos_len_id);		
-	}
-	if (wordsFiltered[word].end_pos_id === positions[posn].meter_pos_len_id) {
-		posMatch = false;
-		break;
-	}
-}
 
 // Gather direct intertexts
 	
@@ -317,15 +328,6 @@ for (let posn in positions) {
 	wordsFiltered[word].indirectIntertexts = wordsFiltered[word].indirectIntertextIDs.length;
 }
 	
-
-```
-
-```js
-wordsFiltered
-```
-
-
-```js
 const intertextsArrComplete = [];
 
 for (let line in lineArr) {
@@ -359,6 +361,10 @@ const intertextsArr = intertextsArrComplete.filter(pos => pos.word);
 ```
 
 ```js
+wordsFiltered
+```
+
+```js
 intertextsArr
 ```
 
@@ -378,7 +384,7 @@ for (let meter in meters) {
 // Define grid height.
 const gridY = (lineRange.lastLine - lineRange.firstLine) + 1;
 
-const cellSize = 10;
+const cellSize = 15;
 const gridHeight = gridY * cellSize;
 const gridWidth = gridX * cellSize;
 ```
@@ -450,6 +456,7 @@ ${Plot.plot({
 			},
 		})
 	],
+	style: {fontSize: "12px"},
 	width: gridWidth + 100,
 	height: gridHeight + 50,
 	marginTop: 20,
