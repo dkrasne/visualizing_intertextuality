@@ -1,3 +1,7 @@
+---
+title: Visualizing Intertextuality
+---
+
 # Visualizing Intertextuality
 
 A project to visualize intertexts in Latin poetry using [nodegoat](https://nodegoat.net/), [Observable Framework](https://observablehq.com/framework/), and Python. View the code on [GitHub](https://github.com/dkrasne/visualizing_intertextuality).
@@ -22,7 +26,8 @@ const nodegoatTables = FileAttachment("data/nodegoat_tables.json").json()
 nodegoatTables
 ```
 
-### Select work section to view
+### Select passage to view
+
 
 ```js
 // Create authors dropdown
@@ -35,8 +40,8 @@ for (let author in authorTable) {
 	authorList.push(authorSet);
 }
 
-const authorPicker = Inputs.select(new Map([[null,null]].concat(authorList)), {label: "Author:", value: null, sort: true});
-let authorID = view(authorPicker);
+const authorPicker = Inputs.select(new Map([[null,null]].concat(authorList)), {label: "Select author:", value: null, sort: true});
+const authorID = view(authorPicker);
 ```
 
 ```js
@@ -52,7 +57,7 @@ for (let work in workTable) {
 	}
 }
 
-const workPicker = Inputs.select(new Map([[null, null]].concat(workList)), {label: "Work:", value: null, sort: true});
+const workPicker = Inputs.select(new Map([[null, null]].concat(workList)), {label: "Select work:", value: null, sort: true});
 const workID = view(workPicker);
 ```
 
@@ -76,24 +81,50 @@ for (let workSeg in workSegTable) {
 	}
 }
 
-const workSegPicker = Inputs.select(new Map([[null, null]].concat(workSegList)), {label: "Work section:", value: null, sort: true});
+const workSegPicker = Inputs.select(new Map([[null, null]].concat(workSegList)), {label: "Select work section:", value: null, sort: true});
 const workSegID = view(workSegPicker);
 ```
 
+<div class="grid grid-cols-3">
+<div class="card">
+${authorPicker}
+</div>
+<div class="card">
+${workPicker}
+</div>
+<div class="card">
+${workSegPicker}
+</div>
+</div>
 
 ```js
-authorPicker
-```
-<!--
-The author's ID is ${authorID}.
--->
+const passageDetails = {};
 
-```js
-workPicker
-```
+for (let author in authorTable) {
+	if (authorTable[author].obj_id === authorID) {
+		passageDetails.authorName = authorTable[author].author_name;
+	}
+}
 
-```js
-workSegPicker
+for (let work in workTable) {
+	if (workTable[work].obj_id === workID) {
+		passageDetails.workTitle = workTable[work].title;
+	}
+}
+
+for (let workSeg in workSegTable) {
+	
+	if (workSegTable[workSeg].obj_id === workSegID) {	
+		let workSegName;
+		if (!workSegTable[workSeg].work_subsection) {
+			workSegName = workSegTable[workSeg].work_section;
+		} else {
+			workSegName = workSegTable[workSeg].work_section + ', ' + workSegTable[workSeg].work_subsection;
+		}
+		
+		passageDetails.workSegName = workSegName;
+	}
+}
 ```
 
 ```js
@@ -116,20 +147,25 @@ for (let workSeg in workSegTable) {
 	}
 }
 
+```
+
+```js
 // Create number pickers for range of lines to display
 
 const lineMinPicker = Inputs.number([workSegVars.workSegLineMin, workSegVars.workSegLineMax], 
 									{step: 1, 
 									label: "Select starting line: ", 
 									value: workSegVars.workSegLineMin, 
-									default: workSegVars.workSegLineMin});
+									placeholder: workSegVars.workSegLineMin});
 const startLine = view(lineMinPicker);
+```
 
+```js
 const lineMaxPicker = Inputs.number([workSegVars.workSegLineMin, workSegVars.workSegLineMax], 
 									{step: 1, 
 									label: "Select ending line: ", 
 									value: workSegVars.workSegLineMin + 19, 
-									default: workSegVars.workSegLineMax});
+									placeholder: workSegVars.workSegLineMax});
 const endLine = view(lineMaxPicker);
 ```
 
@@ -148,7 +184,9 @@ if (startLine > 0) {
 
 if (endLine >= startLine) {
 	lineRange.lastLine = endLine;
-} else {lineRange.lastLine = lineRange.firstLine + 20;}
+} else {lineRange.lastLine = lineRange.firstLine + 0;}
+
+// STILL NEED TO ADD LOGIC FOR ENDING PAST THE MAX AVAILABLE, AS WELL AS IF THE FIRST LINE ISN'T 1.
 ```
 
 ```js
@@ -156,12 +194,16 @@ if (endLine >= startLine) {
 
 const meterID = workSegVars.workSegMeterID;
 let positions;
+let meterLen;
 
 for (let meter in meters) {
 	if (meters[meter].meter_id === meterID) {
 		positions = meters[meter].positions;
+		meterLen = meters[meter].max_line_beats;
 	}
 }
+
+const meterPosArr = d3.range(1, meterLen+1);
 
 let i = 1;
 for (let pos in positions) {
@@ -178,6 +220,7 @@ for (let pos in positions) {
 positions
 ```
 
+
 ## Prepare intertexts
 
 ```js
@@ -193,7 +236,9 @@ for (let inst in wordInstTable) {
 }
 
 const wordsFiltered = wordInstArr.filter(inst => inst.line_num >= lineRange.firstLine && inst.line_num <= lineRange.lastLine);
+const lineArr = d3.range(lineRange.firstLine, lineRange.lastLine+1);
 ```
+
 
 ```js
 // Get intertexts
@@ -201,10 +246,27 @@ const wordsFiltered = wordInstArr.filter(inst => inst.line_num >= lineRange.firs
 const wordLvlIntxts = nodegoatTables.word_lvl_intxt_table;
 
 for (let word in wordsFiltered) {
+	wordsFiltered[word].posIDs = [];
 	wordsFiltered[word].directIntertexts = 0;
 	wordsFiltered[word].indirectIntertexts = 0;
 	wordsFiltered[word].directIntertextIDs = [];
 	wordsFiltered[word].indirectIntertextIDs = [];
+
+// Assign all spanned positions to word
+
+let posMatch = false;
+for (let posn in positions) {
+	if (wordsFiltered[word].start_pos_id === positions[posn].meter_pos_len_id) {
+		posMatch = true;
+	}
+	if (posMatch === true) {
+		wordsFiltered[word].posIDs.push(positions[posn].meter_pos_len_id);		
+	}
+	if (wordsFiltered[word].end_pos_id === positions[posn].meter_pos_len_id) {
+		posMatch = false;
+		break;
+	}
+}
 
 // Gather direct intertexts
 	
@@ -252,6 +314,7 @@ for (let word in wordsFiltered) {
 		j += 1;
 	}} while (j < checkedIDs.length);
 
+	wordsFiltered[word].indirectIntertexts = wordsFiltered[word].indirectIntertextIDs.length;
 }
 	
 
@@ -263,9 +326,41 @@ wordsFiltered
 
 
 ```js
+const intertextsArrComplete = [];
+
+for (let line in lineArr) {
+	for (let i in meterPosArr) {
+		let intertextObj = {};
+		intertextObj.lineNum = lineArr[line];
+		intertextObj.linePos = meterPosArr[i];
+		intertextObj.intxtCnt = 0;
+		for (let posn in positions) {
+			if (positions[posn].gridNums.includes(meterPosArr[i])) {
+				intertextObj.linePosID = positions[posn].meter_pos_len_id;
+				break;
+			}
+		}
+		for (let word in wordsFiltered) {
+			if (wordsFiltered[word].line_num === intertextObj.lineNum && wordsFiltered[word].posIDs.includes(intertextObj.linePosID)) {
+				intertextObj.wordObj = wordsFiltered[word];
+				intertextObj.intxtCnt = wordsFiltered[word].directIntertexts + wordsFiltered[word].indirectIntertexts;
+				intertextObj.word = wordsFiltered[word].word;
+			}
+		}
+		
+		
+		
+		intertextsArrComplete.push(intertextObj);
+	}
+}
+
+const intertextsArr = intertextsArrComplete.filter(pos => pos.word);
 
 ```
 
+```js
+intertextsArr
+```
 
 ## Create Grid
 
@@ -281,20 +376,92 @@ for (let meter in meters) {
 }
 
 // Define grid height.
-const gridY = (endLine - startLine) + 1;
+const gridY = (lineRange.lastLine - lineRange.firstLine) + 1;
 
+const cellSize = 10;
+const gridHeight = gridY * cellSize;
+const gridWidth = gridX * cellSize;
 ```
 
+<!--
 The grid will be ${gridX} cells wide.
 The grid will be ${gridY} cells tall.
+-->
+
 
 ```js
-Plot.plot({
+
+if (intertextsArr.every(intxt => intxt.intxtCnt === 0)) {
+	display(html`<p>Based on information currently in the database, there are no intertexts in the specified passage.</p>`)
+} else {
+
+display(
+
+html`<div class="grid grid-cols-2"><div class="card" style="background-color:#ccccff; padding-top: 30px;">
+
+<h2>${passageDetails.authorName}, <i>${passageDetails.workTitle}</i>, ${passageDetails.workSegName}: lines ${lineRange.firstLine}&ndash;${lineRange.lastLine}</h2>
+
+${Plot.plot({
 	grid: true,
-	x: {label: 'Position', domain: d3.range(1,gridX+1)},
-	y: {label: 'Line', domain: d3.range(startLine, endLine +1)},
-	color: {scheme: "Blues"},
-})
+	x: {
+		label: null, 
+		domain: d3.range(1,gridX+1),
+		padding: 0,
+		axis: null,
+		},
+	y: {
+		label: 'Line', 
+		domain: d3.range(lineRange.firstLine, lineRange.lastLine +1),
+//		padding: 0,
+		tickSize: 0,
+		},
+	color: {scheme: "Greens"},
+	marks: [
+		Plot.cell(intertextsArr, {
+			x: "linePos",
+			y: "lineNum",
+			fill: d => d.wordObj.directIntertexts + d.wordObj.indirectIntertexts,
+			tip: {format: {
+				word: true,
+				x: false,
+				y: false,
+				lineNum: true,
+				fill: false
+			}},
+			channels: {
+				title: d => `${d.wordObj.word} (line ${d.lineNum})\n# direct intertexts: ${d.wordObj.directIntertexts}\n# indirect intertexts: ${d.wordObj.indirectIntertexts}`,
+				word: d => d.wordObj.word,
+				lineNum: {
+					value: "lineNum",
+					label: "line"
+				},
+				dirIntxt: {
+					value: d => d.wordObj.directIntertexts,
+					label: "# direct intertexts"
+				},
+				indIntxt: {
+					value: d => d.wordObj.indirectIntertexts,
+					label: "# inherited intertexts"
+				},
+/*				intxtCnt: {
+					value: "intxtCnt",
+					label: "# direct and indirect intertexts"
+				}, */
+			},
+		})
+	],
+	width: gridWidth + 100,
+	height: gridHeight + 50,
+	marginTop: 20,
+	marginRight: 50,
+	marginBottom: 30,
+	marginLeft: 50
+})}
+</div>
+<div><p>Eventually the text of the selected passage may go here, but it's more likely that I'll put a network visualization here.</p></div>
+</div>`
+
+)}
 ```
 
 
