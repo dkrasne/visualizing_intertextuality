@@ -4,19 +4,26 @@ title: Visualizing Intertextuality
 
 # Visualizing Intertextuality
 
-A project to visualize intertexts in Latin poetry using [nodegoat](https://nodegoat.net/), [Observable Framework](https://observablehq.com/framework/), and Python. View the code on [GitHub](https://github.com/dkrasne/visualizing_intertextuality).
+A project to visualize intertexts in Latin poetry using [nodegoat](https://nodegoat.net/), [Observable Framework](https://observablehq.com/framework/), and Python. 
+
+View the code on [GitHub](https://github.com/dkrasne/visualizing_intertextuality).
 
 
 <!-- Load data -->
 
 ```js
+// Attach extracted nodegoat objects (final output of Python data loader)
 const nodegoatModel = FileAttachment("data/nodegoat_data.json").json()
 ```
-
-
 ```js
+// Attach restructured tables for querying
 const nodegoatTables = FileAttachment("data/nodegoat_tables.json").json()
 ```
+```js
+// Attach meters table for querying.
+const meters = FileAttachment("data/meters.json").json()
+```
+<!-- End load data -->
 
 
 ## Select passage to view
@@ -62,7 +69,9 @@ const workSegTable = nodegoatTables.work_seg_table;
 
 for (let workSeg in workSegTable) {
 	let workSegName;
-	if (!workSegTable[workSeg].work_subsection) {
+	if (!workSegTable[workSeg].work_section) {	
+		workSegName = "all"
+	} else if (!workSegTable[workSeg].work_subsection) {
 		workSegName = workSegTable[workSeg].work_section;
 	} else {
 		workSegName = workSegTable[workSeg].work_section + ', ' + workSegTable[workSeg].work_subsection;
@@ -346,6 +355,16 @@ for (let line in lineArr) {
 
 const intertextsArr = intertextsArrComplete.filter(pos => pos.word);
 
+// Get final intertext counts, in order to set tick range
+
+const intxtCnts = [];
+
+if (intertextsArr.length > 0) {
+	for (let i in intertextsArr) {
+		intxtCnts.push(intertextsArr[i].intxtCnt);
+	}
+}
+
 ```
 
 
@@ -365,9 +384,9 @@ for (let meter in meters) {
 }
 
 // Define grid height.
-const gridY = (lineRange.lastLine - lineRange.firstLine) + 1;
+const gridY = (lineRange.lastLine - lineRange.firstLine) + 1;  // I may need to modify this to accomodate passages with extra lines
 
-const cellSize = 15;
+const cellSize = 20;
 const gridHeight = gridY * cellSize;
 const gridWidth = gridX * cellSize;
 ```
@@ -401,13 +420,13 @@ ${Plot.plot({
 	y: {
 		label: 'Line', 
 		domain: d3.range(lineRange.firstLine, lineRange.lastLine +1),
-//		padding: 0,
 		tickSize: 0,
 		},
 	color: {scheme: "Greens", 
 		legend: true, 
-		label: "Total Intertexts",
-//		ticks: d3.range(4)		// NEED TO SET THIS TO A RANGE FROM MIN. INTERTEXTS TO MAX. INTERTEXTS
+		label: "Total Intertexts (direct & indirect)",
+		ticks: d3.range(Math.min(...intxtCnts), Math.max(...intxtCnts)+1),
+		tickFormat: d => Math.floor(d),
 		},
 	marks: [
 		Plot.cell(intertextsArr, {
@@ -443,16 +462,18 @@ ${Plot.plot({
 			},
 		})
 	],
-	style: {fontSize: "12px"},
-	width: gridWidth + 100,
+	style: {fontSize: "12pt"},
+	width: gridWidth + 120,
 	height: gridHeight + 50,
 	marginTop: 20,
 	marginRight: 50,
 	marginBottom: 30,
-	marginLeft: 50
+	marginLeft: 70
 })}
 </div>
-<div><p>Eventually the text of the selected passage may go here, but it's more likely that I'll put a network visualization here.</p></div>
+<div>
+	<p>Eventually the text of the selected passage may go here, but it's more likely that I'll put a network visualization here.</p>
+</div>
 </div>`
 
 )}
@@ -492,6 +513,11 @@ wordsFiltered
 intertextsArr
 ```
 
+Meters:
+
+```js
+meters
+```
 
 
 ## Testing stuff goes below here.
@@ -604,14 +630,4 @@ const csvSamp = FileAttachment("data/sample_csv_loader.csv").csv({typed: true})
 
 ```js
 Inputs.table(csvSamp)
-```
-
-
-```js
-// Attach meters table for querying.
-const meters = FileAttachment("data/meters.json").json()
-```
-
-```js
-meters
 ```
