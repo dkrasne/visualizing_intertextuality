@@ -6,27 +6,20 @@ title: Visualizing Intertextuality
 
 A project to visualize intertexts in Latin poetry using [nodegoat](https://nodegoat.net/), [Observable Framework](https://observablehq.com/framework/), and Python. View the code on [GitHub](https://github.com/dkrasne/visualizing_intertextuality).
 
-## Prelims
 
-### Load data
+<!-- Load data -->
 
 ```js
 const nodegoatModel = FileAttachment("data/nodegoat_data.json").json()
 ```
 
-```js
-nodegoatModel
-```
 
 ```js
 const nodegoatTables = FileAttachment("data/nodegoat_tables.json").json()
 ```
 
-```js
-nodegoatTables
-```
 
-### Select passage to view
+## Select passage to view
 
 
 ```js
@@ -86,15 +79,15 @@ const workSegID = view(workSegPicker);
 ```
 
 <div class="grid grid-cols-3">
-<div class="card">
-${authorPicker}
-</div>
-<div class="card">
-${workPicker}
-</div>
-<div class="card">
-${workSegPicker}
-</div>
+	<div class="card">
+		${authorPicker}
+	</div>
+	<div class="card">
+		${workPicker}
+	</div>
+	<div class="card">
+		${workSegPicker}
+	</div>
 </div>
 
 ```js
@@ -216,12 +209,7 @@ for (let pos in positions) {
 }
 ```
 
-```js
-positions
-```
-
-
-## Prepare intertexts
+<!-- Prepare intertexts for display -->
 
 ```js
 // Build word-level intertexts
@@ -282,10 +270,10 @@ for (let word in wordsFiltered) {
 // Gather direct intertexts
 	
 	for (let intxt in wordLvlIntxts) {
-		if (wordLvlIntxts[intxt].target_word_id === wordsFiltered[word].obj_id) {
-			let sourceID = wordLvlIntxts[intxt].source_word_id;
-			wordsFiltered[word].directIntertexts += 1;
-			wordsFiltered[word].directIntertextIDs.push(sourceID);
+		if (wordLvlIntxts[intxt].target_word_id === wordsFiltered[word].obj_id) {	// check each intertext to see if the current word is its target
+			let sourceID = wordLvlIntxts[intxt].source_word_id;		// if so, set 'sourceID' to the respective source word
+			wordsFiltered[word].directIntertexts += 1;		// increment the number of direct intertexts
+			wordsFiltered[word].directIntertextIDs.push(sourceID);	// add the source word to the list of direct intertexts
 		}
 	}
 
@@ -295,10 +283,10 @@ for (let word in wordsFiltered) {
 	for (let i in wordsFiltered[word].directIntertextIDs) {
 		let id = wordsFiltered[word].directIntertextIDs[i];
 		for (let intxt in wordLvlIntxts) {
-			if (wordLvlIntxts[intxt].target_word_id === id) {
-				let sourceID = wordLvlIntxts[intxt].source_word_id;	
+			if (wordLvlIntxts[intxt].target_word_id === id) {		// check each intertext to see if a direct intertext source is also the target of another intertext
+				let sourceID = wordLvlIntxts[intxt].source_word_id;		// if so, set 'sourceID' to the respective source word
 				if (!wordsFiltered[word].indirectIntertextIDs.includes(sourceID) && !wordsFiltered[word].directIntertextIDs.includes(sourceID)) {
-					wordsFiltered[word].indirectIntertextIDs.push(sourceID);
+					wordsFiltered[word].indirectIntertextIDs.push(sourceID);	// if the relevant source word isn't already included in the direct or indirect intertexts, add it to the list of indirect intertexts
 				} 
 			}
 		}
@@ -360,15 +348,10 @@ const intertextsArr = intertextsArrComplete.filter(pos => pos.word);
 
 ```
 
-```js
-wordsFiltered
-```
 
-```js
-intertextsArr
-```
+## Visualization
 
-## Create Grid
+<!-- Create grid -->
 
 ```js
 // Define grid width based on the selection's meter.
@@ -405,7 +388,7 @@ display(
 
 html`<div class="grid grid-cols-2"><div class="card" style="background-color:#ccccff; padding-top: 30px;">
 
-<h2>${passageDetails.authorName}, <i>${passageDetails.workTitle}</i>, ${passageDetails.workSegName}: lines ${lineRange.firstLine}&ndash;${lineRange.lastLine}</h2>
+<h2 style="padding-bottom: 10px;">${passageDetails.authorName}, <i>${passageDetails.workTitle}</i>, ${passageDetails.workSegName}: lines ${lineRange.firstLine}&ndash;${lineRange.lastLine}</h2>
 
 ${Plot.plot({
 	grid: true,
@@ -421,7 +404,11 @@ ${Plot.plot({
 //		padding: 0,
 		tickSize: 0,
 		},
-	color: {scheme: "Greens"},
+	color: {scheme: "Greens", 
+		legend: true, 
+		label: "Total Intertexts",
+//		ticks: d3.range(4)		// NEED TO SET THIS TO A RANGE FROM MIN. INTERTEXTS TO MAX. INTERTEXTS
+		},
 	marks: [
 		Plot.cell(intertextsArr, {
 			x: "linePos",
@@ -470,6 +457,41 @@ ${Plot.plot({
 
 )}
 ```
+
+<hr>
+
+## Data Checks
+
+`nodegoatModel`:
+
+```js
+nodegoatModel
+```
+
+`nodegoatTables`:
+
+```js
+nodegoatTables
+```
+
+`positions` (metrical positions):
+
+```js
+positions
+```
+
+`wordsFiltered`:
+
+```js
+wordsFiltered
+```
+
+`intertextsArr`:
+
+```js
+intertextsArr
+```
+
 
 
 ## Testing stuff goes below here.
