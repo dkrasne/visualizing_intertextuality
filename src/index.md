@@ -1,10 +1,14 @@
 ---
 title: Visualizing Intertextuality
+theme: [wide, alt]
+toc: false
 ---
 
 # Visualizing Intertextuality
 
-A project to visualize intertexts in Latin poetry using [nodegoat](https://nodegoat.net/), [Observable Framework](https://observablehq.com/framework/), and Python. 
+**Developed by:** Darcy Krasne
+
+A project to visualize intertexts in Latin poetry using [nodegoat](https://nodegoat.net/), [Observable Framework](https://observablehq.com/framework/), and Python. (See [the about page](./about) for further details.)
 
 View the code on [GitHub](https://github.com/dkrasne/visualizing_intertextuality).
 
@@ -28,6 +32,7 @@ const meters = FileAttachment("data/meters.json").json()
 
 ## Select passage to view
 
+<div class="tip">Currently there is a limited set of intertexts in the database. Choose Valerius Flaccus, <i>Argonautica</i>, Book 2, lines 475&ndash;476 to see what the display looks like.</div>
 
 ```js
 // Create authors dropdown
@@ -35,9 +40,13 @@ const meters = FileAttachment("data/meters.json").json()
 const authorList = [];
 const authorTable = nodegoatTables.author_table;
 
+/* If there are any surviving bilingual poets, there may need to be a second filtering step at the works table. */
+
 for (let author in authorTable) {
-	const authorSet = [authorTable[author].author_name, authorTable[author].obj_id];
-	authorList.push(authorSet);
+	if (authorTable[author].language === "Latin") {
+		const authorSet = [authorTable[author].author_name, authorTable[author].obj_id];
+		authorList.push(authorSet);
+	}
 }
 
 const authorPicker = Inputs.select(new Map([[null,null]].concat(authorList)), {label: "Select author:", value: null, sort: true});
@@ -163,13 +172,25 @@ const startLine = view(lineMinPicker);
 ```
 
 ```js
+let tempMax = Math.min(workSegVars.workSegLineMin + 19, Math.max(workSegVars.workSegLineMin,workSegVars.workSegLineMax))
+
 const lineMaxPicker = Inputs.number([workSegVars.workSegLineMin, workSegVars.workSegLineMax], 
 									{step: 1, 
 									label: "Select ending line: ", 
-									value: workSegVars.workSegLineMin + 19, 
+//									value: workSegVars.workSegLineMin + 19, 
+									value: tempMax, 
 									placeholder: workSegVars.workSegLineMax});
 const endLine = view(lineMaxPicker);
 ```
+
+<div class="grid grid-cols-2">
+<div class="card">
+${lineMinPicker}
+</div>
+<div class="card">
+${lineMaxPicker}
+</div>
+</div>
 
 ```js
 // Set default numbers
@@ -347,13 +368,11 @@ for (let line in lineArr) {
 			}
 		}
 		
-		
-		
 		intertextsArrComplete.push(intertextObj);
 	}
 }
 
-const intertextsArr = intertextsArrComplete.filter(pos => pos.word);
+const intertextsArr = intertextsArrComplete.filter(pos => pos.word); // only include cells that have a word assigned to them
 
 // Get final intertext counts, in order to set tick range
 
@@ -398,6 +417,14 @@ The grid will be ${gridY} cells tall.
 
 
 ```js
+let bgColor = "#ccccff"; // this is a nice blue that works well
+/* the following are attempts to make a more "papyrus"-like background that still contrasts with the lightest green */
+/*
+bgColor = "#ddcc88";
+bgColor = "#daba91"; // taken from an actual papyrus pixel
+bgColor = "#ccaf87"; // taken from an actual papyrus pixel
+bgColor = "#d4b48c"; // average of the previous two colors
+*/
 
 if (intertextsArr.every(intxt => intxt.intxtCnt === 0)) {
 	display(html`<p>Based on information currently in the database, there are no intertexts in the specified passage.</p>`)
@@ -405,7 +432,11 @@ if (intertextsArr.every(intxt => intxt.intxtCnt === 0)) {
 
 display(
 
-html`<div class="grid grid-cols-2"><div class="card" style="background-color:#ccccff; padding-top: 30px;">
+html`<p style="max-width:none; font-size:smaller;">Click on a cell to freeze the popup information. &ldquo;Direct intertexts&rdquo; are those where a scholar has suggested a direct link between the present word and an earlier word. &ldquo;Indirect intertexts&rdquo; are intertexts at further remove (i.e., where a direct or indirect intertext refers to an earlier passage).</p>
+
+<p style="max-width:none; font-size:smaller;">Two caveats: absence of a word does not mean that there are no intertexts, just that they are not yet in the database; and lines appear in numeric order, even if editors agree that they should be transposed.</p></div>
+
+<div class="grid grid-cols-2"><div class="card" style="background-color:${bgColor}; padding-top: 30px;">
 
 <h2 style="padding-bottom: 10px;">${passageDetails.authorName}, <i>${passageDetails.workTitle}</i>, ${passageDetails.workSegName}: lines ${lineRange.firstLine}&ndash;${lineRange.lastLine}</h2>
 
@@ -472,7 +503,7 @@ ${Plot.plot({
 })}
 </div>
 <div>
-	<p>Eventually the text of the selected passage may go here, but it's more likely that I'll put a network visualization here.</p>
+	<p>Eventually there will be a network visualization in this space.</p>
 </div>
 </div>`
 
@@ -480,6 +511,34 @@ ${Plot.plot({
 ```
 
 <hr>
+
+## Data
+
+<details>
+<summary>Click here to view the data.</summary>
+
+Raw data from nodegoat (extracted into separate objects):
+
+```js
+nodegoatModel
+```
+
+Data after initial transformation:
+
+```js
+nodegoatTables
+```
+```js
+meters
+```
+
+</details>
+
+<hr>
+
+# Sandbox
+
+Everything below here will not be in the final project.
 
 ## Data Checks
 
@@ -519,6 +578,7 @@ Meters:
 meters
 ```
 
+<hr>
 
 ## Testing stuff goes below here.
 

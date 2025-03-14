@@ -195,6 +195,7 @@ wd_lvl_intxt_cols = {"source_word_id": {"67392": "refid"},
 wd_lvl_intxt_grp_cols = {"word_intxt_ids": {"67406": "refid"}}
 author_cols = {"author_name": {"67375": "objval"},
                "wikidata_url": {"67383": "objval"},
+               "language": {"68096": "objval"},
                "praenomen": {"67385": "objval"},
                "nomen": {"67386": "objval"},
                "cognomen": {"67387": "objval"}}
