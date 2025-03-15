@@ -70,18 +70,18 @@ One need not understand Latin to see the words shared between the lines of poetr
 
 This project asks how intertextuality can be displayed and comprehended through a visual, rather than textual, medium. The goal is to conceptualize and develop alternative methods of visualizing the intertextual richness and complexity of a given passage, starting from the assumption that such a visualization requires two different dimensions: one that shows the density of intertexts within a given passage, and one that shows the referential network arising around the passage. The structure of the data and its output should enable analytical approaches and questions, and the tools have been selected with these considerations in mind.
 
-The data is stored in a [nodegoat](https://nodegoat.net/) [object-relational database](https://en.wikipedia.org/wiki/Object%E2%80%93relational_database). nodegoat was chosen for several reasons, including its humanities-oriented design, its ease of use, and its ability to expose the data as Linked Open Data. (While the open-source graph database [neo4j](https://neo4j.com/) was considered as an alternative option due to the intrinsic interconnectivity of intertextuality, the *relationship* and *structure* of that interconnectivity is also critical.) Use of nodegoat also avoids the need to host and serve the data, and it provides an API for access.
+The data is stored in a [nodegoat](https://nodegoat.net/) [object-relational database](https://en.wikipedia.org/wiki/Object%E2%80%93relational_database). nodegoat was chosen for several reasons, including its humanities-oriented design, its ease of use, and its ability to expose the data as Linked Open Data. (While the open-source graph database [neo4j](https://neo4j.com/) was considered as an alternative option due to the intrinsic interconnectivity of intertextuality, the *relationship* and *structure* of that interconnectivity are also critical.) Use of nodegoat also avoids the need to host and serve the data, and it provides an API for access.
 
-The choice of [Observable Framework](https://observablehq.com/framework/) for hosting the project was initially due to a piece of serendipity: [the nodegoat guide includes a demonstration of exporting data via the API to Observable](https://nodegoat.net/guide.s/150/export-data-to-observable), and the example visualization of letter-writing frequency resembled my mental image of what an intertextual density visualization might look like. While researching [Observable](https://observablehq.com/), I discovered its successor, Observable Framework, which offered several clear affordances: open source, highly customizable visualizations using [Observable Plot](https://observablehq.com/plot/) and [D3.js](https://d3js.org/), simultaneously static and reactive, automatic integration with GitHub, the ability to preload data, and the ability to write data loaders in any language. The customizability and the polyglot environment were initially the most appealing aspects, but the other benefits quickly became apparent.
+The choice of [Observable Framework](https://observablehq.com/framework/) for hosting the project was initially due to a piece of serendipity: [the nodegoat guide includes a demonstration of exporting data via the API to Observable](https://nodegoat.net/guide.s/150/export-data-to-observable), and the example visualization of letter-writing frequency somewhat resembled my mental image of what an intertextual density visualization might look like. While researching [Observable](https://observablehq.com/), I discovered its successor, Observable Framework, which offered several clear affordances: open source, highly customizable visualizations using [Observable Plot](https://observablehq.com/plot/) and [D3.js](https://d3js.org/), simultaneously static and reactive, automatic integration with GitHub, the ability to preload data, and the ability to write data loaders in any language. The customizability and the polyglot environment were initially the most appealing aspects, but the other benefits quickly became apparent.
 
 ## Methodology
 
 ### Database Design
 
-There is currently no database of intertexts. Some benchmark datasets exist for the purpose of testing and training tools designed for detecting intertexts, notably [Dexter *et al.* (2024)](dexter2024), who provide a flat CSV file with 945 parallels between the first book of Valerius Flaccus&rsquo; *Argonautica* and four other epics (one of which is approximately contemporary with the *Argonautica*, and three of which are earlier) that are recorded in three specific commentaries. This database, therefore, will itself provide a valuable resource and is accordingly designed with an eye both to future developments of the present project and to reuse by other scholars: not all of the entered data is used in the project as it currently stands.
+There is currently no database of intertexts. Some benchmark datasets exist for the purpose of testing and training tools designed for detecting intertexts, notably [Dexter *et al.* (2024)](dexter2024), who provide a flat CSV file with 945 parallels (some comprised of multiple words) between the first book of Valerius Flaccus&rsquo; *Argonautica* and four other epics (one of which is approximately contemporary with the *Argonautica*, and three of which are earlier) that are recorded in three specific commentaries. This database, therefore, will itself provide a valuable resource and is accordingly designed with an eye both to future developments of the present project and to reuse by other scholars: not all of the entered data is used in the project as it currently stands.
 
 <figure>
-<a href="./_file/images/nodegoat_model_2025-3-13.png"><img src="./images/nodegoat_model_2025-3-13.png" style="max-width: 100%;"></a>
+<a href="https://pratt.darcykrasne.com/Portfolio/viz_intxt/nodegoat_model_2025-3-13.png"><img src="./images/nodegoat_model_2025-3-13.png" style="max-width: 100%;"></a>
 <figcaption>
 The database model, as of 13 March 2025.
 </figcaption>
@@ -95,7 +95,7 @@ While the project overall is strictly concerned with Latin poetry, Greek texts a
 
 #### Data Extraction and Transformation with Python
 
-Every time the website is deployed, a data loader written in Python performs an API call from nodegoat to fetch the current database model. It then extracts the nodegoat IDs for each object type table and does another API call for the individual objects. It assigns the objects, under their object types, to a dictionary, and then transforms them into dataframes, unpacking the highly nested information of the nodegoat JSON objects:
+Every time the website is deployed (usually by an update on GitHub), a data loader written in Python performs an API call from nodegoat to fetch the current database model. It then extracts the nodegoat IDs for each object type table and does another API call for the individual objects. It assigns the objects, under their object types, to a dictionary, and then transforms them into dataframes, unpacking the highly nested information of the nodegoat JSON objects:
 
 ```python
 # Create table dataframes
@@ -136,7 +136,7 @@ def table_to_df(table, cols_dict):
     return df
 ```
 
-It joins the disparate metrical data into a single dataframe and then returns it to a single restructured JSON object; and it converts each of the other dataframes to a JSON object. These are all saved to files that are automatically committed to GitHub.
+It joins the disparate metrical data into a single dataframe and then returns it to a single restructured JSON object; and it converts each of the other dataframes to a JSON object, which are collectively stored in an array. These are all saved to files that are automatically committed to GitHub.
 
 In the next stage of the project, the same Python data loader will also create network nodes and edges from the data.
 
@@ -146,6 +146,8 @@ The remainder of the code is written in JavaScript, within an Observable Framewo
 
 <details>
 <summary>Click to view the code for the Author, Work, and Work Section selectors</summary>
+
+N.B. I have removed indications of separate code blocks from the following.
 
 ```js run=false
 // Create authors dropdown
@@ -211,6 +213,8 @@ The creation of the two inputs for choosing the starting and ending lines for di
 
 <details>
 <summary>Click to view the code for choosing the starting and ending lines</summary>
+
+N.B. I have removed indications of separate code blocks from the following.
 
 ```js run=false
 // Create necessary variables for chart display
@@ -309,13 +313,13 @@ The basic motivation was to make the display resemble the layout of the poem, wh
 
 ## Next Steps
 
-- network creation with NetworkX and D3.js
-- option to view only direct intertext density
-- code to reconcile elisions
-- figure out how to include lines like '845a'
-- display of what the intertexts are (this may be an option to toggle with the network graph?)
-- collaboration with projects on automated detection of text reuse to enhance database
+Currently underway are the entry of additional intertexts into the database and the creation of an intertextuality network from the selected word, using [NetworkX](https://networkx.org/) and [D3.js](https://d3js.org/). Following that, in addition to continuing database input, attention will focus on providing a display of what the intertexts are, as well as tweaking the code to handle elisions, extranumerical lines (such as 845a, which would come between 845 and 846), and alternative readings. A few additional planned long-term developments are:
 
+- an option to view only direct intertext density
+- an option to view &ldquo;descendant&rdquo; intertexts instead of &ldquo;ancestor&rdquo; intertexts
+- collaboration with projects on automated detection of text reuse (such as [Tesserae](https://tesserae.caset.buffalo.edu/) or [F&#x012b;lum](http://tools.qcrit.org/filum)) to enhance the database, with a reduction of manual labor
+
+Other requests and suggestions for future development are welcome [at the GitHub page](https://github.com/dkrasne/visualizing_intertextuality).
 
 ## Bibliography
 
