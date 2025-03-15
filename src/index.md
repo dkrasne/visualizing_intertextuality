@@ -6,11 +6,34 @@ toc: false
 
 # Visualizing Intertextuality
 
-**Developed by:** Darcy Krasne
+**Developed by:** [Darcy Krasne](http://www.darcykrasne.com/)
 
 A project to visualize intertexts in Latin poetry using [nodegoat](https://nodegoat.net/), [Observable Framework](https://observablehq.com/framework/), and Python. (See [the about page](./about) for further details.)
 
 View the code on [GitHub](https://github.com/dkrasne/visualizing_intertextuality).
+
+
+<!--
+
+	Code block 1
+	```js
+	const testTF = true;
+	const testHtml = html`<div><p>${testTF}</p></div>`;
+	```
+
+	Code block 2
+	```js
+	const testInput = testTF ? html`<input type=range step=1 min=1 max=15>` : null;
+	const n = testInput ? view(testInput) : null;
+
+	```
+
+	Code block 3
+	```js
+	if (testTF === false) {display(testHtml);} else {display(testInput);}
+	```
+
+-->
 
 
 <!-- Load data -->
@@ -208,8 +231,6 @@ if (startLine > 0) {
 if (endLine >= startLine) {
 	lineRange.lastLine = endLine;
 } else {lineRange.lastLine = lineRange.firstLine + 0;}
-
-// STILL NEED TO ADD LOGIC FOR ENDING PAST THE MAX AVAILABLE, AS WELL AS IF THE FIRST LINE ISN'T 1.
 ```
 
 ```js
@@ -417,30 +438,7 @@ The grid will be ${gridY} cells tall.
 
 
 ```js
-let bgColor = "#ccccff"; // this is a nice blue that works well
-/* the following are attempts to make a more "papyrus"-like background that still contrasts with the lightest green */
-/*
-bgColor = "#ddcc88";
-bgColor = "#daba91"; // taken from an actual papyrus pixel
-bgColor = "#ccaf87"; // taken from an actual papyrus pixel
-bgColor = "#d4b48c"; // average of the previous two colors
-*/
-
-if (intertextsArr.every(intxt => intxt.intxtCnt === 0)) {
-	display(html`<p>Based on information currently in the database, there are no intertexts in the specified passage.</p>`)
-} else {
-
-display(
-
-html`<p style="max-width:none; font-size:smaller;">Click on a cell to freeze the popup information. &ldquo;Direct intertexts&rdquo; are those where a scholar has suggested a direct link between the present word and a word in an earlier text. &ldquo;Indirect intertexts&rdquo; are intertexts at further remove (i.e., where a direct or indirect intertext refers to another, still earlier, passage). Currently, the project does not include intratexts (allusions to other passages within the same text).</p>
-
-<p style="max-width:none; font-size:smaller;">Two caveats: absence of a word does not mean that there are no intertexts, just that they are not yet in the database; and lines appear in numeric order, even if editors agree that they should be transposed.</p></div>
-
-<div class="grid grid-cols-2"><div class="card" style="background-color:${bgColor}; padding-top: 30px;">
-
-<h2 style="padding-bottom: 10px;">${passageDetails.authorName}, <i>${passageDetails.workTitle}</i>, ${passageDetails.workSegName}: lines ${lineRange.firstLine}&ndash;${lineRange.lastLine}</h2>
-
-${Plot.plot({
+const plotDisplay = intertextsArr.every(intxt => intxt.intxtCnt === 0) ? null : Plot.plot({
 	grid: true,
 	x: {
 		label: null, 
@@ -486,10 +484,6 @@ ${Plot.plot({
 					value: d => d.wordObj.indirectIntertexts,
 					label: "# inherited intertexts"
 				},
-/*				intxtCnt: {
-					value: "intxtCnt",
-					label: "# direct and indirect intertexts"
-				}, */
 			},
 		})
 	],
@@ -500,14 +494,56 @@ ${Plot.plot({
 	marginRight: 50,
 	marginBottom: 30,
 	marginLeft: 70
-})}
+});
+
+```
+
+```js
+const plotCurrSelect = !plotDisplay ? null : Generators.input(plotDisplay);
+```
+
+```js
+let bgColor = "#ccccff"; // this is a nice blue that works well
+/* the following are attempts to make a more "papyrus"-like background that still contrasts with the lightest green */
+/*
+bgColor = "#ddcc88";
+bgColor = "#daba91"; // taken from an actual papyrus pixel
+bgColor = "#ccaf87"; // taken from an actual papyrus pixel
+bgColor = "#d4b48c"; // average of the previous two colors
+*/
+
+if (!plotDisplay) {
+	display(html`<p>Based on information currently in the database, there are no intertexts in the specified passage.</p>`)
+} else {
+
+display(
+
+html`<p style="max-width:none; font-size:smaller;">Click on a cell to freeze the popup information. <b>Direct intertexts</b> are those where a scholar has suggested a direct link between the present word and a word in an earlier text. <b>Indirect intertexts</b> are intertexts at further remove (i.e., where a direct or indirect intertext refers to another, still earlier, passage). Currently, the project does not include intratexts (allusions to other passages within the same text).</p>
+
+<p style="max-width:none; font-size:smaller;"><b>Two caveats:</b> absence of a word does not mean that there are no intertexts, just that they are not yet in the database; and lines appear in numeric order, even if editors agree that they should be transposed.</p></div>
+
+<div class="grid grid-cols-2"><div class="card" style="background-color:${bgColor}; padding-top: 30px;">
+
+<h2 style="padding-bottom: 10px;">${passageDetails.authorName}, <i>${passageDetails.workTitle}</i>, ${passageDetails.workSegName}: lines ${lineRange.firstLine}&ndash;${lineRange.lastLine}</h2>
+
+${plotDisplay}
 </div>
 <div>
 	<p>Eventually there will be a network visualization in this space.</p>
+	<p>Selected word object ID: ${plotCurrSelect ? plotCurrSelect.wordObj.obj_id : "none"}<br>
+	Selected word: ${plotCurrSelect ? plotCurrSelect.word : "none"}</p>
 </div>
 </div>`
-
 )}
+
+```
+
+
+```js
+if (plotDisplay) {
+	display(html`<p>The selected datapoint, which will serve as the starting point of the generated network (this will eventually not be displayed):</p>`)
+	if (plotCurrSelect) {display(plotCurrSelect)} else {display(html`<p><i>No current selection in plot.</i></p>`)}
+	}
 ```
 
 <hr>
@@ -515,7 +551,7 @@ ${Plot.plot({
 ## Data
 
 <details>
-<summary>Click here to view the data.</summary>
+<summary>Click here to view the full data.</summary>
 
 Raw data from nodegoat (extracted into separate objects):
 
