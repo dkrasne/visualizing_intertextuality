@@ -438,6 +438,8 @@ The grid will be ${gridY} cells tall.
 
 
 ```js
+// Create plot, conditional on the existence of intertexts
+
 const plotDisplay = intertextsArr.every(intxt => intxt.intxtCnt === 0) ? null : Plot.plot({
 	grid: true,
 	x: {
@@ -538,9 +540,9 @@ ${plotDisplay}
 
 ```
 
-
 ```js
-if (plotDisplay) {
+if (!plotDisplay) {display(html`<p></p>`)}
+else {
 	display(html`<p>The selected datapoint, which will serve as the starting point of the generated network (this will eventually not be displayed):</p>`)
 	if (plotCurrSelect) {display(plotCurrSelect)} else {display(html`<p><i>No current selection in plot.</i></p>`)}
 	}
