@@ -218,7 +218,8 @@ meter_cols = {"meter_name": {"67527": "objval"},
               "ok_word_pos": {"67530": "refid"}}
 meter_pos_len_cols = {"meter_id": {"67535": "refid"},
                       "position_id": {"67536": "refid"},
-                      "max_length": {"67537": "objval"}}
+                      "max_length": {"67537": "objval"},
+                      "unit_line": {"68127": "objval"}}
 
 # Convert tables to dataframes based on specified columns
 word_instance_df = table_to_df(word_instance_table, wd_inst_cols)
@@ -265,12 +266,13 @@ for meter in meter_names:
     for i in range(len(meter_df_ext_sub)):
         pos_dict = {}
         pos_dict["position"] = meter_df_ext_sub.loc[i, "position"]
-        pos_dict["pos_len"] = int(meter_df_ext_sub.loc[i, "max_length"])
+        pos_dict["pos_len"] = int(meter_df_ext_sub.loc[i, "max_length"]) # use int() to convert from np.int64
         pos_dict["meter_pos_len_id"] = meter_df_ext_sub.loc[i, "meter_pos_len_id"]
+        pos_dict["unit_line"] = int(meter_df_ext_sub.loc[i, "unit_line"]) # use int() to convert from np.int64
         meter_pos_len_list.append(pos_dict)
     meter_dict["meter_id"] = meter_df_ext_sub["meter_id"].unique()[0]
-    meter_dict["max_line_beats"] = int(meter_df_ext_sub["max_line_beats"].unique()[0])
-    meter_dict["recur_line_pattern"] = int(meter_df_ext_sub["recur_line_pattern"].unique()[0])
+    meter_dict["max_line_beats"] = int(meter_df_ext_sub["max_line_beats"].unique()[0]) # use int() to convert from np.int64
+    meter_dict["recur_line_pattern"] = int(meter_df_ext_sub["recur_line_pattern"].unique()[0]) # use int() to convert from np.int64
     meter_dict['positions'] = meter_pos_len_list
     meters_dict[meter] = meter_dict
 

@@ -239,25 +239,46 @@ if (endLine >= startLine) {
 const meterID = workSegVars.workSegMeterID;
 let positions;
 let meterLen;
+let linePattern;
 
 for (let meter in meters) {
 	if (meters[meter].meter_id === meterID) {
 		positions = meters[meter].positions;
 		meterLen = meters[meter].max_line_beats;
+		linePattern = meters[meter].recur_line_pattern;
 	}
 }
 
 const meterPosArr = d3.range(1, meterLen+1);
+let linePatternArr = d3.range(1,linePattern+1);
 
 let i = 1;
-for (let pos in positions) {
-	const posBeats = positions[pos].pos_len;
-	positions[pos].gridNums = [];
-	for (let j = 0; j < posBeats; j++) {
-		positions[pos].gridNums.push(i);
-		i += 1;
+if (linePattern === 1) {		// for stichic meters
+	for (let pos in positions) {
+		const posBeats = positions[pos].pos_len;
+		positions[pos].gridNums = [];
+		for (let j = 0; j < posBeats; j++) {
+			positions[pos].gridNums.push(i);
+			i += 1;
+		}
+	}
+} else {	// for meters with stanzas or multi-line patterns
+	for (let line in linePatternArr){
+		let currPatternLine = linePatternArr[line];
+		i = 1;
+		for (let pos in positions) {
+			if (positions[pos].unit_line === currPatternLine) {
+				const posBeats = positions[pos].pos_len;
+				positions[pos].gridNums = [];
+				for (let j = 0; j < posBeats; j++) {
+					positions[pos].gridNums.push(i);
+					i += 1;
+				}
+			}
+		}
 	}
 }
+
 ```
 
 <!-- Prepare intertexts for display -->
@@ -423,7 +444,8 @@ for (let meter in meters) {
 	}
 }
 
-// Define grid height.
+// Define grid height based on number of lines.
+
 const gridY = (lineRange.lastLine - lineRange.firstLine) + 1;  // I may need to modify this to accomodate passages with extra lines
 
 const cellSize = 20;
