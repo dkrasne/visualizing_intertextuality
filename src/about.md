@@ -81,7 +81,7 @@ The choice of [Observable Framework](https://observablehq.com/framework/) for ho
 There is currently no database of intertexts. Some benchmark datasets exist for the purpose of testing and training tools designed for detecting intertexts, notably [Dexter *et al.* (2024)](dexter2024), who provide a flat CSV file with 945 parallels (some comprised of multiple words) between the first book of Valerius Flaccus&rsquo; *Argonautica* and four other epics (one of which is approximately contemporary with the *Argonautica*, and three of which are earlier) that are recorded in three specific commentaries. This database, therefore, will itself provide a valuable resource and is accordingly designed with an eye both to future developments of the present project and to reuse by other scholars: not all of the entered data is used in the project as it currently stands.
 
 <figure>
-<a href="https://pratt.darcykrasne.com/Portfolio/viz_intxt/nodegoat_model_2025-3-13.png"><img src="./images/nodegoat_model_2025-3-13.png" style="max-width: 100%;"></a>
+<a href="https://pratt.darcykrasne.com/Portfolio/viz_intxt/nodegoat_model_2025-3-13.png"><img src="./images/nodegoat_model_2025-3-13.png" style="max-width: 100%;" alt="A representation of a database, showing objects connected by lines"></a>
 <figcaption>
 The database model, as of 13 March 2025.
 </figcaption>
