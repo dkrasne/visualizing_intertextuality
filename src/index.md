@@ -13,29 +13,6 @@ A project to visualize intertexts in Latin poetry using [nodegoat](https://nodeg
 View the code on [GitHub](https://github.com/dkrasne/visualizing_intertextuality).
 
 
-<!--
-
-	Code block 1
-	```js
-	const testTF = true;
-	const testHtml = html`<div><p>${testTF}</p></div>`;
-	```
-
-	Code block 2
-	```js
-	const testInput = testTF ? html`<input type=range step=1 min=1 max=15>` : null;
-	const n = testInput ? view(testInput) : null;
-
-	```
-
-	Code block 3
-	```js
-	if (testTF === false) {display(testHtml);} else {display(testInput);}
-	```
-
--->
-
-
 <!-- Load data -->
 
 ```js
@@ -50,7 +27,77 @@ const nodegoatTables = FileAttachment("data/nodegoat_tables.json").json()
 // Attach meters table for querying.
 const meters = FileAttachment("data/meters.json").json()
 ```
+```js
+// Attach full list of intertexts (used for network)
+const intertextsTable = FileAttachment("data/intxts_full.json").json()
+```
+```js
+// Attach networkx graph json
+const graphData = FileAttachment("data/intxt_network_graph.json").json()
+```
+```js
+// Attach sankey chart data
+const sankeyData = FileAttachment("data/sankey_data.json").json()
+```
+<!--
+<script src="https://unpkg.com/d3-array@1"></script>
+<script src="https://unpkg.com/d3-collection@1"></script>
+<script src="https://unpkg.com/d3-path@1"></script>
+<script src="https://unpkg.com/d3-shape@1"></script>
+<script src="https://unpkg.com/d3-sankey@0"></script>
+-->
+
 <!-- End load data -->
+
+<!-- Create mapping of ID-to-name -->
+```js
+const lookupIDTable = new Map();
+
+for (let i in nodegoatTables.word_instance_table) {
+	let item = nodegoatTables.word_instance_table[i];
+	let key = item.obj_id;
+	let word = item.word;
+	let line = item.line_num;
+	let def = {'word': word, 'lineNum': line};
+	lookupIDTable.set(key, def);
+}
+
+for (let i in nodegoatTables.author_table) {
+	let item = nodegoatTables.author_table[i];
+	let key = item.obj_id;
+	let def = item.author_name;
+	lookupIDTable.set(key, def);
+}
+
+// I may want to change this to a dictionary that includes author as well as title
+for (let i in nodegoatTables.work_table) {
+	let item = nodegoatTables.work_table[i];
+	let key = item.obj_id;
+	let def = item.title;
+	lookupIDTable.set(key, def);
+}
+```
+```js
+for (let i in nodegoatTables.work_seg_table) {
+	let item = nodegoatTables.work_seg_table[i];
+	let section = item.work_section || '';
+	let subsec = item.work_subsection || '';
+	let key = item.obj_id;
+	let work_id = String(item.work_id);
+	let work = lookupIDTable.get(work_id);
+	let section_string;
+	if (section && subsec) {
+		section_string = `${section}, ${subsec}`;
+	} else if (section) {
+		section_string = `${section}`;
+	} else {
+		section_string = '';
+	}
+	let def = {'work': work, 'section': section_string};
+	lookupIDTable.set(key, def);
+}
+```
+<!-- End mapping -->
 
 
 ## Select passage to view
@@ -572,6 +619,260 @@ else {
 
 <hr>
 
+<!--
+
+## Attempting network
+
+```js
+const width = 640;
+const height = 640;
+
+const links = graphData.links.map((d) => Object.create(d));
+const nodes = graphData.nodes.map((d) => Object.create(d));
+
+const color = d3.scaleOrdinal(d3.schemeObservable10);
+
+const simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(links).id((d) => d.id))
+    .force("charge", d3.forceManyBody())
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .on("tick", ticked);
+
+const svg = d3.create("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [0, 0, width, height])
+    .attr("style", "max-width: 100%; height: auto;");
+
+
+// a combination of ChatGPT and Elijah Meeks
+const marker = svg.append("defs")
+	.append("marker")
+  .attr("id", "arrow")
+  .attr("viewBox", "0 0 10 10")
+  .attr("refX", 20)
+  .attr("refY", 5)
+  .attr("markerUnits", 'userSpaceOnUse')
+  .attr("markerWidth", 6)
+  .attr("markerHeight", 6)
+  .attr("orient", "auto")
+  .append("path")
+  .attr("d", "M 0 0 L 10 5 L 0 10 z")
+  .attr("fill", "black")
+  .attr("fill-opacity", 0.6);
+
+const link = svg.append("g")
+    .attr("stroke", "var(--theme-foreground-faint)")
+    .attr("stroke-opacity", 0.6)
+  .selectAll("line")
+  .data(links)
+  .join("line")
+    .attr("stroke-width", (d) => Math.sqrt(d.weight))
+	.attr("marker-end", "url(#arrow)");
+
+const node = svg.append("g")
+    .attr("stroke", "var(--theme-background)")
+    .attr("stroke-width", 1.5)
+  .selectAll("circle")
+  .data(nodes)
+  .join("circle")
+    .attr("r", (d) => {
+    let proto = Object.getPrototypeOf(d);
+	let numProps = Object.keys(proto).length - 2;
+    return Math.sqrt(numProps) * 5})
+    .attr("fill", (d) => color(d.author))
+    .call(drag(simulation));
+
+node.append("title")
+    .text((d) => lookupIDTable.get(d.id).section ? `${lookupIDTable.get(d.id).work}, ${lookupIDTable.get(d.id).section}` : lookupIDTable.get(d.id).work);
+
+function ticked() {
+  link
+      .attr("x1", (d) => d.source.x)
+      .attr("y1", (d) => d.source.y)
+      .attr("x2", (d) => d.target.x)
+      .attr("y2", (d) => d.target.y);
+
+  node
+      .attr("cx", (d) => d.x)
+      .attr("cy", (d) => d.y);
+}
+
+display(svg.node());
+```
+
+```js
+function drag(simulation) {
+
+  function dragstarted(event) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    event.subject.fx = event.subject.x;
+    event.subject.fy = event.subject.y;
+  }
+
+  function dragged(event) {
+    event.subject.fx = event.x;
+    event.subject.fy = event.y;
+  }
+
+  function dragended(event) {
+    if (!event.active) simulation.alphaTarget(0);
+    event.subject.fx = null;
+    event.subject.fy = null;
+  }
+
+  return d3.drag()
+      .on("start", dragstarted)
+      .on("drag", dragged)
+      .on("end", dragended);
+}
+```
+```js
+nodes
+```
+```js
+links
+```
+
+
+```js
+// Create maps to store total counts and assign indices for each source-target pair.
+const edgeCountMap = new Map();
+const edgeIndexMap = new Map();
+
+// Loop through links to annotate them.
+graphData.links.forEach(link => {
+  // Assume link.source and link.target are objects with an "id" property.
+  const key = `${link.source.id}-${link.target.id}`;
+  // Get the current index for this pair (starting at 0).
+  const currentIndex = edgeIndexMap.get(key) || 0;
+  // Assign this edge its index.
+  link.edgeIndex = currentIndex;
+  // Update the index for the next edge.
+  edgeIndexMap.set(key, currentIndex + 1);
+  // Also count the total number of edges for this pair.
+  edgeCountMap.set(key, (edgeCountMap.get(key) || 0) + 1);
+});
+
+// (Optional) Log the edge counts to verify.
+// console.log("Edge counts:", [...edgeCountMap.entries()]);
+
+```
+
+```js
+
+const links2 = graphData.links.map((d) => Object.create(d));
+const nodes2 = graphData.nodes.map((d) => Object.create(d));
+
+
+const svg2 = html`<svg width=800 height=600 style="border:1px solid black"><defs></defs></svg>`;
+
+const simulation2 = d3.forceSimulation(nodes2)
+    .force("link", d3.forceLink(links2).id((d) => d.id))
+    .force("charge", d3.forceManyBody())
+    .force("center", d3.forceCenter(width / 2, height / 2))
+
+const selection = d3.select(svg2);
+
+// Define a small offset to prevent overlap (adjust as needed)
+const linkOffset = 3;
+const curveStrength = 30; // Adjust curve height
+
+// Find min/max values in your node positions
+const xExtent = d3.extent(nodes2, d => d.x);
+const yExtent = d3.extent(nodes2, d => d.y);
+
+// Create scaling functions to map node positions to canvas size
+const xScale = d3.scaleLinear().domain(xExtent).range([50, 750]); // Keep some margin
+const yScale = d3.scaleLinear().domain(yExtent).range([50, 550]);
+
+d3.select(svg2)
+  .selectAll("path")
+  .data(links2)
+  .join("path")
+  .attr("d", d => {
+    const x1 = xScale(d.source.x);
+    const y1 = yScale(d.source.y);
+    const x2 = xScale(d.target.x);
+    const y2 = yScale(d.target.y);
+    
+    const key = `${d.source.id}-${d.target.id}`;
+    const totalEdges = edgeCountMap.get(key); // Total edges for this pair
+    const index = d.edgeIndex;               // This edge's index
+    
+    // Calculate curve offset.
+    // The formula centers the edges: if there is an odd number, the middle edge is straight;
+    // if even, they are symmetrically curved.
+    const curveOffset = ((index + 1) - (totalEdges + 1) / 2) * curveStrength;
+    
+    // Compute midpoint for the quadratic Bézier curve.
+    const midX = (x1 + x2) / 2;
+    const midY = (y1 + y2) / 2 - curveOffset;
+    
+    return `M ${x1},${y1} Q ${midX},${midY} ${x2},${y2}`;
+  })
+  .attr("fill", "none")
+  .attr("stroke", "black")
+  .attr("stroke-width", 1);
+
+/* 
+// Apply scaling when setting positions
+// Draw offset links (edges)
+selection
+  .selectAll("line")
+  .data(graphData.links)
+  .join("line")
+  .attr("x1", d => xScale(d.source.x) + (d.key ? linkOffset * (d.key % 2 ? 1 : -1) : 0))
+  .attr("y1", d => yScale(d.source.y) + (d.key ? linkOffset * (d.key % 2 ? -1 : 1) : 0))
+  .attr("x2", d => xScale(d.target.x) + (d.key ? linkOffset * (d.key % 2 ? -1 : 1) : 0))
+  .attr("y2", d => yScale(d.target.y) + (d.key ? linkOffset * (d.key % 2 ? 1 : -1) : 0))
+  .attr("stroke", "black")
+  .attr("stroke-width", 1);
+*/
+
+// Draw nodes (circles)
+selection
+  .selectAll("circle")
+  .data(nodes2)
+  .join("circle")
+  .attr("cx", d => xScale(d.x))
+  .attr("cy", d => yScale(d.y))
+  .attr("r", 5)
+  .attr("fill", "black");
+
+
+
+
+const defs = d3.select(svg2).select("defs");
+
+defs.append("marker")
+  .attr("id", "arrow")
+  .attr("viewBox", "0 0 10 10")
+  .attr("refX", 20)
+  .attr("refY", 5)
+  .attr("markerWidth", 6)
+  .attr("markerHeight", 6)
+  .attr("orient", "auto")
+  .append("path")
+  .attr("d", "M 0 0 L 10 5 L 0 10 z")
+  .attr("fill", "black");
+
+// Now, update the edges to use the arrowheads
+d3.select(svg2)
+  .selectAll("path")
+  .attr("marker-end", "url(#arrow)");
+
+
+```
+
+```js
+view(svg2)
+```
+
+-->
+
+<hr>
+
 ## Data
 
 <details>
@@ -590,6 +891,9 @@ nodegoatTables
 ```
 ```js
 meters
+```
+```js
+intertextsTable
 ```
 
 </details>
@@ -637,6 +941,22 @@ Meters:
 ```js
 meters
 ```
+
+`graphData`:
+```js
+graphData
+```
+
+`sankeyData`:
+```js
+sankeyData
+```
+
+`lookupIDTable`:
+```js
+lookupIDTable
+```
+
 
 <hr>
 

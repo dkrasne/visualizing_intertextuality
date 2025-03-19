@@ -4,6 +4,7 @@ import json
 import os
 import requests
 import pandas as pd
+import networkx as nx
 
 # set parameters
 api_token = os.getenv("NODEGOAT_API_TOKEN")
@@ -295,7 +296,8 @@ tables_list = ['word_instance_table',
  'work_seg_table',
  'lemma_table',
  'meter_table',
- 'meter_pos_len_table']
+ 'meter_pos_len_table',
+ 'match_type_class_table']
 
 df_list = [word_instance_df,
            word_lvl_intxt_df,
@@ -305,7 +307,8 @@ df_list = [word_instance_df,
            work_seg_df,
            lemma_df,
            meter_df,
-           meter_pos_len_df]
+           meter_pos_len_df,
+           match_type_class_df]
 
 tables_df_to_dict = {}
 
@@ -316,6 +319,174 @@ for i, df in enumerate(df_list):
 
 with open(scriptdir+"/nodegoat_tables.json", "w") as table_json:
     json.dump(tables_df_to_dict, table_json)
+
+
+######## CREATE NETWORK ##############
+
+# In preparation for creating a network, create a full set of intertexts, starting at the group level, with IDs for all features
+
+grp_intxts_list = [str(item) for sublist in list(word_lvl_intxt_grp_df.word_intxt_ids) for item in sublist]
+intxt_grp_list = []
+
+def build_intxt_dict(intxt_ids):
+    for intxt in intxt_ids:
+        intxt_id = str(intxt)
+        for row2 in word_lvl_intxt_df[word_lvl_intxt_df.obj_id == intxt_id].iterrows():
+            row_dict = {}
+            if intxt_id in grp_intxts_list:
+                row_dict["intxt_grp_id"] = intxt_grp_id
+            else:
+                row_dict["intxt_grp_id"] = None
+            row_dict["intxt_id"] = intxt_id
+            row2 = row2[1]
+            source_id = row2.source_word_id
+            target_id = row2.target_word_id
+            if isinstance(row2.match_type_ids, list):
+                match_type_ids = [str(id) for id in row2.match_type_ids]
+            else:
+                match_type_ids = []
+            row_dict["source_word_id"] = source_id
+            row_dict["target_word_id"] = target_id
+            source_df = word_instance_df.copy().query(f"obj_id == '{source_id}'").reset_index(drop=True) \
+                .merge(work_seg_df, how="left", left_on="work_segment_id", right_on="obj_id").drop("obj_id_y", axis=1) \
+                .merge(work_df, how="left", left_on="work_id", right_on="obj_id")[['obj_id_x','word','work_segment_id', 'line_num','line_num_modifier',"work_id","author_id"]]
+            target_df = word_instance_df.copy().query(f"obj_id == '{target_id}'").reset_index(drop=True) \
+                .merge(work_seg_df, how="left", left_on="work_segment_id", right_on="obj_id").drop("obj_id_y", axis=1) \
+                .merge(work_df, how="left", left_on="work_id", right_on="obj_id")[['obj_id_x','word','work_segment_id', 'line_num','line_num_modifier',"work_id","author_id"]]
+            row_dict["source_author_id"] = source_df.loc[0,'author_id']
+            row_dict["source_work_id"] = source_df.loc[0,'work_id']
+            row_dict["source_work_seg_id"] = source_df.loc[0,'work_segment_id']
+            if isinstance(source_df.loc[0,'line_num_modifier'], str):
+                row_dict["source_line_num"] = str(source_df.loc[0,'line_num'])+source_df.loc[0,'line_num_modifier']
+            else:
+                row_dict["source_line_num"] = str(source_df.loc[0,'line_num'])
+            row_dict["target_author_id"] = target_df.loc[0,'author_id']
+            row_dict["target_work_id"] = target_df.loc[0,'work_id']
+            row_dict["target_work_seg_id"] = target_df.loc[0,'work_segment_id']
+            if isinstance(target_df.loc[0,'line_num_modifier'],str):
+                row_dict["target_line_num"] = str(target_df.loc[0,'line_num'])+target_df.loc[0,'line_num_modifier']
+            else:
+                row_dict["target_line_num"] = str(target_df.loc[0,'line_num'])
+            row_dict["match_type_ids"] = match_type_ids
+            intxt_grp_list.append(row_dict)
+
+for row in word_lvl_intxt_grp_df.iterrows():
+    row = row[1]
+    intxt_grp_id = row.obj_id
+    intxt_ids = row.word_intxt_ids
+    build_intxt_dict(intxt_ids)
+build_intxt_dict([intxt for intxt in word_lvl_intxt_df.obj_id if intxt not in grp_intxts_list])
+
+intxt_full_df = pd.DataFrame.from_dict(intxt_grp_list)
+
+with open(scriptdir+"/intxts_full.json", "w") as intxts_full:
+    json.dump(intxt_grp_list, intxts_full)
+
+
+######### CREATE AND EXPORT NETWORK ####################
+
+G = nx.MultiDiGraph()
+
+def add_intxt_multi(sub_df, id, graph):
+    # each node is a work_segment_id for a given intertext; author and work IDs are attributes
+    source = sub_df.loc[0,"source_work_seg_id"]
+    target = sub_df.loc[0,"target_work_seg_id"]
+    source_author = sub_df.loc[0,"source_author_id"]
+    source_work = sub_df.loc[0,"source_work_id"]
+    target_author = sub_df.loc[0,"target_author_id"]
+    target_work = sub_df.loc[0,"target_work_id"]
+    # the words included in each intertext group are attached to the source or target node (as appropriate) with the group ID or intertext ID as the key
+    source_words = list(sub_df.source_word_id.unique())
+    target_words = list(sub_df.target_word_id.unique())
+    # the edge is identified by the group ID or intertext ID (for any intertexts not included in a group)
+    edge = id
+    edge_weight = (len(source_words) + len(target_words))/2
+    # the match types are added as an attribute to the edge
+    if len(sub_df) > 1:
+        match_types = list(set(sub_df.match_type_ids.sum()))
+    else:
+        match_types = list(sub_df.loc[0,"match_type_ids"])
+    if not graph.has_node(source):
+        graph.add_node(source, author=source_author, work=source_work, id=source_words)
+    else:
+        nx.set_node_attributes(graph, values={source: source_words}, name=id)
+    if not graph.has_node(target):
+        graph.add_node(target, author=target_author, work=target_work, id=target_words)
+    else:
+        nx.set_node_attributes(graph, values={target: target_words}, name=id)
+    graph.add_edge(source, target, key=edge, match_types=match_types, weight=edge_weight)
+
+for id in intxt_full_df.intxt_grp_id.unique():
+    if isinstance(id, str):
+        sub_df = intxt_full_df.query(f"intxt_grp_id == '{id}'").reset_index(drop=True)
+        add_intxt_multi(sub_df, id, G)
+for id in intxt_full_df[intxt_full_df.intxt_grp_id.isna()].intxt_id:
+    sub_df = intxt_full_df.query(f"intxt_id == '{id}'").reset_index(drop=True)
+    add_intxt_multi(sub_df, id, G)
+
+graph_json = nx.node_link_data(G)
+
+with open(scriptdir+"/intxt_network_graph.json", "w") as graph_file:
+    json.dump(graph_json, graph_file)
+
+######## CREATE AND EXPORT DATA FOR SANKEY DIAGRAM ###############
+
+def prep_sankey(df):
+    nodes_edges_dict = {}
+    grp_df = df[~df.intxt_grp_id.isna()]
+    no_grp_df = df[df.intxt_grp_id.isna()].drop("intxt_grp_id", axis=1)
+    grp_ids = list(grp_df.intxt_grp_id.unique())
+    no_grp_ids = list(no_grp_df.intxt_id.unique())
+    nodes = []
+    edges = []
+    for work_seg in list(df.source_work_seg_id.unique()):
+        author = df[df.source_work_seg_id == work_seg].reset_index(drop=True).loc[0,"source_author_id"]
+        work = df[df.source_work_seg_id == work_seg].reset_index(drop=True).loc[0,"source_work_id"]
+        nodes.append({"name": work_seg, "author": author, "work": work})
+    # print(len(nodes))
+    for work_seg in list(df.target_work_seg_id.unique()):
+        if work_seg not in [item["name"] for item in nodes]:
+            author = df[df.target_work_seg_id == work_seg].reset_index(drop=True).loc[0,"target_author_id"]
+            work = df[df.target_work_seg_id == work_seg].reset_index(drop=True).loc[0,"target_work_id"]
+            nodes.append({"name": work_seg, "author": author, "work": work})
+    # print(len(nodes))
+    # print(nodes)
+    nodes_edges_dict["nodes"] = nodes
+    def make_edge(id, df, grp=True):
+        source = df.loc[0, "source_work_seg_id"]
+        target = df.loc[0, "target_work_seg_id"]
+        source_words = list(df.source_word_id.unique())
+        target_words = list(df.target_word_id.unique())
+        num_words = (len(source_words)+len(target_words))/2    # using average because sometimes multiple words are compressed into a single word or a single word is split into multiple words
+        id = id
+        if grp == True:
+            group_id = True
+        else:
+            group_id = False
+        edge_dict = {"source": source,
+                     "target": target,
+                     "source_words": source_words,
+                     "target_words": target_words,
+                     "num_words": num_words,
+                     "id": id,
+                     "group_id": group_id}
+        return edge_dict
+    for id in grp_ids:
+        sub_df = grp_df.query(f"intxt_grp_id == '{id}'").reset_index(drop=True)
+        edges.append(make_edge(id, sub_df))
+    for id in no_grp_ids:
+        sub_df = no_grp_df.query(f"intxt_id == '{id}'").reset_index(drop=True)
+        edges.append(make_edge(id, sub_df, grp=False))
+    # print(edges)
+    nodes_edges_dict["edges"] = edges
+    return nodes_edges_dict
+
+sankey_data = prep_sankey(intxt_full_df)
+
+with open(scriptdir+"/sankey_data.json", "w") as sankey_file:
+    json.dump(sankey_data, sankey_file)
+
+########## BACKUP AND OUTPUT NODEGOAT MODEL AND OBJECT DATA ##############
 
 # Write current model and object list to backup files
 with open(scriptdir+"/model_json_backup.json", "w") as backup_model:
