@@ -328,3 +328,51 @@ Other requests and suggestions for future development are welcome [at the GitHub
 <li id="hardie1989">Hardie, P. R. (1989) &ldquo;Flavian Epicists on Virgil’s Epic Technique,&rdquo; <i>Ramus</i> 18: 3–20.</li>
 <li id="thomas1986">Thomas, R.F. (1986) &ldquo;Virgil&rsquo;s Georgics and the Art of Reference,&rdquo; <i>Harvard Studies in Classical Philology</i> 90: 171–98.</li>
 </ul>
+
+## Appendix: Getting Started with Observable Framework
+
+In learning how to use Framework and setting up my site, I encountered a few snags with the default installation setup and automated deployment via GitHub, which I document here for others who may encounter the same issues.
+
+1. First, while following the [Learn Observable Guide](https://observablehq.observablehq.cloud/learn-observable-guide/), I kept running into an error that claimed I didn't have Python installed when I tried to use a data loader that I had written in Python. [The problem turned out to be](https://github.com/observablehq/framework/issues/1927) that my computer runs Python with `python` rather than `python3`, and the latter is the only possibility recognized by the `observablehq.config.js` file. The solution is to add the following to the end of the file, just before the closing `};`:
+
+```js run=false
+// MODIFY LIST OF INTERPRETERS:
+  interpreters: {
+	".py": ["python"]
+  },
+```
+
+2. Second, after setting up [an automated deployment using GitHub Actions every time I pushed changes to GitHub](https://observablehq.com/framework/deploying#automated-deploys), I encountered two problems. First, because I was importing a couple of packages in my Python data loader, I was getting an error message when running the build that the package wasn't found, [a problem that had already been documented and solved here](https://talk.observablehq.com/t/github-actions-with-pandas-data-loader-on-observable-framework/9309). But even after following the documented steps, I continued to get the error message, and GitHub was telling me that the deploy had failed, but without an *actual* failure (i.e., the site was correctly updating on Observable Framework). The solution was to *also* add a new line to Framework's `package.json` file:
+
+```json
+# ...
+"observable": "observable",
+"install": "pip install -r requirements.txt"
+#...
+```
+
+3. Third, when using GitHub Actions and a deploy.yml script for an automated deploy, any API keys need to be added to both Observable Framework secrets *and* GitHub Secrets, as well as adding them in the build step of the `deploy.yml` script:
+
+```yaml
+- run: npm run build
+  env:
+    NODEGOAT_API_TOKEN: ${{ secrets.NODEGOAT_API_TOKEN }}
+```
+
+4. Fourth, I needed my data loader to produce multiple files, not just the one it's intended to produce at the end, due to needing to limit my API calls (I have enough tables to retrieve from nodegoat that I can only call the full set of them once every fifteen minutes). This was in itself not a problem, but the files weren't storing themselves successfully on GitHub. I ultimately discovered ([with the aid of ChatGPT to get the exact correct format](https://chatgpt.com/share/67dc1153-1adc-800d-9680-c00477d2fa85)) that I needed to add yet another step to my `deploy.yml` script; and I also need to add a GitHub token to both the build step and the new commit/push step, so that this portion of the script looked as follows:
+
+```yaml
+- run: npm run build
+  env:
+    NODEGOAT_API_TOKEN: ${{ secrets.NODEGOAT_API_TOKEN }}
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+- name: Commit and Push Changes
+  run: |
+    git config --global user.name "GitHub Actions"
+    git config --global user.email "actions@github.com"
+    git add .
+    git diff --quiet && git diff --staged --quiet || git commit -m "Auto-update model_json_backup.json and objects_json_backup.json"
+    git push
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```

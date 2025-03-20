@@ -39,14 +39,6 @@ const graphData = FileAttachment("data/intxt_network_graph.json").json()
 // Attach sankey chart data
 const sankeyData = FileAttachment("data/sankey_data.json").json()
 ```
-<!--
-<script src="https://unpkg.com/d3-array@1"></script>
-<script src="https://unpkg.com/d3-collection@1"></script>
-<script src="https://unpkg.com/d3-path@1"></script>
-<script src="https://unpkg.com/d3-shape@1"></script>
-<script src="https://unpkg.com/d3-sankey@0"></script>
--->
-
 <!-- End load data -->
 
 <!-- Create mapping of ID-to-name -->
@@ -600,7 +592,7 @@ html`<p style="max-width:none; font-size:smaller;">Click on a cell to freeze the
 ${plotDisplay}
 </div>
 <div>
-	<p>Eventually there will be a network visualization in this space.</p>
+	<p>Eventually there will be a network visualization in this space. For now, you can see <a href="./sankey">a diagram of the full set of available intertexts</a>.</p>
 	<p>Selected word object ID: ${plotCurrSelect ? plotCurrSelect.wordObj.obj_id : "none"}<br>
 	Selected word: ${plotCurrSelect ? plotCurrSelect.word : "none"}</p>
 </div>

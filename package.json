@@ -7,10 +7,11 @@
     "dev": "observable preview",
     "deploy": "observable deploy",
     "observable": "observable",
-	"install": "pip install -r requirements.txt"
+    "install": "pip install -r requirements.txt"
   },
   "dependencies": {
-    "@observablehq/framework": "^1.13.2"
+    "@observablehq/framework": "^1.13.2",
+    "d3-sankey": "^0.12.3"
   },
   "devDependencies": {
     "rimraf": "^5.0.5"
