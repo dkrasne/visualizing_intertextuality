@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "@observablehq/framework": "^1.13.2",
-    "d3-sankey": "^0.12.3"
+    "d3-sankey": "^0.12.3",
+	"esbuild": ">=0.25.0"
   },
   "devDependencies": {
-    "rimraf": "^5.0.5"
+    "rimraf": "^5.0.5",
+	"esbuild": ">=0.25.0"
   },
   "engines": {
     "node": ">=18"
