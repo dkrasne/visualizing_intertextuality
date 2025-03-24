@@ -2,8 +2,24 @@
 title: Full Intertext Diagram
 ---
 
-Mouse over a rectangular node to see the work and section that it represents. Mouse over a linking flow path to see the words it represents.
+# Full Intertext Diagram
 
+The following diagram shows the connections between all intertexts currently in the database.
+
+Each node represents one section of a work (a `work segment`, as defined on <a href="./about#database-design">the About page</a>). A flow path linking two nodes represents words that have been identified as intertexts between the source text (higher up) and the target text (lower down); its width shows (in relative terms) *how many* words are borrowed.
+
+Mouse over a rectangular node to see the work and section that it represents. Mouse over a linking flow path to see the words it represents. (Currently, the latter may not work on mobile phones.)
+
+<div style="font-size:smaller;">
+
+Eventually, subsets of this diagram will appear on the main page for the currently-selected portion of a work.
+
+*Some possible additional future work:*
+- *making the nodes repositionable*
+- *highlighting the entire set of flows connected to the currently-selected node*
+
+</div>
+<hr>
 
 ```js
 const nodes = [];
@@ -90,7 +106,7 @@ const chart = SankeyChart({nodes: nodes, links: links},
         })
         for (let i in targetWords) {targetWords[i] = `${targetWords[i].word} (line ${targetWords[i].lineNum})`}
 
-        return `${lookupIDTable.get(sourceNode).work}: ${sourceWords.join(', ')}\n${lookupIDTable.get(targetNode).work}: ${targetWords.join(', ')}`;
+        return `${lookupIDTable.get(sourceNode).work}, ${lookupIDTable.get(sourceNode).section}: ${sourceWords.join(', ')}\n${lookupIDTable.get(targetNode).work}, ${lookupIDTable.get(targetNode).section}: ${targetWords.join(', ')}`;
     }
 })
 
@@ -98,7 +114,9 @@ const chart = SankeyChart({nodes: nodes, links: links},
 view(chart)
 ```
 
-Eventually, subsets of this diagram will appear on the main page for the currently-selected portion of a work.
+<hr>
+
+Anything below here will not appear in the final version.
 
 ```js
 chart.nodes

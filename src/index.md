@@ -94,7 +94,7 @@ for (let i in nodegoatTables.work_seg_table) {
 
 ## Select passage to view
 
-<div class="tip">Currently there is a limited set of intertexts in the database. Choose Valerius Flaccus, <i>Argonautica</i>, Book 2, lines 475&ndash;476 to see what the display looks like.</div>
+<div class="tip">Currently there is a limited set of intertexts in the database. Choose Valerius Flaccus, <i>Argonautica</i>, Book 1, lines 1&ndash;4 or Book 2, lines 475&ndash;476 to see what the display looks like. You can also <a href="./sankey">view this diagram</a> to get a rough idea of what the full network of intertexts currently looks like.</div>
 
 ```js
 // Create authors dropdown
@@ -592,7 +592,7 @@ html`<p style="max-width:none; font-size:smaller;">Click on a cell to freeze the
 ${plotDisplay}
 </div>
 <div>
-	<p>Eventually there will be a network visualization in this space. For now, you can see <a href="./sankey">a diagram of the full set of available intertexts</a>.</p>
+	<p>Eventually there will be a network visualization in this space. For now, you can see <a href="./sankey">a diagram of the full set of available intertexts</a> to get a sense of what it might look like.</p>
 	<p>Selected word object ID: ${plotCurrSelect ? plotCurrSelect.wordObj.obj_id : "none"}<br>
 	Selected word: ${plotCurrSelect ? plotCurrSelect.word : "none"}</p>
 </div>

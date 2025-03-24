@@ -78,7 +78,7 @@ The choice of [Observable Framework](https://observablehq.com/framework/) for ho
 
 ### Database Design
 
-There is currently no database of intertexts. Some benchmark datasets exist for the purpose of testing and training tools designed for detecting intertexts, notably [Dexter *et al.* (2024)](dexter2024), who provide a flat CSV file with 945 parallels (some comprised of multiple words) between the first book of Valerius Flaccus&rsquo; *Argonautica* and four other epics (one of which is approximately contemporary with the *Argonautica*, and three of which are earlier) that are recorded in three specific commentaries. This database, therefore, will itself provide a valuable resource and is accordingly designed with an eye both to future developments of the present project and to reuse by other scholars: not all of the entered data is used in the project as it currently stands.
+There is currently no database of intertexts. Some benchmark datasets exist for the purpose of testing and training tools designed for detecting intertexts, notably [Dexter *et al.* (2024)](dexter2024), who provide a flat CSV file with 945 parallels (some comprised of multiple words) between the first book of Valerius Flaccus&rsquo; *Argonautica* and four other epics (one of which is approximately contemporary with the *Argonautica*, and three of which are earlier) that are recorded in three specific commentaries. This database, therefore, will itself provide a valuable resource and is accordingly designed with an eye both to future developments of the present project and to reuse by other scholars: not all of the entered data is used in the project as it currently stands. (It is important to note that one significant difference between this project&rsquo;s selection of intertexts and [Dexter *et al.* (2024)](dexter2024)&rsquo;s approach is that this project only includes parallels specifically identified as probable points of allusion, whereas they also include parallel *uses* of words, such as those where a commentator identifies another word-use that shares a similar unusual meaning.)
 
 <figure>
 <a href="https://pratt.darcykrasne.com/Portfolio/viz_intxt/nodegoat_model_2025-3-13.png"><img src="./images/nodegoat_model_2025-3-13.png" style="max-width: 100%;" alt="A representation of a database, showing objects connected by lines"></a>
@@ -89,7 +89,9 @@ The database model, as of 13 March 2025.
 
 The critical core tables are `word instance`, `word-level intertext`, `word-level intertext (grouping)`, `author`, `work`, `work segment`, `meter`, and `meter position length`. Each `word instance` object represents a single word in a single line of a single poem; each `word-level intertext` object comprises a source word and a target word. Since intertexts are often made up of several words, a `word-level intertext (grouping)` object clusters these intertext pairings together, taking advantage of nodegoat&rsquo;s [&ldquo;multiple&rdquo; option](https://nodegoat.net/documentation.s/52/object-type). Words are not assigned directly to works, but to work segments. While that choice is due to ensuring that the database is in first normal form, the way the work segment is determined is due not just to conventional poetic divisions (such as books) but also to meter, because the basis of the intertextual density display is a grid whose width is determined by the meter of the piece. As many works are polymetric, the meter is assigned to the work segment, which can represent anything from an entire work (in the case of, e.g., an epyllion) to a single poem within a multi-book work (e.g., one of Statius&rsquo;s *Silvae*) or a passage of a drama (e.g., a section of a choral passage in a Senecan tragedy). A `word instance` is placed within a `work segment` by line number and by location within the line, based not on word order or syllable count but on metrical *sedes* (placement). (This decision was made both to accommodate textual variation and to enable the placement of words within the grid.) The placement is defined by the word&rsquo;s beginning and ending `meter position length` objects, which in turn specify the maximum number of beats that can be assigned to a given metrical position (as well as specifying which line of a stanza the position belongs to, for stichic meters): these ultimately govern the appearance of the word in the grid, but they also offer the future possibility of comparing the metrical placement of intertexts. (I am not going into detail here on some decisions regarding the calculation of metrical &ldquo;length&rdquo; or the properties of database objects because I hope to publish some of that information in due course; however, it will ultimately be available in some form.)
 
-While the project overall is strictly concerned with Latin poetry, Greek texts also need to be included within the database due to Latin poetry&rsquo;s clear intertextual engagement with them. Accordingly, each author has a language property that specifies them as a Greek or Latin author. While this does not allow for the possibility of bilingual authors, our surviving texts do not really compass this scenario, or do so insufficiently to justify putting the language label with works instead of authors. ([The Late Antique poet Claudian is one such counterexample](https://antigonejournal.com/2024/12/claudians-gigantomachia/), but he is so late that his works are unlikely to serve as the *source* of any intertexts in the database; and this is the only situation in which a Greek text can enter the database.)
+While the project overall is strictly concerned with Latin poetry, Greek texts also need to be included within the database due to Latin poetry&rsquo;s clear intertextual engagement with them. Accordingly, each author has a language property that specifies them as either a Greek or Latin author. While this does not allow for the possibility of bilingual authors, our surviving texts do not really compass this scenario, or do so insufficiently to justify putting the language label with works instead of authors. ([The Late Antique poet Claudian is one such counterexample](https://antigonejournal.com/2024/12/claudians-gigantomachia/), but he is so late that his works are unlikely to serve as the *source* of any intertexts in the database; and this is the only situation in which a Greek text can enter the database.)
+
+Finally, each `word-level intertext` records at least one scholarly source (sometimes the original publication proposing the intertext, and sometimes a commentary), which are collectively stored in a `publication` table. This information is not currently displayed in any fashion, but it will eventually be available.
 
 ### Data Pipeline
 
@@ -138,7 +140,120 @@ def table_to_df(table, cols_dict):
 
 It joins the disparate metrical data into a single dataframe and then returns it to a single restructured JSON object; and it converts each of the other dataframes to a JSON object, which are collectively stored in an array. These are all saved to files that are automatically committed to GitHub.
 
-In the next stage of the project, the same Python data loader will also create network nodes and edges from the data.
+In the next stage of the project, the same Python data loader also creates network nodes and edges from the data. (This is [currently in progress](./sankey) as a [Sankey diagram](https://en.wikipedia.org/wiki/Sankey_diagram); I chose this over a traditional network graph since the sequential nature of an intertextual network makes it well-suited to visualizing as a flow-path.) While part of the network creation is done automatically by the d3 Sankey module, the initial preparation of nodes and edges is performed in the data loader.
+
+<p><details>
+<summary>Click to view the two custom functions for this stage.</summary>
+
+```python
+grp_intxts_list = [str(item) for sublist in list(word_lvl_intxt_grp_df.word_intxt_ids) for item in sublist]
+intxt_grp_list = []
+
+def build_intxt_dict(intxt_ids):
+    for intxt in intxt_ids:
+        intxt_id = str(intxt)
+        for row2 in word_lvl_intxt_df[word_lvl_intxt_df.obj_id == intxt_id].iterrows():
+            row_dict = {}
+            if intxt_id in grp_intxts_list:
+                row_dict["intxt_grp_id"] = intxt_grp_id
+            else:
+                row_dict["intxt_grp_id"] = None
+            row_dict["intxt_id"] = intxt_id
+            row2 = row2[1]
+            source_id = row2.source_word_id
+            target_id = row2.target_word_id
+            if isinstance(row2.match_type_ids, list):
+                match_type_ids = [str(id) for id in row2.match_type_ids]
+            else:
+                match_type_ids = []
+            row_dict["source_word_id"] = source_id
+            row_dict["target_word_id"] = target_id
+            source_df = word_instance_df.copy().query(f"obj_id == '{source_id}'").reset_index(drop=True) \
+                .merge(work_seg_df, how="left", left_on="work_segment_id", right_on="obj_id").drop("obj_id_y", axis=1) \
+                .merge(work_df, how="left", left_on="work_id", right_on="obj_id")[['obj_id_x','word','work_segment_id', 'line_num','line_num_modifier',"work_id","author_id"]]
+            target_df = word_instance_df.copy().query(f"obj_id == '{target_id}'").reset_index(drop=True) \
+                .merge(work_seg_df, how="left", left_on="work_segment_id", right_on="obj_id").drop("obj_id_y", axis=1) \
+                .merge(work_df, how="left", left_on="work_id", right_on="obj_id")[['obj_id_x','word','work_segment_id', 'line_num','line_num_modifier',"work_id","author_id"]]
+            row_dict["source_author_id"] = source_df.loc[0,'author_id']
+            row_dict["source_work_id"] = source_df.loc[0,'work_id']
+            row_dict["source_work_seg_id"] = source_df.loc[0,'work_segment_id']
+            if isinstance(source_df.loc[0,'line_num_modifier'], str):
+                row_dict["source_line_num"] = str(source_df.loc[0,'line_num'])+source_df.loc[0,'line_num_modifier']
+            else:
+                row_dict["source_line_num"] = str(source_df.loc[0,'line_num'])
+            row_dict["target_author_id"] = target_df.loc[0,'author_id']
+            row_dict["target_work_id"] = target_df.loc[0,'work_id']
+            row_dict["target_work_seg_id"] = target_df.loc[0,'work_segment_id']
+            if isinstance(target_df.loc[0,'line_num_modifier'],str):
+                row_dict["target_line_num"] = str(target_df.loc[0,'line_num'])+target_df.loc[0,'line_num_modifier']
+            else:
+                row_dict["target_line_num"] = str(target_df.loc[0,'line_num'])
+            row_dict["match_type_ids"] = match_type_ids
+            intxt_grp_list.append(row_dict)
+
+for row in word_lvl_intxt_grp_df.iterrows():
+    row = row[1]
+    intxt_grp_id = row.obj_id
+    intxt_ids = row.word_intxt_ids
+    build_intxt_dict(intxt_ids)
+build_intxt_dict([intxt for intxt in word_lvl_intxt_df.obj_id if intxt not in grp_intxts_list])
+
+intxt_full_df = pd.DataFrame.from_dict(intxt_grp_list)
+
+def prep_sankey(df):
+    nodes_edges_dict = {}
+    grp_df = df[~df.intxt_grp_id.isna()]
+    no_grp_df = df[df.intxt_grp_id.isna()].drop("intxt_grp_id", axis=1)
+    grp_ids = list(grp_df.intxt_grp_id.unique())
+    no_grp_ids = list(no_grp_df.intxt_id.unique())
+    nodes = []
+    edges = []
+    for work_seg in list(df.source_work_seg_id.unique()):
+        author = df[df.source_work_seg_id == work_seg].reset_index(drop=True).loc[0,"source_author_id"]
+        work = df[df.source_work_seg_id == work_seg].reset_index(drop=True).loc[0,"source_work_id"]
+        nodes.append({"name": work_seg, "author": author, "work": work})
+    # print(len(nodes))
+    for work_seg in list(df.target_work_seg_id.unique()):
+        if work_seg not in [item["name"] for item in nodes]:
+            author = df[df.target_work_seg_id == work_seg].reset_index(drop=True).loc[0,"target_author_id"]
+            work = df[df.target_work_seg_id == work_seg].reset_index(drop=True).loc[0,"target_work_id"]
+            nodes.append({"name": work_seg, "author": author, "work": work})
+    # print(len(nodes))
+    # print(nodes)
+    nodes_edges_dict["nodes"] = nodes
+    def make_edge(id, df, grp=True):
+        source = df.loc[0, "source_work_seg_id"]
+        target = df.loc[0, "target_work_seg_id"]
+        source_words = list(df.source_word_id.unique())
+        target_words = list(df.target_word_id.unique())
+        num_words = (len(source_words)+len(target_words))/2    # using average because sometimes multiple words are compressed into a single word or a single word is split into multiple words
+        id = id
+        if grp == True:
+            group_id = True
+        else:
+            group_id = False
+        edge_dict = {"source": source,
+                     "target": target,
+                     "source_words": source_words,
+                     "target_words": target_words,
+                     "num_words": num_words,
+                     "id": id,
+                     "group_id": group_id}
+        return edge_dict
+    for id in grp_ids:
+        sub_df = grp_df.query(f"intxt_grp_id == '{id}'").reset_index(drop=True)
+        edges.append(make_edge(id, sub_df))
+    for id in no_grp_ids:
+        sub_df = no_grp_df.query(f"intxt_id == '{id}'").reset_index(drop=True)
+        edges.append(make_edge(id, sub_df, grp=False))
+    # print(edges)
+    nodes_edges_dict["edges"] = edges
+    return nodes_edges_dict
+
+sankey_data = prep_sankey(intxt_full_df)
+```
+
+</details></p>
 
 #### Data Loading and Transformation with JavaScript
 
@@ -308,12 +423,86 @@ const intertextsArr = intertextsArrComplete.filter(pos => pos.word); // only inc
 
 #### Visualization
 
-The basic motivation was to make the display resemble the layout of the poem, while not showing information that doesn't exist. The background color was chosen to enable visibility of the palest values while still enabling contrast with all shades on the scale.
+The basic motivation was to make the display resemble the layout of the poem, while not showing information that doesn't exist. The background color was chosen to enable visibility of the palest values while still enabling contrast with all shades on the scale, including for individuals with color vision deficiencies.
+
+For the Sankey diagram, the standard horizontal layout was rotated both to accommodate the future lengthening of the network and to convey a sense of the &ldquo;descent&rdquo; or &ldquo;inheritance&rdquo; analogy between earlier and later texts. The colors (which distinguish between authors) are currently drawn from the default [Tableau10](https://d3js.org/d3-scale-chromatic/categorical#schemeTableau10), but since there will eventually be repetitions once more than ten authors are in the database, they are reinforced by the inclusion of the author&rsquo;s name. I have also added a custom tool-tip popup for the nodes (and will subsequently do so for the links), since the default Sankey module only uses the HTML &lt;title&gt;, which does not render on all touch-screen devices:
+
+```js run=false
+if (Tt) {
+    const nodeLabelG = node
+        .append("g")
+        .attr("class","node_label_group")
+        .attr("transform", d => {
+            const labelTranslate = +`-${(d.y1 - d.y0)/2}`;
+            if (d.x0 < width / 2){
+            return `translate(${(d.x0) +  5}, ${d.y0}) rotate(-90,0,0) translate(${labelTranslate},${d.x1 - d.x0})`
+            }
+            return `translate(${(d.x0 - 55)}, ${d.y0})  rotate(-90,0,0) translate(${labelTranslate},0)`
+            })
+        .attr("opacity","0")
+        .attr("overflow","visible")
+        .style('pointer-events', 'none');
+
+    nodeLabelG.append("rect")
+        .attr("height","50")
+        .attr("width","130")
+        .attr("stroke","black")
+        .attr("fill","none")
+        .attr("filter","drop-shadow(0 3px 4px rgba(0,0,0,.5))");
+
+    const nodeLabelText = nodeLabelG.append("text")
+            .attr("x","5")
+            .attr("y",".5em")
+            .attr("font-size","11")
+            .attr("font-family","sans-serif")
+            .attr("font-weight","normal")
+            .attr("stroke","none")
+            .attr("fill","black");
+
+    nodeLabelText.append("tspan")
+        .attr("dy","1em")
+        .text((d,i) => {
+            let authorID = origNodes[i].author;
+            return lookupIDTable.get(authorID);
+        });
+    nodeLabelText.append("tspan")
+        .attr("x","5")
+        .attr("dy","1em")
+        .attr("font-style","italic")
+        .text((d,i) => {
+            let workID = origNodes[i].work;
+            return lookupIDTable.get(workID);});
+    nodeLabelText.append("tspan")
+        .attr("x","5")
+        .attr("dy","1em")
+        .text((d,i) => Tt[i].split("\n")[1]); 
+
+    nodeRect
+        .on("mouseover", function(event) {
+            d3.select(this).attr("opacity","1");
+            d3.select(this.nextSibling.nextSibling)
+                .attr("opacity","1")
+            d3.select(this.nextSibling.nextSibling.firstChild)
+                .attr("fill","white")
+        })
+        .on("mouseout", function(event) {
+                d3.select(this).attr("opacity",".6");
+                d3.select(this.nextSibling.nextSibling)
+                .attr("opacity","0")
+            d3.select(this.nextSibling.nextSibling.firstChild)
+                .attr("fill","none")});
+}
+
+svg.selectAll(".node")
+    .on("mouseover", function(event) {
+        d3.select(this).raise();
+    })
+```
 
 
 ## Next Steps
 
-Currently underway are the entry of additional intertexts into the database and the creation of an intertextuality network from the selected word, using [NetworkX](https://networkx.org/) and [D3.js](https://d3js.org/). Following that, in addition to continuing database input, attention will focus on providing a display of what the intertexts are, as well as tweaking the code to handle elisions, extranumerical lines (such as 845a, which would come between 845 and 846), and alternative readings. A few additional planned long-term developments are:
+Currently underway are the entry of additional intertexts into the database and the creation of an intertextuality network from the selected word, using [D3.js](https://d3js.org/), as described above. Following that, in addition to continuing database input, attention will focus on providing a display of what the intertexts are, as well as tweaking the code to handle elisions, extranumerical lines (such as 845a, which would come between 845 and 846), and alternative readings. A few additional potential long-term developments are:
 
 - an option to view only direct intertext density
 - an option to view &ldquo;descendant&rdquo; intertexts instead of &ldquo;ancestor&rdquo; intertexts
