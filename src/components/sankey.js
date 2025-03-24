@@ -53,6 +53,10 @@ export function SankeyChart(
         center: d3Sankey.sankeyCenter
       }[nodeAlign] ?? d3Sankey.sankeyJustify;
 
+  // keep original node & link values
+  const origNodes = [...nodes];
+  const origLinks = [...links];
+
   // Compute values.
   const LS = d3.map(links, linkSource).map(intern);
   const LT = d3.map(links, linkTarget).map(intern);
@@ -99,9 +103,21 @@ export function SankeyChart(
   const svg = d3
     .create("svg")
     .attr("width", width)
-    .attr("height", height)
+    .attr("height", width)
     .attr("viewBox", [0, 0, width, height])
-    .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+    .attr("style", "max-width: 100%; height: auto; height: intrinsic;")
+    .attr("transform", "rotate(90,0,0) translate("+marginTop+",0)")
+    .attr("style","border: 1px solid black")
+    ;
+
+  const link = svg
+    .append("g")
+    .attr("fill", "none")
+    .attr("stroke-opacity", linkStrokeOpacity)
+    .selectAll("g")
+    .data(links)
+    .join("g")
+    .style("mix-blend-mode", linkMixBlendMode);
 
   const node = svg
     .append("g")
@@ -119,15 +135,6 @@ export function SankeyChart(
 
   if (G) node.attr("fill", ({index: i}) => color(G[i]));
   if (Tt) node.append("title").text(({index: i}) => Tt[i]);
-
-  const link = svg
-    .append("g")
-    .attr("fill", "none")
-    .attr("stroke-opacity", linkStrokeOpacity)
-    .selectAll("g")
-    .data(links)
-    .join("g")
-    .style("mix-blend-mode", linkMixBlendMode);
 
   if (linkColor === "source-target")
     link
@@ -178,11 +185,83 @@ export function SankeyChart(
       .attr("y", (d) => (d.y1 + d.y0) / 2)
       .attr("dy", "0.35em")
       .attr("text-anchor", (d) => (d.x0 < width / 2 ? "start" : "end"))
-      .text(({index: i}) => Tl[i]);
+      .text(({index: i}) => Tl[i])
+      //.attr("transform", d => "rotate("+d.y1+"10,0,0)")
+      ;
+
+
+// add real pop-up labels to nodes
+
+      if (Tt) {
+        const nodeG = svg.selectAll(".node_group")
+            .data(nodes)
+            .enter()
+            .append("g")
+            .attr("class","node_group")
+            .attr("transform", d => `translate(${d.x0},${d.y0})`);
+        
+        const nodeG_node = nodeG.append("g")
+            .attr("stroke", nodeStroke)
+            .attr("stroke-width", nodeStrokeWidth)
+            .attr("stroke-opacity", nodeStrokeOpacity)
+            .attr("stroke-linejoin", nodeStrokeLinejoin)
+            .on("mouseover", function(event) {
+        //        const [x,y] = d3.pointer(event, this);
+                d3.select(this.nextSibling)
+                    .attr("opacity","1")
+            })
+            .on("mouseout", function(event) {
+                    d3.select(this.nextSibling)
+                    .attr("opacity","0")});
+        
+        nodeG_node.append("rect")
+            .attr("height", (d) => d.y1 - d.y0)
+            .attr("width", (d) => d.x1 - d.x0)
+            .attr("stroke","none")
+            .attr("fill","rgba(255,255,255,0)");
+        
+        const nodeLabelG = nodeG
+            .append("g")
+            .attr("class","node_label_group")
+            .attr("transform", d => `rotate(-90,0,0) translate(-${(d.y1 - d.y0) / 2}, ${d.x1 - d.x0})`)
+            .attr("opacity","0")
+            ;
+        
+        nodeLabelG.append("rect")
+            .attr("height","80")
+            .attr("width","100")
+            .attr("stroke","black")
+            .attr("fill","white")
+            .attr("filter","drop-shadow(0 3px 4px rgba(0,0,0,.5))");
+
+        nodeLabelG.append("text")
+                .attr("x","5")
+                .attr("y",".5em")
+                .attr("font-size","12")
+            .append("tspan")
+                .attr("dy","1em")
+                .text((d,i) => origNodes[i].author) // change this to actual text once in "real" Sankey diagram
+            .append("tspan")
+                .attr("x","5")
+                .attr("dy","1em")
+                .text((d,i) => origNodes[i].work) // change this to actual text once in "real" Sankey diagram
+                ; 
+                
+        const labelGroup = node.append("g")
+            .attr("transform", (d) => `translate(${d.x0},${d.y0})`)
+            .attr("class","label_group")
+        
+        labelGroup.append("rect")
+            .attr("width","40")
+            .attr("height","40")
+            .attr("stroke","black")
+        }
+        
+
 
   function intern(value) {
     return value !== null && typeof value === "object" ? value.valueOf() : value;
   }
 
-  return Object.assign(svg.node(), {scales: {color}});
+  return Object.assign(svg.node(), {scales: {color}, nodes: nodes, links: links});
 }
