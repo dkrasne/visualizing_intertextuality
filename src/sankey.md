@@ -6,15 +6,15 @@ title: Full Intertext Diagram
 
 The following diagram shows the connections between all intertexts currently in the database.
 
-Each node represents one section of a work (a `work segment`, as defined on <a href="./about#database-design">the About page</a>). A flow path linking two nodes represents words that have been identified as intertexts between the source text (higher up) and the target text (lower down); its width shows (in relative terms) *how many* words are borrowed.
+Each rectangular node represents one section of a work (a `work segment`, as defined on <a href="./about#database-design">the About page</a>). A flow path linking two nodes represents words that have been identified as intertexts between the source text (higher up) and the target text (lower down); its width shows (in relative terms) *how many* words are borrowed.
 
-Mouse over a rectangular node to see the work and section that it represents. Mouse over a linking flow path to see the words it represents. (Currently, the latter may not work on mobile phones.)
+Mouse over a node to see the work and section that it represents. Mouse over a linking flow path to see the words it represents. (Currently, the latter may not work on mobile phones.)
 
 <div style="font-size:smaller;">
 
 Eventually, subsets of this diagram will appear on the main page for the currently-selected portion of a work.
 
-*Some possible additional future work:*
+*Some additional future work:*
 - *making the nodes repositionable*
 - *highlighting the entire set of flows connected to the currently-selected node*
 
@@ -316,15 +316,23 @@ const browserWidth = window.innerWidth;
   // A unique identifier for clip paths (to avoid conflicts).
   const uid = `O-${Math.random().toString(16).slice(2)}`;
 
-  const svg = d3
+//  const svg = d3
+const svg_outer = d3
     .create("svg")
     .attr("width", width)
     .attr("height", width)
-    .attr("viewBox", [0, 0, width, height])
-    .attr("style", "max-width: 100%; height: auto; height: intrinsic;")
-    .attr("transform", "rotate(90,0,0) translate("+marginTop+",0)")
-    //.attr("style","border: 1px solid black")
+    .attr("viewBox", [0, 0, width, width])
+    .attr("style", "max-width: 100%; height: auto; height: intrinsic")
+//    .attr("transform", "rotate(90,0,0) translate("+marginTop+",0)")
+//    .attr("style","border: 1px solid black")
     ;
+
+  const svg = svg_outer.append("g")
+    .attr("transform", "rotate(90,0,0) translate(0,-"+(width*.75 + marginTop)+")")
+    .attr("id","outer_group")
+
+
+
 
   const link = svg
     .append("g")
@@ -587,7 +595,7 @@ svg.selectAll(".node")
     return value !== null && typeof value === "object" ? value.valueOf() : value;
   }
 
-  return Object.assign(svg.node(), {scales: {color}, nodes: nodes, links: links});
+  return Object.assign(svg_outer.node(), {scales: {color}, nodes: nodes, links: links});
 }
 
 ```

@@ -592,7 +592,8 @@ html`<p style="max-width:none; font-size:smaller;">Click on a cell to freeze the
 ${plotDisplay}
 </div>
 <div>
-	<p>Eventually there will be a network visualization in this space. For now, you can see <a href="./sankey">a diagram of the full set of available intertexts</a> to get a sense of what it might look like.</p>
+	<p>Eventually there will be a network visualization in this space. For now, you can see <a href="./sankey">a diagram of the full set of available intertexts</a> to get a sense of what that visualization might look like.</p>
+	<p><i>The following information will eventually not be displayed.</i></p>
 	<p>Selected word object ID: ${plotCurrSelect ? plotCurrSelect.wordObj.obj_id : "none"}<br>
 	Selected word: ${plotCurrSelect ? plotCurrSelect.word : "none"}</p>
 </div>
