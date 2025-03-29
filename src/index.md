@@ -583,7 +583,7 @@ display(
 
 html`<p style="max-width:none; font-size:smaller;">Click on a cell to freeze the popup information. <b>Direct intertexts</b> are those where a scholar has suggested a direct link between the present word and a word in an earlier text. <b>Indirect intertexts</b> are intertexts at further remove (i.e., where a direct or indirect intertext refers to another, still earlier, passage). Currently, the project does not include intratexts (allusions to other passages within the same text).</p>
 
-<p style="max-width:none; font-size:smaller;"><b>Two caveats:</b> absence of a word does not mean that there are no intertexts, just that they are not yet in the database; and lines appear in numeric order, even if editors agree that they should be transposed.</p></div>
+<p style="max-width:none; font-size:smaller;"><b>Two caveats:</b> absence of a word does not necessarily mean that there are no intertexts, just that they are not yet in the database; and lines appear in numeric order, even if editors agree that they should be transposed.</p></div>
 
 <div class="grid grid-cols-2"><div class="card" style="background-color:${bgColor}; padding-top: 30px;">
 
