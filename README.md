@@ -12,15 +12,15 @@ A project to visualize intertextuality in Latin poetry, using [nodegoat](https:/
 │  ├─ data
 │  │  ├─ nodegoat_data.json.py		# a data loader written in Python
 │  │  ├─ intxt_network_graph.json	# NetworkX graph data (output by nodegoat_data.json.py)
-│  │  ├─ intxts_full.json			# all intertexts (output by nodegoat_data.json.py)
-│  │  ├─ meters.json				# information on Latin meters (output by nodegoat_data.json.py)
+│  │  ├─ intxts_full.json		# all intertexts (output by nodegoat_data.json.py)
+│  │  ├─ meters.json			# information on Latin meters (output by nodegoat_data.json.py)
 │  │  ├─ model_json_backup.json		# backup of the nodegoat model structure in case API call fails (output by nodegoat_data.json.py)
 │  │  ├─ nodegoat_tables.json		# reformatted database tables from nodegoat (output by nodegoat_data.json.py)
 │  │  ├─ objects_json_backup.json	# backup of the nodegoat object data in case API call fails (output by nodegoat_data.json.py)
-│  │  └─ sankey_data.json			# intertexts formatted for sankey chart (output by nodegoat_data.json.py)
-│  ├─ about.md						# about the project
-│  ├─ sankey.md						# full diagram of intertexts (markdown and JavaScript)
-│  └─ index.md						# the home page	(markdown and JavaScript)
+│  │  └─ sankey_data.json		# intertexts formatted for sankey chart (output by nodegoat_data.json.py)
+│  ├─ about.md				# about the project
+│  ├─ sankey.md				# full diagram of intertexts (markdown and JavaScript)
+│  └─ index.md				# the home page	(markdown and JavaScript)
 └─ README.md						# this page
 ```
 
@@ -31,7 +31,7 @@ For a full discussion of each part of this chart, see [the project's About page]
 ```mermaid
 flowchart TD;
 	data[Manual data collection from commentaries, articles, and other publications]
-	nodegoat["Manual entry into nodegoat database (<a href="https://pratt.darcykrasne.com/Portfolio/viz_intxt/nodegoat_model_2025-3-13.png">see model diagram here</a>)"]
+	nodegoat["Manual data entry into nodegoat database (<a href="https://pratt.darcykrasne.com/Portfolio/viz_intxt/nodegoat_model_2025-3-13.png">see model diagram here</a>)"]
 	python[Python data-loader performs API call from nodegoat, transforms data, and produces JSON files]
 	file1[meters.json]
 	file2[nodegoat_tables.json]
