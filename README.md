@@ -6,6 +6,8 @@ A project to visualize intertextuality in Latin poetry, using [nodegoat](https:/
 
 ## Structure of this repository
 
+Any files not listed below are part of the Observable Framework setup or are solely for local testing purposes.
+
 ```ini
 .
 ├─ src
@@ -21,7 +23,7 @@ A project to visualize intertextuality in Latin poetry, using [nodegoat](https:/
 │  ├─ about.md				# about the project
 │  ├─ sankey.md				# full diagram of intertexts (markdown and JavaScript)
 │  └─ index.md				# the home page	(markdown and JavaScript)
-└─ README.md						# this page
+└─ README.md				# this page
 ```
 
 ## Diagram of data workflow
@@ -32,7 +34,7 @@ For a full discussion of each part of this chart, see [the project's About page]
 flowchart TD;
 	data[Manual data collection from commentaries, articles, and other publications]
 	nodegoat["Manual data entry into nodegoat database (<a href="https://pratt.darcykrasne.com/Portfolio/viz_intxt/nodegoat_model_2025-3-13.png">see model diagram here</a>)"]
-	python[Python data-loader performs API call from nodegoat, transforms data, and produces JSON files]
+	python["Python data loader <code>nodegoat_data.json.py</code> performs API call from nodegoat, transforms data, and produces multiple JSON files"]
 	file1[meters.json]
 	file2[nodegoat_tables.json]
 	file3[intxts_full.json]
@@ -42,7 +44,7 @@ flowchart TD;
 	file7["objects_json_backup.json (backup nodegoat data)"]
 	file8["nodegoat_data.json (complete nodegoat data)"]
 	load[markdown/JavaScript pages load data]
-	scripts[JavaScript transforms data into visualizations]
+	scripts["JavaScript (Observable Plot and D3.js) transforms data into visualizations"]
     viz_cell[Cell plot visualization]
     viz_sankey[Sankey chart visualization]
 	data --> nodegoat --> python
