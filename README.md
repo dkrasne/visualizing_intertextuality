@@ -30,12 +30,33 @@ For a full discussion of each part of this chart, see [the project's About page]
 
 ```mermaid
 flowchart TD;
-	data[Manual data collection]
-	nodegoat[nodegoat database]
-	python[Python data-loader does API call from nodegoat, produces JSON files]
-	load[Data loads into markdown/JavaScript pages]
+	data[Manual data collection from commentaries, articles, and other publications]
+	nodegoat["Manual entry into nodegoat database (<a href="https://pratt.darcykrasne.com/Portfolio/viz_intxt/nodegoat_model_2025-3-13.png">see model diagram here</a>)"]
+	python[Python data-loader performs API call from nodegoat, transforms data, and produces JSON files]
+	file1[meters.json]
+	file2[nodegoat_tables.json]
+	file3[intxts_full.json]
+	file4[intxt_network_graph.json]
+	file5[sankey_data.json]
+	file6["model_json_backup.json (backup nodegoat model)"]
+	file7["objects_json_backup.json (backup nodegoat data)"]
+	file8["nodegoat_data.json (complete nodegoat data)"]
+	load[markdown/JavaScript pages load data]
 	scripts[JavaScript transforms data into visualizations]
-	data --> nodegoat --> python --> load --> scripts
+    viz_cell[Cell plot visualization]
+    viz_sankey[Sankey chart visualization]
+	data --> nodegoat --> python
+	python --> file1 --> load
+	python --> file2 --> load
+	python --> file3 --> load
+	python --> file4 --> load
+	python --> file5 --> load
+	python --> file6 --> load
+	python --> file7 --> load
+	python --> file8 --> load
+	load --> scripts
+    scripts --> viz_cell
+    scripts --> viz_sankey
 ```
 
 
