@@ -1,5 +1,48 @@
 # Visualizing Intertextuality
 
+Website: https://visualizing-intertextuality.observablehq.cloud/visualizing-intertextuality/
+
+A project to visualize intertextuality in Latin poetry, using [nodegoat](https://nodegoat.net/) and [Observable Framework](https://observablehq.com/framework/).
+
+## Structure of this repository
+
+```ini
+.
+├─ src
+│  ├─ data
+│  │  ├─ nodegoat_data.json.py		# a data loader written in Python
+│  │  ├─ intxt_network_graph.json	# NetworkX graph data (output by nodegoat_data.json.py)
+│  │  ├─ intxts_full.json			# all intertexts (output by nodegoat_data.json.py)
+│  │  ├─ meters.json				# information on Latin meters (output by nodegoat_data.json.py)
+│  │  ├─ model_json_backup.json		# backup of the nodegoat model structure in case API call fails (output by nodegoat_data.json.py)
+│  │  ├─ nodegoat_tables.json		# reformatted database tables from nodegoat (output by nodegoat_data.json.py)
+│  │  ├─ objects_json_backup.json	# backup of the nodegoat object data in case API call fails (output by nodegoat_data.json.py)
+│  │  └─ sankey_data.json			# intertexts formatted for sankey chart (output by nodegoat_data.json.py)
+│  ├─ about.md						# about the project
+│  ├─ sankey.md						# full diagram of intertexts (markdown and JavaScript)
+│  └─ index.md						# the home page	(markdown and JavaScript)
+└─ README.md						# this page
+```
+
+## Diagram of data workflow
+
+For a full discussion of each part of this chart, see [the project's About page](https://visualizing-intertextuality.observablehq.cloud/visualizing-intertextuality/about).
+
+```mermaid
+flowchart TD;
+	data[Manual data collection]
+	nodegoat[nodegoat database]
+	python[Python data-loader does API call from nodegoat, produces JSON files]
+	load[Data loads into markdown/JavaScript pages]
+	scripts[JavaScript transforms data into visualizations]
+	data --> nodegoat --> python --> load --> scripts
+```
+
+
+<!--
+
+# Visualizing Intertextuality
+
 This is an [Observable Framework](https://observablehq.com/framework/) app. To install the required dependencies, run:
 
 ```
@@ -57,3 +100,5 @@ A typical Framework project looks like this:
 | `npm run deploy`     | Deploy your app to Observable                            |
 | `npm run clean`      | Clear the local data loader cache                        |
 | `npm run observable` | Run commands like `observable help`                      |
+
+-->
