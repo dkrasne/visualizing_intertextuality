@@ -38,14 +38,14 @@ flowchart TD;
 	data[Manual data collection from commentaries, articles, and other publications]
 	nodegoat["Manual data entry into nodegoat database (<a href="https://pratt.darcykrasne.com/Portfolio/viz_intxt/nodegoat_model_2025-3-13.png">see model diagram here</a>)"]
 	python["Python data loader <code>nodegoat_data.json.py</code> performs API call from nodegoat, transforms data, and produces multiple JSON files"]
-	file1(meters.json)
-	file2(nodegoat_tables.json)
-	file3(intxts_full.json)
-	file4(intxt_network_graph.json)
-	file5(sankey_data.json)
-	file6("model_json_backup.json (backup nodegoat model)")
-	file7("objects_json_backup.json (backup nodegoat data)")
-	file8("nodegoat_data.json (complete reformatted nodegoat data)")
+	file1([meters.json])
+	file2([nodegoat_tables.json])
+	file3([intxts_full.json])
+	file4([intxt_network_graph.json])
+	file5([sankey_data.json])
+	file6(["model_json_backup.json (backup nodegoat model)"])
+	file7(["objects_json_backup.json (backup nodegoat data)"])
+	file8(["nodegoat_data.json (complete reformatted nodegoat data)"])
 	load[markdown/JavaScript pages load transformed data]
 	scripts["JavaScript (Observable Plot and D3.js) transforms data into visualizations"]
     viz_cell[Cell plot visualization]
