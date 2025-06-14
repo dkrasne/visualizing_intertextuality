@@ -1,6 +1,6 @@
 ---
 title: Visualizing Intertextuality
-theme: [wide, alt]
+theme: [wide, air]
 toc: false
 ---
 
