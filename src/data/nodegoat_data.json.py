@@ -127,6 +127,10 @@ for objtype in obj_list:
             position_class_table = objtype["objects"]
             tables_dict["position_class_table"] = position_class_table
             break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 22806:
+            scholar_table = objtype["objects"]
+            tables_dict["scholar_table"] = scholar_table
+            break
         elif objtype["objects"][id_num]["object"]["type_id"] == 21856:
             publication_table = objtype["objects"]
             tables_dict["publication_table"] = publication_table
@@ -134,6 +138,14 @@ for objtype in obj_list:
         elif objtype["objects"][id_num]["object"]["type_id"] == 21860:
             pleiades_table = objtype["objects"]
             tables_dict["pleiades_table"] = pleiades_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 22824:
+            collection_table = objtype["objects"]
+            tables_dict["collection_table"] = collection_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 22825:
+            authorship_prob_class_table = objtype["objects"]
+            tables_dict["authorship_prob_class_table"] = authorship_prob_class_table
             break
         else:
             pass
@@ -154,7 +166,15 @@ def table_to_df(table, cols_dict):
             id_val = list(val.keys())[0]
             if val[id_val] == "refid":
                 try:
-                    tdict[str(key)] = obj_defs[str(id_val)]["object_definition_ref_object_id"]
+                    # tdict[str(key)] = obj_defs[str(id_val)]["object_definition_ref_object_id"]
+                    refval = obj_defs[str(id_val)]["object_definition_ref_object_id"]
+                    if isinstance(refval, list):
+                        for i, newval in enumerate(refval):
+                            if isinstance(newval, str) and len(newval.split("_")) == 2:
+                                splitval = newval.split("_")
+                                refval[i] = {'refid': splitval[0], 
+                                             'refval': splitval[1]}
+                    tdict[str(key)] = refval
                 except:
                     tdict[str(key)] = None
             elif val[id_val] == "objval":
@@ -163,12 +183,16 @@ def table_to_df(table, cols_dict):
                 except:
                     tdict[str(key)] = None
         dictlist.append(tdict)
-    df = pd.DataFrame.from_dict(dictlist)
+    df = pd.DataFrame.from_dict(dictlist).copy()
+
+    # catch any exceptions that didn't store empty value as None
+    df = df.astype(object)
+    df = df.where(~df.isna(), None)
 
     # convert numeric IDs to string and remove any trailing decimals
     for col in df:
         if col[-3:] == "_id":
-            df[col] = df[col].astype(str)
+            df[col] = df[col].apply(lambda x: str(x) if x is not None else x)
     def remove_decimal(id_string):
         if isinstance(id_string, str) and id_string[-2:] == ".0":
             return id_string[:-2]
@@ -176,7 +200,7 @@ def table_to_df(table, cols_dict):
     for col in df:
         if col[-3:] == "_id":
             df[col] = df[col].apply(remove_decimal)
-
+    
     return df
 
 # Prepare columns for dataframes
@@ -186,23 +210,28 @@ wd_inst_cols = {"word": {"67388": "objval"},
                 "line_num": {"67405": "objval"},
                 "line_num_modifier": {"67411": "objval"},
                 "start_pos_id": {"67401": "refid"},
-                #"start_pos": {"67401": "objval"},
                 "end_pos_id": {"67402": "refid"},
-                #"end_pos": {"67402": "objval"}
+                "elided_monosyllable": {"70908": "objval"} # should end up as a Boolean
                 }
 wd_lvl_intxt_cols = {"source_word_id": {"67392": "refid"},
                      "target_word_id": {"67393": "refid"},
                      "match_type_ids": {"67397": "refid"}}
 wd_lvl_intxt_grp_cols = {"word_intxt_ids": {"67406": "refid"}}
 author_cols = {"author_name": {"67375": "objval"},
-               "wikidata_url": {"67383": "objval"},
+               "wikidata_id": {"67383": "objval"},
+               "VIAF_id": {"70909": "objval"},
+               "DLL_author_authority": {"70910": "objval"},
                "language": {"68096": "objval"},
                "praenomen": {"67385": "objval"},
                "nomen": {"67386": "objval"},
                "cognomen": {"67387": "objval"}}
 work_cols = {"title": {"67378": "objval"},
              "author_id": {"67379": "refid"},
-             "cts_urn": {"67533": "objval"}}
+             "cts_urn": {"67533": "objval"},
+             "DLL_work_authority": {"70911": "objval"},
+             "authorship_prob_ids": {"70987": "refid"}}
+collection_cols = {"cts_urn": {"70990": "objval"},
+                   "DLL_work_authority": {"70991": "objval"}}
 work_seg_cols = {"work_id": {"67408": "refid"},
                  "work_section": {"67410": "objval"},
                  "work_subsection": {"67539": "objval"},
@@ -212,15 +241,32 @@ work_seg_cols = {"work_id": {"67408": "refid"},
                  "meter_id": {"67531": "refid"},
                  "perseus_url": {"67534": "objval"}}
 lemma_cols = {"lemma": {"67440": "objval"},
-              "lila_uri": {"67441": "objval"}}
+              "lila_uri": {"67441": "objval"},
+              # in future, should add information from sub-objects, but that will require additional logic
+              }
 meter_cols = {"meter_name": {"67527": "objval"},
               "max_line_beats": {"67528": "objval"},
               "recur_line_pattern": {"67529": "objval"},
-              "ok_word_pos": {"67530": "refid"}}
+              #"ok_word_pos": {"67530": "refid"},
+              "equiv_uris": {"70955": "objval"}}
 meter_pos_len_cols = {"meter_id": {"67535": "refid"},
                       "position_id": {"67536": "refid"},
                       "max_length": {"67537": "objval"},
                       "unit_line": {"68127": "objval"}}
+### The rest aren't necessary for the actual visualization ###
+publication_cols = {"author_id": {"67416": "refid"},
+                    "publication_date": {"67417": "objval"},
+                    "article_chapter_title": {"67418": "objval"},
+                    "book_journal_title": {"67419": "objval"},
+                    "issue_number": {"67420": "objval"}} # may need to turn this into a date
+scholar_cols = {"surname": {"70904": "objval"},
+                "forenames": {"71050": "objval"},
+                "orcid": {"70905": "objval"}}
+pleiades_cols = {"pleiades_uri": {"67426": "objval"},
+                 "place_name": {"67427": "objval"},
+                 "PID": {"67431": "objval"},
+                 # in future, may add latitude and longitude from sub-object, but that would require additional logic
+                 }
 
 # Convert tables to dataframes based on specified columns
 word_instance_df = table_to_df(word_instance_table, wd_inst_cols)
@@ -228,10 +274,17 @@ word_lvl_intxt_df = table_to_df(word_lvl_intxt_table, wd_lvl_intxt_cols)
 word_lvl_intxt_grp_df = table_to_df(word_lvl_intxt_grp_table, wd_lvl_intxt_grp_cols)
 author_df = table_to_df(author_table, author_cols)
 work_df = table_to_df(work_table,work_cols)
+collection_df = table_to_df(collection_table,collection_cols)
 work_seg_df = table_to_df(work_seg_table,work_seg_cols)
 lemma_df = table_to_df(lemma_table,lemma_cols)
 meter_df = table_to_df(meter_table,meter_cols)
 meter_pos_len_df = table_to_df(meter_pos_len_table,meter_pos_len_cols)
+scholar_df = table_to_df(scholar_table,scholar_cols)
+publication_df = table_to_df(publication_table,publication_cols)
+pleiades_df = table_to_df(pleiades_table,pleiades_cols)
+
+# For `word instance` df, make sure that elided_monosyllable is either False or True, not None:
+word_instance_df['elided_monosyllable'] = word_instance_df['elided_monosyllable'].apply(lambda x: False if x is None else x)
 
 # Convert tables to dataframes for classification/lookup tables
 match_type_class_list = []
@@ -249,6 +302,18 @@ for pt in position_class_table:
     pt_dict["position"] = position_class_table[pt]["object"]["object_name"]
     position_class_list.append(pt_dict)
 position_class_df = pd.DataFrame.from_dict(position_class_list)
+
+authorship_prob_class_list = []
+for ap in authorship_prob_class_table:
+    ap_dict = {}
+    ap_dict["authorship_problem_id"] = ap
+    ap_dict["authorship_problem"] = authorship_prob_class_table[ap]["object"]["object_name"]
+    try:
+        ap_dict["lod_uris"] = authorship_prob_class_table[ap]["object_definitions"]['70993']["object_definition_value"]
+    except:
+        ap_dict["lod_uris"] = None
+    authorship_prob_class_list.append(ap_dict)
+authorship_prob_class_df = pd.DataFrame.from_dict(authorship_prob_class_list)
 
 ############ Join tables and make JSON objects###########
 
@@ -288,27 +353,31 @@ with open(scriptdir+"/meters.json", "w") as meters_json:
 
 ######## OUTPUT ALL DATAFRAMES IN DICT -> JSON FORMAT ############
 
-tables_list = ['word_instance_table',
- 'word_lvl_intxt_table',
- 'word_lvl_intxt_grp_table',
- 'author_table',
- 'work_table',
- 'work_seg_table',
- 'lemma_table',
- 'meter_table',
- 'meter_pos_len_table',
- 'match_type_class_table']
+# tables_list = ['word_instance_table',
+#  'word_lvl_intxt_table',
+#  'word_lvl_intxt_grp_table',
+#  'author_table',
+#  'work_table',
+#  'work_seg_table',
+#  'lemma_table',
+#  'meter_table',
+#  'meter_pos_len_table',
+#  'match_type_class_table']
 
-df_list = [word_instance_df,
-           word_lvl_intxt_df,
-           word_lvl_intxt_grp_df,
-           author_df,
-           work_df,
-           work_seg_df,
-           lemma_df,
-           meter_df,
-           meter_pos_len_df,
-           match_type_class_df]
+# df_list = [word_instance_df,
+#            word_lvl_intxt_df,
+#            word_lvl_intxt_grp_df,
+#            author_df,
+#            work_df,
+#            work_seg_df,
+#            lemma_df,
+#            meter_df,
+#            meter_pos_len_df,
+#            match_type_class_df]
+
+tables_list = list(tables_dict.keys())
+
+df_list = [eval("_".join(table.split("_")[:-1])+"_df") for table in tables_list]
 
 tables_df_to_dict = {}
 
@@ -424,12 +493,14 @@ for id in intxt_full_df[intxt_full_df.intxt_grp_id.isna()].intxt_id:
     sub_df = intxt_full_df.query(f"intxt_id == '{id}'").reset_index(drop=True)
     add_intxt_multi(sub_df, id, G)
 
-graph_json = nx.node_link_data(G)
+graph_json = nx.node_link_data(G, edges="links") # may eventually need to change this to `edges="edges"`, this is unclear.
 
 with open(scriptdir+"/intxt_network_graph.json", "w") as graph_file:
     json.dump(graph_json, graph_file)
 
 ######## CREATE AND EXPORT DATA FOR SANKEY DIAGRAM ###############
+
+# This will likely need to be adjusted once I include an intertext from a text without an author (e.g., the Aetna).
 
 def prep_sankey(df):
     nodes_edges_dict = {}
