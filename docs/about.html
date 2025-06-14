@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="generator" content="Observable Framework v1.13.3">
+<title>About the Project | Visualizing Intertextuality</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="preload" as="style" href="./_observablehq/theme-air,near-midnight.dcdbf18e.css">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="stylesheet" type="text/css" href="./_observablehq/theme-air,near-midnight.dcdbf18e.css">
+<link rel="modulepreload" href="./_observablehq/client.69715e39.js">
+<link rel="modulepreload" href="./_observablehq/runtime.e080113b.js">
+<link rel="modulepreload" href="./_observablehq/stdlib.ec062f48.js">
+<link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
+<script type="module">
+
+import "./_observablehq/client.69715e39.js";
+
+</script>
+</head>
+<body>
+<input id="observablehq-sidebar-toggle" type="checkbox" title="Toggle sidebar">
+<label id="observablehq-sidebar-backdrop" for="observablehq-sidebar-toggle"></label>
+<nav id="observablehq-sidebar">
+  <ol>
+    <label id="observablehq-sidebar-close" for="observablehq-sidebar-toggle"></label>
+    <li class="observablehq-link"><a href="./">Visualizing Intertextuality</a></li>
+  </ol>
+  <ol>
+    <li class="observablehq-link observablehq-link-active"><a href="./about">About the Project</a></li>
+    <li class="observablehq-link"><a href="./sankey">Full Intertext Diagram</a></li>
+    <li class="observablehq-link"><a href="./thanks">Thanks and Acknowledgements</a></li>
+  </ol>
+</nav>
+<script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
+<div id="observablehq-center">
+<aside id="observablehq-toc" data-selector="h1:not(:first-of-type)[id], h2:first-child[id], :not(h1) + h2[id]">
+<nav>
+<div>Contents</div>
+<ol>
+<li class="observablehq-secondary-link"><a href="#background-what-is-intertextuality">Background: What is Intertextuality?</a></li>
+<li class="observablehq-secondary-link"><a href="#considerations-and-tools">Considerations and Tools</a></li>
+<li class="observablehq-secondary-link"><a href="#methodology">Methodology</a></li>
+<li class="observablehq-secondary-link"><a href="#next-steps">Next Steps</a></li>
+<li class="observablehq-secondary-link"><a href="#bibliography">Bibliography</a></li>
+<li class="observablehq-secondary-link"><a href="#appendix-getting-started-with-observable-framework">Appendix: Getting Started with Observable Framework</a></li>
+</ol>
+</nav>
+</aside>
+<main id="observablehq-main" class="observablehq">
+<h1 id="visualizing-intertextuality" tabindex="-1"><a class="observablehq-header-anchor" href="#visualizing-intertextuality">Visualizing Intertextuality</a></h1>
+<h2 id="about-the-project" tabindex="-1"><a class="observablehq-header-anchor" href="#about-the-project">About the Project</a></h2>
+<h2 id="background-what-is-intertextuality" tabindex="-1"><a class="observablehq-header-anchor" href="#background-what-is-intertextuality">Background: What is Intertextuality?</a></h2>
+<p>Within the scholarly field of Latin poetry, “intertextuality” is a commonly-discussed concept. The term itself is commonly credited to the philosopher <a href="https://en.wikipedia.org/wiki/Julia_Kristeva" target="_blank" rel="noopener noreferrer">Julia Kristeva</a>, who first used it in two essays from the 1960s; its meaning, however—especially as it has come to be used, rather than as Kristeva originated it—is a source of debate across and within the academic fields that make use of the term. The present project is concerned with the following definition of intertextuality, as it is commonly used by most scholars who study Latin poetry.</p>
+<p>Intertextuality refers to an allusive compositional technique whereby the writer of a text draws in language and imagery from earlier authors’ texts. In and of itself, this is a normal practice of almost any creative writing: intentionally or not, writers draw inspiration and even phrasing from earlier literature. However, within Latin (and, to a lesser extent, Greek) poetry, it is common for distinct, discrete phrases from earlier authors to serve almost as building blocks of later poetry, with an expectation that the earlier source and its context will be recognized. This form of reprocessing earlier poetry has come to be understood as an act of critical scholarship on the part of the poet, rather than as unimaginative borrowings and imitations, one that gives meaning to both the source (earlier) text and the target (later) text. (While I take the terms “source” and “target” from <a href="https://tesserae.caset.buffalo.edu/" target="_blank" rel="noopener noreferrer">Tesserae</a>, their use in network theory makes them especially apt here.) Additionally, poets often do not simply allude to a single earlier text in a given passage: they intertwine and overlay their allusions, in an approach that has been termed “combinatorial” (<a href="#hardie1989">Hardie 1990</a>).</p>
+<p>There are two slightly distinct, if largely overlapping, modes of multiple allusion that scholars have highlighted. One is commonly called “window reference” (<a href="#thomas1986">Thomas 1986</a>), a term that describes the stacking of two or more related models through which each preceding model can be glimpsed. For instance, a passage in text A makes allusion to passages in earlier texts B, C, and D, which are themselves already related, in that A’s most immediate model, B, also makes allusion to C, and C to D, and possibly also B to D. The passages need share no vocabulary for this type of allusion to be operative. The other mode, the aforementioned “combinatorial imitation,” is a more detail-oriented method that weaves together discrete words and phrases from disparate sources—sometimes related, but sometimes unrelated—into a single line or two. Here, shared lexemes or synonyms, or at least shared sound-patterns, are a base-level prerequisite. Currently, the latter is the only type of intertextuality that is dealt with by this project; it may expand to include the former at a later stage.</p>
+<p>When intertexts are discussed in scholarship, they are often shown using typographical conventions, such as marking the words shared between two passages in a bold or italic font. For a limited number of intertexts, this suffices. For passages with a more complex set of intertexts behind them, however, or if a scholar wishes to discuss a set of intertexts that develops across several different texts, the limits of typography and comprehensibility are quickly reached:</p>
+<figure class="card">
+<table>
+<tbody><tr>
+<td>
+saeva sedens super arma et centum <i><u>vinctus</u> <b>aënis</b></i> (Verg. 1.295)
+</td>
+<td>
+FUROR
+</td>
+</tr>
+<tr>
+<td>
+atque <i style="border-bottom: 3px double;">adamanteis</i> discordia <i><u>vincta</u> catenis</i> (Man. 1.923)
+</td>
+<td>
+DISCORDIA
+</td>
+</tr>
+<tr>
+<td>
+abruptis Catilina minax <b><u>fractisque</u> catenis</b> (Luc. 6.793)
+</td>
+<td>
+CATILINE
+</td>
+</tr>
+<tr>
+<td>
+<i><u>vincla</u></i> Iovis <i><b><u>fractoque</u></b></i> trahens <i><b style="border-bottom: 3px double;">adamante</b> <b>catenas</b></i> (VF 3.225)
+</td>
+<td>
+COEUS
+</td>
+</tr>
+<tr>
+<td colspan="2">
+<span style="font-size:smaller;">N.B. sound echo in <i>vinctus <u>aënis</u></i> | <i>vincta c<u>a</u>t<u>enis</u></i></span>
+</td>
+</tr>
+</tbody></table>
+<figcaption>Example from a handout used at UCL’s Flavian Intertextuality Day in December 2015.</figcaption>
+</figure>
+<p>One need not understand Latin to see the words shared between the lines of poetry in the example above; and one need not understand Latin to recognize that any such approach is limited by constraints of practicality, legibility, and intelligibility.</p>
+<h2 id="considerations-and-tools" tabindex="-1"><a class="observablehq-header-anchor" href="#considerations-and-tools">Considerations and Tools</a></h2>
+<p>This project asks how intertextuality can be displayed and comprehended through a visual, rather than textual, medium. The goal is to conceptualize and develop alternative methods of visualizing the intertextual richness and complexity of a given passage, starting from the assumption that such a visualization requires two different dimensions: one that shows the density of intertexts within a given passage, and one that shows the referential network arising around the passage. The structure of the data and its output should enable analytical approaches and questions, and the tools have been selected with these considerations in mind.</p>
+<p>The data is stored in a <a href="https://nodegoat.net/" target="_blank" rel="noopener noreferrer">nodegoat</a> <a href="https://en.wikipedia.org/wiki/Object%E2%80%93relational_database" target="_blank" rel="noopener noreferrer">object-relational database</a>. nodegoat was chosen for several reasons, including its humanities-oriented design, its ease of use, and its ability to expose the data as Linked Open Data. (While the open-source graph database <a href="https://neo4j.com/" target="_blank" rel="noopener noreferrer">neo4j</a> was considered as an alternative option due to the intrinsic interconnectivity of intertextuality, the <em>relationship</em> and <em>structure</em> of that interconnectivity are also critical.) Use of nodegoat also avoids the need to host and serve the data, and it provides an API for access.</p>
+<p>The choice of <a href="https://observablehq.com/framework/" target="_blank" rel="noopener noreferrer">Observable Framework</a> for hosting the project was initially due to a piece of serendipity: <a href="https://nodegoat.net/guide.s/150/export-data-to-observable" target="_blank" rel="noopener noreferrer">the nodegoat guide includes a demonstration of exporting data via the API to Observable</a>, and the example visualization of letter-writing frequency somewhat resembled my mental image of what an intertextual density visualization might look like. While researching <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a>, I discovered its successor, Observable Framework, which offered several clear affordances: open source, highly customizable visualizations using <a href="https://observablehq.com/plot/" target="_blank" rel="noopener noreferrer">Observable Plot</a> and <a href="https://d3js.org/" target="_blank" rel="noopener noreferrer">D3.js</a>, simultaneously static and reactive, automatic integration with GitHub, the ability to preload data, and the ability to write data loaders in any language. The customizability and the polyglot environment were initially the most appealing aspects, but the other benefits quickly became apparent.</p>
+<h2 id="methodology" tabindex="-1"><a class="observablehq-header-anchor" href="#methodology">Methodology</a></h2>
+<h3 id="database-design" tabindex="-1"><a class="observablehq-header-anchor" href="#database-design">Database Design</a></h3>
+<p>There is currently no database of intertexts. Some benchmark datasets exist for the purpose of testing and training tools designed for detecting intertexts, notably <a href="#dexter2024">Dexter <em>et al.</em> (2024)</a>, who provide a flat CSV file with 945 parallels (some comprised of multiple words) between the first book of Valerius Flaccus’ <em>Argonautica</em> and four other epics (one of which is approximately contemporary with the <em>Argonautica</em>, and three of which are earlier) that are recorded in three specific commentaries. This database, therefore, will itself provide a valuable resource and is accordingly designed with an eye both to future developments of the present project and to reuse by other scholars: not all of the entered data is used in the project as it currently stands. (It is important to note that one significant difference between this project’s selection of intertexts and <a href="#dexter2024">Dexter <em>et al.</em> (2024)</a>’s approach is that this project only includes parallels specifically identified as probable points of allusion, whereas they also include parallel <em>uses</em> of words, such as those where a commentator identifies another word-use that shares a similar unusual meaning.)</p>
+<figure>
+<a href="https://pratt.darcykrasne.com/Portfolio/viz_intxt/nodegoat_model_2025-3-13.png" target="_blank" rel="noopener noreferrer"><img src="./_file/images/nodegoat_model_2025-3-13.ab46d206.png" style="max-width: 100%;" alt="A representation of a database, showing objects connected by lines"></a>
+<figcaption>
+The database model, as of 13 March 2025.
+</figcaption>
+</figure>
+<p>The critical core tables are <code>word instance</code>, <code>word-level intertext</code>, <code>word-level intertext (grouping)</code>, <code>author</code>, <code>work</code>, <code>work segment</code>, <code>meter</code>, and <code>meter position length</code>. Each <code>word instance</code> object represents a single word in a single line of a single poem; each <code>word-level intertext</code> object comprises a source word and a target word. Since intertexts are often made up of several words, a <code>word-level intertext (grouping)</code> object clusters these intertext pairings together, taking advantage of nodegoat’s <a href="https://nodegoat.net/documentation.s/52/object-type" target="_blank" rel="noopener noreferrer">“multiple” option</a>. Words are not assigned directly to works, but to work segments. While that choice is due to ensuring that the database is in first normal form, the way the work segment is determined is due not just to conventional poetic divisions (such as books) but also to meter, because the basis of the intertextual density display is a grid whose width is determined by the meter of the piece. As many works are polymetric, the meter is assigned to the work segment, which can represent anything from an entire work (in the case of, e.g., an epyllion) to a single poem within a multi-book work (e.g., one of Statius’s <em>Silvae</em>) or a passage of a drama (e.g., a section of a choral passage in a Senecan tragedy). A <code>word instance</code> is placed within a <code>work segment</code> by line number and by location within the line, based not on word order or syllable count but on metrical <em>sedes</em> (placement). (This decision was made both to accommodate textual variation and to enable the placement of words within the grid.) The placement is defined by the word’s beginning and ending <code>meter position length</code> objects, which in turn specify the maximum number of beats that can be assigned to a given metrical position (as well as specifying which line of a stanza the position belongs to, for stichic meters): these ultimately govern the appearance of the word in the grid, but they also offer the future possibility of comparing the metrical placement of intertexts. (I am not going into detail here on some decisions regarding the calculation of metrical “length” or the properties of database objects because I hope to publish some of that information in due course; however, it will ultimately be available in some form.)</p>
+<p>While the project overall is strictly concerned with Latin poetry, Greek texts also need to be included within the database due to Latin poetry’s clear intertextual engagement with them. Accordingly, each author has a language property that specifies them as either a Greek or Latin author. While this does not allow for the possibility of bilingual authors, our surviving texts do not really compass this scenario, or do so insufficiently to justify putting the language label with works instead of authors. (<a href="https://antigonejournal.com/2024/12/claudians-gigantomachia/" target="_blank" rel="noopener noreferrer">The Late Antique poet Claudian is one such counterexample</a>, but he is so late that his works are unlikely to serve as the <em>source</em> of any intertexts in the database; and this is the only situation in which a Greek text can enter the database.)</p>
+<p>Finally, each <code>word-level intertext</code> records at least one scholarly source (sometimes the original publication proposing the intertext, and sometimes a commentary), which are collectively stored in a <code>publication</code> table. This information is not currently displayed in any fashion, but it will eventually be available.</p>
+<h3 id="data-pipeline" tabindex="-1"><a class="observablehq-header-anchor" href="#data-pipeline">Data Pipeline</a></h3>
+<h4 id="data-extraction-and-transformation-with-python" tabindex="-1"><a class="observablehq-header-anchor" href="#data-extraction-and-transformation-with-python">Data Extraction and Transformation with Python</a></h4>
+<p>Every time the website is deployed (usually by an update on GitHub), a data loader written in Python performs an API call from nodegoat to fetch the current database model. It then extracts the nodegoat IDs for each object type table and does another API call for the individual objects. It assigns the objects, under their object types, to a dictionary, and then transforms them into dataframes, unpacking the highly nested information of the nodegoat JSON objects:</p>
+<pre data-language="python"><code class="language-python"><span class="hljs-comment"># Create table dataframes</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">table_to_df</span>(<span class="hljs-params">table, cols_dict</span>):
+    dictlist = []
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">id</span> <span class="hljs-keyword">in</span> table:
+        tdict = {}
+        obj_defs = table[<span class="hljs-built_in">id</span>][<span class="hljs-string">"object_definitions"</span>]
+        tdict[<span class="hljs-string">"obj_id"</span>] = <span class="hljs-built_in">id</span>
+        <span class="hljs-keyword">for</span> key, val <span class="hljs-keyword">in</span> cols_dict.items():
+            <span class="hljs-comment"># key becomes key in tdict</span>
+            id_val = <span class="hljs-built_in">list</span>(val.keys())[<span class="hljs-number">0</span>]
+            <span class="hljs-keyword">if</span> val[id_val] == <span class="hljs-string">"refid"</span>:
+                <span class="hljs-keyword">try</span>:
+                    tdict[<span class="hljs-built_in">str</span>(key)] = obj_defs[<span class="hljs-built_in">str</span>(id_val)][<span class="hljs-string">"object_definition_ref_object_id"</span>]
+                <span class="hljs-keyword">except</span>:
+                    tdict[<span class="hljs-built_in">str</span>(key)] = <span class="hljs-literal">None</span>
+            <span class="hljs-keyword">elif</span> val[id_val] == <span class="hljs-string">"objval"</span>:
+                <span class="hljs-keyword">try</span>:
+                    tdict[<span class="hljs-built_in">str</span>(key)] = obj_defs[<span class="hljs-built_in">str</span>(id_val)][<span class="hljs-string">"object_definition_value"</span>]
+                <span class="hljs-keyword">except</span>:
+                    tdict[<span class="hljs-built_in">str</span>(key)] = <span class="hljs-literal">None</span>
+        dictlist.append(tdict)
+    df = pd.DataFrame.from_dict(dictlist)
+
+    <span class="hljs-comment"># convert numeric IDs to string and remove any trailing decimals</span>
+    <span class="hljs-keyword">for</span> col <span class="hljs-keyword">in</span> df:
+        <span class="hljs-keyword">if</span> col[-<span class="hljs-number">3</span>:] == <span class="hljs-string">"_id"</span>:
+            df[col] = df[col].astype(<span class="hljs-built_in">str</span>)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">remove_decimal</span>(<span class="hljs-params">id_string</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(id_string, <span class="hljs-built_in">str</span>) <span class="hljs-keyword">and</span> id_string[-<span class="hljs-number">2</span>:] == <span class="hljs-string">".0"</span>:
+            <span class="hljs-keyword">return</span> id_string[:-<span class="hljs-number">2</span>]
+        <span class="hljs-keyword">return</span> id_string
+    <span class="hljs-keyword">for</span> col <span class="hljs-keyword">in</span> df:
+        <span class="hljs-keyword">if</span> col[-<span class="hljs-number">3</span>:] == <span class="hljs-string">"_id"</span>:
+            df[col] = df[col].apply(remove_decimal)
+
+    <span class="hljs-keyword">return</span> df
+</code></pre>
+<p>It joins the disparate metrical data into a single dataframe and then returns it to a single restructured JSON object; and it converts each of the other dataframes to a JSON object, which are collectively stored in an array. These are all saved to files that are automatically committed to GitHub.</p>
+<p>In the next stage of the project, the same Python data loader also creates network nodes and edges from the data. (This is <a href="./sankey">currently in progress</a> as a <a href="https://en.wikipedia.org/wiki/Sankey_diagram" target="_blank" rel="noopener noreferrer">Sankey diagram</a>; I chose this over a traditional network graph since the sequential nature of an intertextual network makes it well-suited to visualizing as a flow-path.) While part of the network creation is done automatically by the d3 Sankey module, the initial preparation of nodes and edges is performed in the data loader.</p>
+<p></p><details>
+<summary>Click to view the two custom functions for this stage.</summary>
+<pre data-language="python"><code class="language-python">grp_intxts_list = [<span class="hljs-built_in">str</span>(item) <span class="hljs-keyword">for</span> sublist <span class="hljs-keyword">in</span> <span class="hljs-built_in">list</span>(word_lvl_intxt_grp_df.word_intxt_ids) <span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> sublist]
+intxt_grp_list = []
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">build_intxt_dict</span>(<span class="hljs-params">intxt_ids</span>):
+    <span class="hljs-keyword">for</span> intxt <span class="hljs-keyword">in</span> intxt_ids:
+        intxt_id = <span class="hljs-built_in">str</span>(intxt)
+        <span class="hljs-keyword">for</span> row2 <span class="hljs-keyword">in</span> word_lvl_intxt_df[word_lvl_intxt_df.obj_id == intxt_id].iterrows():
+            row_dict = {}
+            <span class="hljs-keyword">if</span> intxt_id <span class="hljs-keyword">in</span> grp_intxts_list:
+                row_dict[<span class="hljs-string">"intxt_grp_id"</span>] = intxt_grp_id
+            <span class="hljs-keyword">else</span>:
+                row_dict[<span class="hljs-string">"intxt_grp_id"</span>] = <span class="hljs-literal">None</span>
+            row_dict[<span class="hljs-string">"intxt_id"</span>] = intxt_id
+            row2 = row2[<span class="hljs-number">1</span>]
+            source_id = row2.source_word_id
+            target_id = row2.target_word_id
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(row2.match_type_ids, <span class="hljs-built_in">list</span>):
+                match_type_ids = [<span class="hljs-built_in">str</span>(<span class="hljs-built_in">id</span>) <span class="hljs-keyword">for</span> <span class="hljs-built_in">id</span> <span class="hljs-keyword">in</span> row2.match_type_ids]
+            <span class="hljs-keyword">else</span>:
+                match_type_ids = []
+            row_dict[<span class="hljs-string">"source_word_id"</span>] = source_id
+            row_dict[<span class="hljs-string">"target_word_id"</span>] = target_id
+            source_df = word_instance_df.copy().query(<span class="hljs-string">f"obj_id == '<span class="hljs-subst">{source_id}</span>'"</span>).reset_index(drop=<span class="hljs-literal">True</span>) \
+                .merge(work_seg_df, how=<span class="hljs-string">"left"</span>, left_on=<span class="hljs-string">"work_segment_id"</span>, right_on=<span class="hljs-string">"obj_id"</span>).drop(<span class="hljs-string">"obj_id_y"</span>, axis=<span class="hljs-number">1</span>) \
+                .merge(work_df, how=<span class="hljs-string">"left"</span>, left_on=<span class="hljs-string">"work_id"</span>, right_on=<span class="hljs-string">"obj_id"</span>)[[<span class="hljs-string">'obj_id_x'</span>,<span class="hljs-string">'word'</span>,<span class="hljs-string">'work_segment_id'</span>, <span class="hljs-string">'line_num'</span>,<span class="hljs-string">'line_num_modifier'</span>,<span class="hljs-string">"work_id"</span>,<span class="hljs-string">"author_id"</span>]]
+            target_df = word_instance_df.copy().query(<span class="hljs-string">f"obj_id == '<span class="hljs-subst">{target_id}</span>'"</span>).reset_index(drop=<span class="hljs-literal">True</span>) \
+                .merge(work_seg_df, how=<span class="hljs-string">"left"</span>, left_on=<span class="hljs-string">"work_segment_id"</span>, right_on=<span class="hljs-string">"obj_id"</span>).drop(<span class="hljs-string">"obj_id_y"</span>, axis=<span class="hljs-number">1</span>) \
+                .merge(work_df, how=<span class="hljs-string">"left"</span>, left_on=<span class="hljs-string">"work_id"</span>, right_on=<span class="hljs-string">"obj_id"</span>)[[<span class="hljs-string">'obj_id_x'</span>,<span class="hljs-string">'word'</span>,<span class="hljs-string">'work_segment_id'</span>, <span class="hljs-string">'line_num'</span>,<span class="hljs-string">'line_num_modifier'</span>,<span class="hljs-string">"work_id"</span>,<span class="hljs-string">"author_id"</span>]]
+            row_dict[<span class="hljs-string">"source_author_id"</span>] = source_df.loc[<span class="hljs-number">0</span>,<span class="hljs-string">'author_id'</span>]
+            row_dict[<span class="hljs-string">"source_work_id"</span>] = source_df.loc[<span class="hljs-number">0</span>,<span class="hljs-string">'work_id'</span>]
+            row_dict[<span class="hljs-string">"source_work_seg_id"</span>] = source_df.loc[<span class="hljs-number">0</span>,<span class="hljs-string">'work_segment_id'</span>]
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(source_df.loc[<span class="hljs-number">0</span>,<span class="hljs-string">'line_num_modifier'</span>], <span class="hljs-built_in">str</span>):
+                row_dict[<span class="hljs-string">"source_line_num"</span>] = <span class="hljs-built_in">str</span>(source_df.loc[<span class="hljs-number">0</span>,<span class="hljs-string">'line_num'</span>])+source_df.loc[<span class="hljs-number">0</span>,<span class="hljs-string">'line_num_modifier'</span>]
+            <span class="hljs-keyword">else</span>:
+                row_dict[<span class="hljs-string">"source_line_num"</span>] = <span class="hljs-built_in">str</span>(source_df.loc[<span class="hljs-number">0</span>,<span class="hljs-string">'line_num'</span>])
+            row_dict[<span class="hljs-string">"target_author_id"</span>] = target_df.loc[<span class="hljs-number">0</span>,<span class="hljs-string">'author_id'</span>]
+            row_dict[<span class="hljs-string">"target_work_id"</span>] = target_df.loc[<span class="hljs-number">0</span>,<span class="hljs-string">'work_id'</span>]
+            row_dict[<span class="hljs-string">"target_work_seg_id"</span>] = target_df.loc[<span class="hljs-number">0</span>,<span class="hljs-string">'work_segment_id'</span>]
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(target_df.loc[<span class="hljs-number">0</span>,<span class="hljs-string">'line_num_modifier'</span>],<span class="hljs-built_in">str</span>):
+                row_dict[<span class="hljs-string">"target_line_num"</span>] = <span class="hljs-built_in">str</span>(target_df.loc[<span class="hljs-number">0</span>,<span class="hljs-string">'line_num'</span>])+target_df.loc[<span class="hljs-number">0</span>,<span class="hljs-string">'line_num_modifier'</span>]
+            <span class="hljs-keyword">else</span>:
+                row_dict[<span class="hljs-string">"target_line_num"</span>] = <span class="hljs-built_in">str</span>(target_df.loc[<span class="hljs-number">0</span>,<span class="hljs-string">'line_num'</span>])
+            row_dict[<span class="hljs-string">"match_type_ids"</span>] = match_type_ids
+            intxt_grp_list.append(row_dict)
+
+<span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> word_lvl_intxt_grp_df.iterrows():
+    row = row[<span class="hljs-number">1</span>]
+    intxt_grp_id = row.obj_id
+    intxt_ids = row.word_intxt_ids
+    build_intxt_dict(intxt_ids)
+build_intxt_dict([intxt <span class="hljs-keyword">for</span> intxt <span class="hljs-keyword">in</span> word_lvl_intxt_df.obj_id <span class="hljs-keyword">if</span> intxt <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> grp_intxts_list])
+
+intxt_full_df = pd.DataFrame.from_dict(intxt_grp_list)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">prep_sankey</span>(<span class="hljs-params">df</span>):
+    nodes_edges_dict = {}
+    grp_df = df[~df.intxt_grp_id.isna()]
+    no_grp_df = df[df.intxt_grp_id.isna()].drop(<span class="hljs-string">"intxt_grp_id"</span>, axis=<span class="hljs-number">1</span>)
+    grp_ids = <span class="hljs-built_in">list</span>(grp_df.intxt_grp_id.unique())
+    no_grp_ids = <span class="hljs-built_in">list</span>(no_grp_df.intxt_id.unique())
+    nodes = []
+    edges = []
+    <span class="hljs-keyword">for</span> work_seg <span class="hljs-keyword">in</span> <span class="hljs-built_in">list</span>(df.source_work_seg_id.unique()):
+        author = df[df.source_work_seg_id == work_seg].reset_index(drop=<span class="hljs-literal">True</span>).loc[<span class="hljs-number">0</span>,<span class="hljs-string">"source_author_id"</span>]
+        work = df[df.source_work_seg_id == work_seg].reset_index(drop=<span class="hljs-literal">True</span>).loc[<span class="hljs-number">0</span>,<span class="hljs-string">"source_work_id"</span>]
+        nodes.append({<span class="hljs-string">"name"</span>: work_seg, <span class="hljs-string">"author"</span>: author, <span class="hljs-string">"work"</span>: work})
+    <span class="hljs-comment"># print(len(nodes))</span>
+    <span class="hljs-keyword">for</span> work_seg <span class="hljs-keyword">in</span> <span class="hljs-built_in">list</span>(df.target_work_seg_id.unique()):
+        <span class="hljs-keyword">if</span> work_seg <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> [item[<span class="hljs-string">"name"</span>] <span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> nodes]:
+            author = df[df.target_work_seg_id == work_seg].reset_index(drop=<span class="hljs-literal">True</span>).loc[<span class="hljs-number">0</span>,<span class="hljs-string">"target_author_id"</span>]
+            work = df[df.target_work_seg_id == work_seg].reset_index(drop=<span class="hljs-literal">True</span>).loc[<span class="hljs-number">0</span>,<span class="hljs-string">"target_work_id"</span>]
+            nodes.append({<span class="hljs-string">"name"</span>: work_seg, <span class="hljs-string">"author"</span>: author, <span class="hljs-string">"work"</span>: work})
+    <span class="hljs-comment"># print(len(nodes))</span>
+    <span class="hljs-comment"># print(nodes)</span>
+    nodes_edges_dict[<span class="hljs-string">"nodes"</span>] = nodes
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">make_edge</span>(<span class="hljs-params"><span class="hljs-built_in">id</span>, df, grp=<span class="hljs-literal">True</span></span>):
+        source = df.loc[<span class="hljs-number">0</span>, <span class="hljs-string">"source_work_seg_id"</span>]
+        target = df.loc[<span class="hljs-number">0</span>, <span class="hljs-string">"target_work_seg_id"</span>]
+        source_words = <span class="hljs-built_in">list</span>(df.source_word_id.unique())
+        target_words = <span class="hljs-built_in">list</span>(df.target_word_id.unique())
+        num_words = (<span class="hljs-built_in">len</span>(source_words)+<span class="hljs-built_in">len</span>(target_words))/<span class="hljs-number">2</span>    <span class="hljs-comment"># using average because sometimes multiple words are compressed into a single word or a single word is split into multiple words</span>
+        <span class="hljs-built_in">id</span> = <span class="hljs-built_in">id</span>
+        <span class="hljs-keyword">if</span> grp == <span class="hljs-literal">True</span>:
+            group_id = <span class="hljs-literal">True</span>
+        <span class="hljs-keyword">else</span>:
+            group_id = <span class="hljs-literal">False</span>
+        edge_dict = {<span class="hljs-string">"source"</span>: source,
+                     <span class="hljs-string">"target"</span>: target,
+                     <span class="hljs-string">"source_words"</span>: source_words,
+                     <span class="hljs-string">"target_words"</span>: target_words,
+                     <span class="hljs-string">"num_words"</span>: num_words,
+                     <span class="hljs-string">"id"</span>: <span class="hljs-built_in">id</span>,
+                     <span class="hljs-string">"group_id"</span>: group_id}
+        <span class="hljs-keyword">return</span> edge_dict
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">id</span> <span class="hljs-keyword">in</span> grp_ids:
+        sub_df = grp_df.query(<span class="hljs-string">f"intxt_grp_id == '<span class="hljs-subst">{<span class="hljs-built_in">id</span>}</span>'"</span>).reset_index(drop=<span class="hljs-literal">True</span>)
+        edges.append(make_edge(<span class="hljs-built_in">id</span>, sub_df))
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">id</span> <span class="hljs-keyword">in</span> no_grp_ids:
+        sub_df = no_grp_df.query(<span class="hljs-string">f"intxt_id == '<span class="hljs-subst">{<span class="hljs-built_in">id</span>}</span>'"</span>).reset_index(drop=<span class="hljs-literal">True</span>)
+        edges.append(make_edge(<span class="hljs-built_in">id</span>, sub_df, grp=<span class="hljs-literal">False</span>))
+    <span class="hljs-comment"># print(edges)</span>
+    nodes_edges_dict[<span class="hljs-string">"edges"</span>] = edges
+    <span class="hljs-keyword">return</span> nodes_edges_dict
+
+sankey_data = prep_sankey(intxt_full_df)
+</code></pre>
+</details><p></p>
+<h4 id="data-loading-and-transformation-with-java-script" tabindex="-1"><a class="observablehq-header-anchor" href="#data-loading-and-transformation-with-java-script">Data Loading and Transformation with JavaScript</a></h4>
+<p>The remainder of the code is written in JavaScript, within an Observable Framework markdown document. After loading the data, the script defines several inputs for the choice of author, work, work section, and lines. Each is dependent on the selection made in the previous one, so that the data is progressively filtered.</p>
+<details>
+<summary>Click to view the code for the Author, Work, and Work Section selectors</summary>
+<p>N.B. I have removed indications of separate code blocks from the following.</p>
+<pre data-language="js"><code class="language-js"><span class="hljs-comment">// Create authors dropdown</span>
+
+<span class="hljs-keyword">const</span> authorList = [];
+<span class="hljs-keyword">const</span> authorTable = nodegoatTables.<span class="hljs-property">author_table</span>;
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> author <span class="hljs-keyword">in</span> authorTable) {
+	<span class="hljs-keyword">if</span> (authorTable[author].<span class="hljs-property">language</span> === <span class="hljs-string">"Latin"</span>) {
+		<span class="hljs-keyword">const</span> authorSet = [authorTable[author].<span class="hljs-property">author_name</span>, authorTable[author].<span class="hljs-property">obj_id</span>];
+		authorList.<span class="hljs-title function_">push</span>(authorSet);
+	}
+}
+
+<span class="hljs-keyword">const</span> authorPicker = <span class="hljs-title class_">Inputs</span>.<span class="hljs-title function_">select</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[<span class="hljs-literal">null</span>,<span class="hljs-literal">null</span>]].<span class="hljs-title function_">concat</span>(authorList)), {<span class="hljs-attr">label</span>: <span class="hljs-string">"Select author:"</span>, <span class="hljs-attr">value</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">sort</span>: <span class="hljs-literal">true</span>});
+<span class="hljs-keyword">const</span> authorID = <span class="hljs-title function_">view</span>(authorPicker);
+
+
+<span class="hljs-comment">// Create works dropdown</span>
+
+<span class="hljs-keyword">const</span> workList = [];
+<span class="hljs-keyword">const</span> workTable = nodegoatTables.<span class="hljs-property">work_table</span>;
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> work <span class="hljs-keyword">in</span> workTable) {
+	<span class="hljs-keyword">if</span> (workTable[work].<span class="hljs-property">author_id</span> === authorID) {
+		<span class="hljs-keyword">const</span> workSet = [workTable[work].<span class="hljs-property">title</span>, workTable[work].<span class="hljs-property">obj_id</span>]
+		workList.<span class="hljs-title function_">push</span>(workSet);
+	}
+}
+
+<span class="hljs-keyword">const</span> workPicker = <span class="hljs-title class_">Inputs</span>.<span class="hljs-title function_">select</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[<span class="hljs-literal">null</span>, <span class="hljs-literal">null</span>]].<span class="hljs-title function_">concat</span>(workList)), {<span class="hljs-attr">label</span>: <span class="hljs-string">"Select work:"</span>, <span class="hljs-attr">value</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">sort</span>: <span class="hljs-literal">true</span>});
+<span class="hljs-keyword">const</span> workID = <span class="hljs-title function_">view</span>(workPicker);
+
+
+<span class="hljs-comment">// Create work section dropdown</span>
+
+<span class="hljs-keyword">const</span> workSegList = [];
+<span class="hljs-keyword">const</span> workSegTable = nodegoatTables.<span class="hljs-property">work_seg_table</span>;
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> workSeg <span class="hljs-keyword">in</span> workSegTable) {
+	<span class="hljs-keyword">let</span> workSegName;
+	<span class="hljs-keyword">if</span> (!workSegTable[workSeg].<span class="hljs-property">work_section</span>) {	
+		workSegName = <span class="hljs-string">"all"</span>
+	} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!workSegTable[workSeg].<span class="hljs-property">work_subsection</span>) {
+		workSegName = workSegTable[workSeg].<span class="hljs-property">work_section</span>;
+	} <span class="hljs-keyword">else</span> {
+		workSegName = workSegTable[workSeg].<span class="hljs-property">work_section</span> + <span class="hljs-string">', '</span> + workSegTable[workSeg].<span class="hljs-property">work_subsection</span>;
+	}
+	
+	<span class="hljs-keyword">if</span> (workSegTable[workSeg].<span class="hljs-property">work_id</span> === workID) {
+		<span class="hljs-keyword">const</span> workSegSet = [workSegName, workSegTable[workSeg].<span class="hljs-property">obj_id</span>];
+		workSegList.<span class="hljs-title function_">push</span>(workSegSet);
+	}
+}
+
+<span class="hljs-keyword">const</span> workSegPicker = <span class="hljs-title class_">Inputs</span>.<span class="hljs-title function_">select</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[<span class="hljs-literal">null</span>, <span class="hljs-literal">null</span>]].<span class="hljs-title function_">concat</span>(workSegList)), {<span class="hljs-attr">label</span>: <span class="hljs-string">"Select work section:"</span>, <span class="hljs-attr">value</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">sort</span>: <span class="hljs-literal">true</span>});
+<span class="hljs-keyword">const</span> workSegID = <span class="hljs-title function_">view</span>(workSegPicker);
+</code></pre>
+</details>
+<p>The creation of the two inputs for choosing the starting and ending lines for display required slightly more complex logic, as it needed to be based both on what was available to display in the chosen work section while also providing some default inputs.</p>
+<details>
+<summary>Click to view the code for choosing the starting and ending lines</summary>
+<p>N.B. I have removed indications of separate code blocks from the following.</p>
+<pre data-language="js"><code class="language-js"><span class="hljs-comment">// Create necessary variables for chart display</span>
+
+<span class="hljs-keyword">const</span> workSegVars = {
+	<span class="hljs-attr">workSegLineMin</span>: <span class="hljs-number">1</span>,
+	<span class="hljs-attr">workSegLineMax</span>: <span class="hljs-literal">null</span>,
+	<span class="hljs-attr">workSegMeterID</span>: <span class="hljs-literal">null</span>
+};
+
+<span class="hljs-comment">// Set variables for chart display, based on work segment chosen</span>
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> workSeg <span class="hljs-keyword">in</span> workSegTable) {
+	<span class="hljs-keyword">if</span> (workSegTable[workSeg].<span class="hljs-property">obj_id</span> === workSegID) {
+		workSegVars.<span class="hljs-property">workSegLineMin</span> = workSegTable[workSeg].<span class="hljs-property">first_line</span>;
+		workSegVars.<span class="hljs-property">workSegLineMax</span> = workSegTable[workSeg].<span class="hljs-property">last_line</span>;
+		workSegVars.<span class="hljs-property">workSegMeterID</span> = workSegTable[workSeg].<span class="hljs-property">meter_id</span>;
+		<span class="hljs-keyword">break</span>;
+	}
+}
+
+<span class="hljs-comment">// Create number pickers for range of lines to display</span>
+
+<span class="hljs-keyword">const</span> lineMinPicker = <span class="hljs-title class_">Inputs</span>.<span class="hljs-title function_">number</span>([workSegVars.<span class="hljs-property">workSegLineMin</span>, workSegVars.<span class="hljs-property">workSegLineMax</span>], 
+									{<span class="hljs-attr">step</span>: <span class="hljs-number">1</span>, 
+									<span class="hljs-attr">label</span>: <span class="hljs-string">"Select starting line: "</span>, 
+									<span class="hljs-attr">value</span>: workSegVars.<span class="hljs-property">workSegLineMin</span>, 
+									<span class="hljs-attr">placeholder</span>: workSegVars.<span class="hljs-property">workSegLineMin</span>});
+<span class="hljs-keyword">const</span> startLine = <span class="hljs-title function_">view</span>(lineMinPicker);
+
+<span class="hljs-keyword">let</span> tempMax = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(workSegVars.<span class="hljs-property">workSegLineMin</span> + <span class="hljs-number">19</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(workSegVars.<span class="hljs-property">workSegLineMin</span>,workSegVars.<span class="hljs-property">workSegLineMax</span>))
+
+<span class="hljs-keyword">const</span> lineMaxPicker = <span class="hljs-title class_">Inputs</span>.<span class="hljs-title function_">number</span>([workSegVars.<span class="hljs-property">workSegLineMin</span>, workSegVars.<span class="hljs-property">workSegLineMax</span>], 
+									{<span class="hljs-attr">step</span>: <span class="hljs-number">1</span>, 
+									<span class="hljs-attr">label</span>: <span class="hljs-string">"Select ending line: "</span>, 
+									<span class="hljs-attr">value</span>: tempMax, 
+									<span class="hljs-attr">placeholder</span>: workSegVars.<span class="hljs-property">workSegLineMax</span>});
+<span class="hljs-keyword">const</span> endLine = <span class="hljs-title function_">view</span>(lineMaxPicker);
+
+<span class="hljs-comment">// Set default numbers</span>
+
+<span class="hljs-keyword">const</span> lineRange = {
+	<span class="hljs-attr">firstLine</span>: <span class="hljs-number">1</span>,
+	<span class="hljs-attr">lastLine</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {<span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">firstLine</span> + <span class="hljs-number">20</span>;},
+}
+
+
+<span class="hljs-keyword">if</span> (startLine &gt; <span class="hljs-number">0</span>) {
+	lineRange.<span class="hljs-property">firstLine</span> = startLine;
+}
+
+<span class="hljs-keyword">if</span> (endLine &gt;= startLine) {
+	lineRange.<span class="hljs-property">lastLine</span> = endLine;
+} <span class="hljs-keyword">else</span> {lineRange.<span class="hljs-property">lastLine</span> = lineRange.<span class="hljs-property">firstLine</span> + <span class="hljs-number">0</span>;}
+
+</code></pre>
+</details>
+<p>Once the passage is chosen, the script gathers any <code>word instance</code> that falls within the selected lines and then filters the <code>word level intertext</code> objects for those that include the relevant words as an intertext target. These are considered “direct intertexts”. It then collects any intertexts where the <em>source</em> of a direct intertext is the target, and so on; all of these are considered “indirect intertexts”. An empty grid is generated with <code>Plot.cell</code>, using the number of selected lines for its height and the relevant meter's maximum length for its width. Each cell of the grid is populated with the relevant word and intertext counts for that line and metrical position:</p>
+<pre data-language="js"><code class="language-js"><span class="hljs-keyword">const</span> intertextsArrComplete = [];
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> line <span class="hljs-keyword">in</span> lineArr) {
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i <span class="hljs-keyword">in</span> meterPosArr) {
+		<span class="hljs-keyword">let</span> intertextObj = {};
+		intertextObj.<span class="hljs-property">lineNum</span> = lineArr[line];
+		intertextObj.<span class="hljs-property">linePos</span> = meterPosArr[i];
+		intertextObj.<span class="hljs-property">intxtCnt</span> = <span class="hljs-number">0</span>;
+		<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> posn <span class="hljs-keyword">in</span> positions) {
+			<span class="hljs-keyword">if</span> (positions[posn].<span class="hljs-property">gridNums</span>.<span class="hljs-title function_">includes</span>(meterPosArr[i])) {
+				intertextObj.<span class="hljs-property">linePosID</span> = positions[posn].<span class="hljs-property">meter_pos_len_id</span>;
+				<span class="hljs-keyword">break</span>;
+			}
+		}
+		<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> word <span class="hljs-keyword">in</span> wordsFiltered) {
+			<span class="hljs-keyword">if</span> (wordsFiltered[word].<span class="hljs-property">line_num</span> === intertextObj.<span class="hljs-property">lineNum</span> &amp;&amp; wordsFiltered[word].<span class="hljs-property">posIDs</span>.<span class="hljs-title function_">includes</span>(intertextObj.<span class="hljs-property">linePosID</span>)) {
+				intertextObj.<span class="hljs-property">wordObj</span> = wordsFiltered[word];
+				intertextObj.<span class="hljs-property">intxtCnt</span> = wordsFiltered[word].<span class="hljs-property">directIntertexts</span> + wordsFiltered[word].<span class="hljs-property">indirectIntertexts</span>;
+				intertextObj.<span class="hljs-property">word</span> = wordsFiltered[word].<span class="hljs-property">word</span>;
+			}
+		}
+		
+		intertextsArrComplete.<span class="hljs-title function_">push</span>(intertextObj);
+	}
+}
+
+<span class="hljs-keyword">const</span> intertextsArr = intertextsArrComplete.<span class="hljs-title function_">filter</span>(<span class="hljs-function"><span class="hljs-params">pos</span> =&gt;</span> pos.<span class="hljs-property">word</span>); <span class="hljs-comment">// only include cells that have a word assigned to them</span>
+</code></pre>
+<h4 id="visualization" tabindex="-1"><a class="observablehq-header-anchor" href="#visualization">Visualization</a></h4>
+<p>The basic motivation was to make the display resemble the layout of the poem, while not showing information that doesn't exist. The background color was chosen to enable visibility of the palest values while still enabling contrast with all shades on the scale, including for individuals with color vision deficiencies.</p>
+<p>For the Sankey diagram, the standard horizontal layout was rotated both to accommodate the future lengthening of the network and to convey a sense of the “descent” or “inheritance” analogy between earlier and later texts. The colors (which distinguish between authors) are currently drawn from the default <a href="https://d3js.org/d3-scale-chromatic/categorical#schemeTableau10" target="_blank" rel="noopener noreferrer">Tableau10</a>, but since there will eventually be repetitions once more than ten authors are in the database, they are reinforced by the inclusion of the author’s name. (The names are rotated sideways in order not to overrun the boundaries of smaller nodes; <a href="http://www.dgp.toronto.edu/~ravin/papers/ecscw2005_textorientation.pdf" target="_blank" rel="noopener noreferrer">this study on the readability of tilted text</a> suggests that there is not a significant difference in the readibility of sideways text read top-to-bottom or bottom-to-top.) I have also added a custom tool-tip popup for the nodes (and will subsequently do so for the links), since the default Sankey module only uses the HTML &lt;title&gt;, which does not render on all touch-screen devices:</p>
+<pre data-language="js"><code class="language-js"><span class="hljs-keyword">if</span> (<span class="hljs-title class_">Tt</span>) {
+    <span class="hljs-keyword">const</span> nodeLabelG = node
+        .<span class="hljs-title function_">append</span>(<span class="hljs-string">"g"</span>)
+        .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"class"</span>,<span class="hljs-string">"node_label_group"</span>)
+        .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"transform"</span>, <span class="hljs-function"><span class="hljs-params">d</span> =&gt;</span> {
+            <span class="hljs-keyword">const</span> labelTranslate = +<span class="hljs-string">`-<span class="hljs-subst">${(d.y1 - d.y0)/<span class="hljs-number">2</span>}</span>`</span>;
+            <span class="hljs-keyword">if</span> (d.<span class="hljs-property">x0</span> &lt; width / <span class="hljs-number">2</span>){
+            <span class="hljs-keyword">return</span> <span class="hljs-string">`translate(<span class="hljs-subst">${(d.x0) +  <span class="hljs-number">5</span>}</span>, <span class="hljs-subst">${d.y0}</span>) rotate(-90,0,0) translate(<span class="hljs-subst">${labelTranslate}</span>,<span class="hljs-subst">${d.x1 - d.x0}</span>)`</span>
+            }
+            <span class="hljs-keyword">return</span> <span class="hljs-string">`translate(<span class="hljs-subst">${(d.x0 - <span class="hljs-number">55</span>)}</span>, <span class="hljs-subst">${d.y0}</span>)  rotate(-90,0,0) translate(<span class="hljs-subst">${labelTranslate}</span>,0)`</span>
+            })
+        .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"opacity"</span>,<span class="hljs-string">"0"</span>)
+        .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"overflow"</span>,<span class="hljs-string">"visible"</span>)
+        .<span class="hljs-title function_">style</span>(<span class="hljs-string">'pointer-events'</span>, <span class="hljs-string">'none'</span>);
+
+    nodeLabelG.<span class="hljs-title function_">append</span>(<span class="hljs-string">"rect"</span>)
+        .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"height"</span>,<span class="hljs-string">"50"</span>)
+        .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"width"</span>,<span class="hljs-string">"130"</span>)
+        .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"stroke"</span>,<span class="hljs-string">"black"</span>)
+        .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"fill"</span>,<span class="hljs-string">"none"</span>)
+        .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"filter"</span>,<span class="hljs-string">"drop-shadow(0 3px 4px rgba(0,0,0,.5))"</span>);
+
+    <span class="hljs-keyword">const</span> nodeLabelText = nodeLabelG.<span class="hljs-title function_">append</span>(<span class="hljs-string">"text"</span>)
+            .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"x"</span>,<span class="hljs-string">"5"</span>)
+            .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"y"</span>,<span class="hljs-string">".5em"</span>)
+            .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"font-size"</span>,<span class="hljs-string">"11"</span>)
+            .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"font-family"</span>,<span class="hljs-string">"sans-serif"</span>)
+            .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"font-weight"</span>,<span class="hljs-string">"normal"</span>)
+            .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"stroke"</span>,<span class="hljs-string">"none"</span>)
+            .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"fill"</span>,<span class="hljs-string">"black"</span>);
+
+    nodeLabelText.<span class="hljs-title function_">append</span>(<span class="hljs-string">"tspan"</span>)
+        .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"dy"</span>,<span class="hljs-string">"1em"</span>)
+        .<span class="hljs-title function_">text</span>(<span class="hljs-function">(<span class="hljs-params">d,i</span>) =&gt;</span> {
+            <span class="hljs-keyword">let</span> authorID = origNodes[i].<span class="hljs-property">author</span>;
+            <span class="hljs-keyword">return</span> lookupIDTable.<span class="hljs-title function_">get</span>(authorID);
+        });
+    nodeLabelText.<span class="hljs-title function_">append</span>(<span class="hljs-string">"tspan"</span>)
+        .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"x"</span>,<span class="hljs-string">"5"</span>)
+        .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"dy"</span>,<span class="hljs-string">"1em"</span>)
+        .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"font-style"</span>,<span class="hljs-string">"italic"</span>)
+        .<span class="hljs-title function_">text</span>(<span class="hljs-function">(<span class="hljs-params">d,i</span>) =&gt;</span> {
+            <span class="hljs-keyword">let</span> workID = origNodes[i].<span class="hljs-property">work</span>;
+            <span class="hljs-keyword">return</span> lookupIDTable.<span class="hljs-title function_">get</span>(workID);});
+    nodeLabelText.<span class="hljs-title function_">append</span>(<span class="hljs-string">"tspan"</span>)
+        .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"x"</span>,<span class="hljs-string">"5"</span>)
+        .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"dy"</span>,<span class="hljs-string">"1em"</span>)
+        .<span class="hljs-title function_">text</span>(<span class="hljs-function">(<span class="hljs-params">d,i</span>) =&gt;</span> <span class="hljs-title class_">Tt</span>[i].<span class="hljs-title function_">split</span>(<span class="hljs-string">"\n"</span>)[<span class="hljs-number">1</span>]); 
+
+    nodeRect
+        .<span class="hljs-title function_">on</span>(<span class="hljs-string">"mouseover"</span>, <span class="hljs-keyword">function</span>(<span class="hljs-params">event</span>) {
+            d3.<span class="hljs-title function_">select</span>(<span class="hljs-variable language_">this</span>).<span class="hljs-title function_">attr</span>(<span class="hljs-string">"opacity"</span>,<span class="hljs-string">"1"</span>);
+            d3.<span class="hljs-title function_">select</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">nextSibling</span>.<span class="hljs-property">nextSibling</span>)
+                .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"opacity"</span>,<span class="hljs-string">"1"</span>)
+            d3.<span class="hljs-title function_">select</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">nextSibling</span>.<span class="hljs-property">nextSibling</span>.<span class="hljs-property">firstChild</span>)
+                .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"fill"</span>,<span class="hljs-string">"white"</span>)
+        })
+        .<span class="hljs-title function_">on</span>(<span class="hljs-string">"mouseout"</span>, <span class="hljs-keyword">function</span>(<span class="hljs-params">event</span>) {
+                d3.<span class="hljs-title function_">select</span>(<span class="hljs-variable language_">this</span>).<span class="hljs-title function_">attr</span>(<span class="hljs-string">"opacity"</span>,<span class="hljs-string">".6"</span>);
+                d3.<span class="hljs-title function_">select</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">nextSibling</span>.<span class="hljs-property">nextSibling</span>)
+                .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"opacity"</span>,<span class="hljs-string">"0"</span>)
+            d3.<span class="hljs-title function_">select</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">nextSibling</span>.<span class="hljs-property">nextSibling</span>.<span class="hljs-property">firstChild</span>)
+                .<span class="hljs-title function_">attr</span>(<span class="hljs-string">"fill"</span>,<span class="hljs-string">"none"</span>)});
+}
+
+svg.<span class="hljs-title function_">selectAll</span>(<span class="hljs-string">".node"</span>)
+    .<span class="hljs-title function_">on</span>(<span class="hljs-string">"mouseover"</span>, <span class="hljs-keyword">function</span>(<span class="hljs-params">event</span>) {
+        d3.<span class="hljs-title function_">select</span>(<span class="hljs-variable language_">this</span>).<span class="hljs-title function_">raise</span>();
+    })
+</code></pre>
+<h2 id="next-steps" tabindex="-1"><a class="observablehq-header-anchor" href="#next-steps">Next Steps</a></h2>
+<p>Currently underway are the entry of additional intertexts into the database and the creation of an intertextuality network from the selected word, using <a href="https://d3js.org/" target="_blank" rel="noopener noreferrer">D3.js</a>, as described above. Following that, in addition to continuing database input, attention will focus on providing a display of what the intertexts are, as well as tweaking the code to handle elisions, extranumerical lines (such as 845a, which would come between 845 and 846), and alternative readings. A few additional potential long-term developments are:</p>
+<ul>
+<li>an option to view only direct intertext density</li>
+<li>an option to view “descendant” intertexts instead of “ancestor” intertexts</li>
+<li>collaboration with projects on automated detection of text reuse (such as <a href="https://tesserae.caset.buffalo.edu/" target="_blank" rel="noopener noreferrer">Tesserae</a> or <a href="http://tools.qcrit.org/filum" target="_blank" rel="noopener noreferrer">Fīlum</a>) to enhance the database, with a reduction of manual labor</li>
+</ul>
+<p>Other requests and suggestions for future development are welcome <a href="https://github.com/dkrasne/visualizing_intertextuality" target="_blank" rel="noopener noreferrer">at the GitHub page</a>.</p>
+<h2 id="bibliography" tabindex="-1"><a class="observablehq-header-anchor" href="#bibliography">Bibliography</a></h2>
+<ul>
+<li id="dexter2024">Dexter, J.P., Chaudhuri, P., Burns, P.J., Adams, E.D., Bolt, T.J., Cásarez, A., Flynt, J.H., Li, K., Patterson, J.F., Schwartz, A., Shumway, S. (2024) “A Database of Intertexts in Valerius Flaccus’ Argonautica 1: A Benchmarking Resource for the Evaluation of Computational Intertextual Search of Latin Corpora,” <i>Journal of Open Humanities Data</i> 10:14, 1–7. <a href="https://doi.org/10.5334/johd.153" target="_blank" rel="noopener noreferrer">doi: 10.5334/johd.153</a></li>
+<li id="hardie1989">Hardie, P. R. (1989) “Flavian Epicists on Virgil’s Epic Technique,” <i>Ramus</i> 18: 3–20.</li>
+<li id="thomas1986">Thomas, R.F. (1986) “Virgil’s Georgics and the Art of Reference,” <i>Harvard Studies in Classical Philology</i> 90: 171–98.</li>
+</ul>
+<h2 id="appendix-getting-started-with-observable-framework" tabindex="-1"><a class="observablehq-header-anchor" href="#appendix-getting-started-with-observable-framework">Appendix: Getting Started with Observable Framework</a></h2>
+<p>In learning how to use Framework and setting up my site, I encountered a few snags with the default installation setup and automated deployment via GitHub, which I document here for others who may encounter the same issues.</p>
+<ol>
+<li>First, while following the <a href="https://observablehq.observablehq.cloud/learn-observable-guide/" target="_blank" rel="noopener noreferrer">Learn Observable Guide</a>, I kept running into an error that claimed I didn't have Python installed when I tried to use a data loader that I had written in Python. <a href="https://github.com/observablehq/framework/issues/1927" target="_blank" rel="noopener noreferrer">The problem turned out to be</a> that my computer runs Python with <code>python</code> rather than <code>python3</code>, and the latter is the only possibility recognized by the <code>observablehq.config.js</code> file. The solution is to add the following to the end of the file, just before the closing <code>};</code>:</li>
+</ol>
+<pre data-language="js"><code class="language-js"><span class="hljs-comment">// MODIFY LIST OF INTERPRETERS:</span>
+  <span class="hljs-attr">interpreters</span>: {
+	<span class="hljs-string">".py"</span>: [<span class="hljs-string">"python"</span>]
+  },
+</code></pre>
+<ol start="2">
+<li>Second, after setting up <a href="https://observablehq.com/framework/deploying#automated-deploys" target="_blank" rel="noopener noreferrer">an automated deployment using GitHub Actions every time I pushed changes to GitHub</a>, I encountered two problems. First, because I was importing a couple of packages in my Python data loader, I was getting an error message when running the build that the package wasn't found, <a href="https://talk.observablehq.com/t/github-actions-with-pandas-data-loader-on-observable-framework/9309" target="_blank" rel="noopener noreferrer">a problem that had already been documented and solved here</a>. But even after following the documented steps, I continued to get the error message, and GitHub was telling me that the deploy had failed, but without an <em>actual</em> failure (i.e., the site was correctly updating on Observable Framework). The solution was to <em>also</em> add a new line to Framework's <code>package.json</code> file:</li>
+</ol>
+<pre data-language="json"><code class="language-json"># ...
+<span class="hljs-attr">"observable"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"observable"</span><span class="hljs-punctuation">,</span>
+<span class="hljs-attr">"install"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"pip install -r requirements.txt"</span>
+#...
+</code></pre>
+<ol start="3">
+<li>Third, when using GitHub Actions and a deploy.yml script for an automated deploy, any API keys need to be added to both Observable Framework secrets <em>and</em> GitHub Secrets, as well as adding them in the build step of the <code>deploy.yml</code> script:</li>
+</ol>
+<pre data-language="yaml"><code class="language-yaml"><span class="hljs-bullet">-</span> <span class="hljs-attr">run:</span> <span class="hljs-string">npm</span> <span class="hljs-string">run</span> <span class="hljs-string">build</span>
+  <span class="hljs-attr">env:</span>
+    <span class="hljs-attr">NODEGOAT_API_TOKEN:</span> <span class="hljs-string">${{</span> <span class="hljs-string">secrets.NODEGOAT_API_TOKEN</span> <span class="hljs-string">}}</span>
+</code></pre>
+<ol start="4">
+<li>Fourth, I needed my data loader to produce multiple files, not just the one it's intended to produce at the end, due to needing to limit my API calls (I have enough tables to retrieve from nodegoat that I can only call the full set of them once every fifteen minutes). This was in itself not a problem, but the files weren't storing themselves successfully on GitHub. I ultimately discovered (<a href="https://chatgpt.com/share/67dc1153-1adc-800d-9680-c00477d2fa85" target="_blank" rel="noopener noreferrer">with the aid of ChatGPT to get the exact correct format</a>) that I needed to add yet another step to my <code>deploy.yml</code> script; and I also need to add a GitHub token to both the build step and the new commit/push step, so that this portion of the script looked as follows:</li>
+</ol>
+<pre data-language="yaml"><code class="language-yaml"><span class="hljs-bullet">-</span> <span class="hljs-attr">run:</span> <span class="hljs-string">npm</span> <span class="hljs-string">run</span> <span class="hljs-string">build</span>
+  <span class="hljs-attr">env:</span>
+    <span class="hljs-attr">NODEGOAT_API_TOKEN:</span> <span class="hljs-string">${{</span> <span class="hljs-string">secrets.NODEGOAT_API_TOKEN</span> <span class="hljs-string">}}</span>
+    <span class="hljs-attr">GITHUB_TOKEN:</span> <span class="hljs-string">${{</span> <span class="hljs-string">secrets.GITHUB_TOKEN</span> <span class="hljs-string">}}</span>
+<span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Commit</span> <span class="hljs-string">and</span> <span class="hljs-string">Push</span> <span class="hljs-string">Changes</span>
+  <span class="hljs-attr">run:</span> <span class="hljs-string">|
+    git config --global user.name "GitHub Actions"
+    git config --global user.email "actions@github.com"
+    git add .
+    git diff --quiet &amp;&amp; git diff --staged --quiet || git commit -m "Auto-update model_json_backup.json and objects_json_backup.json"
+    git push
+</span>  <span class="hljs-attr">env:</span>
+    <span class="hljs-attr">GITHUB_TOKEN:</span> <span class="hljs-string">${{</span> <span class="hljs-string">secrets.GITHUB_TOKEN</span> <span class="hljs-string">}}</span>
+</code></pre>
+</main>
+<footer id="observablehq-footer">
+<nav><a rel="prev" href="./"><span>Visualizing Intertextuality</span></a><a rel="next" href="./sankey"><span>Full Intertext Diagram</span></a></nav>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2025-06-14T17:51:19">Jun 14, 2025</a>.</div>
+</footer>
+</div>
+</body>
+</html>
