@@ -1,5 +1,13 @@
 // See https://observablehq.com/framework/config for documentation.
+
+// Set up config to work with GitHub Pages
+const isGitHubPages = process.env.DEPLOY_TARGET === "gh-pages";
+
 export default {
+
+ // If deploying to GitHub Pages, add subdirectory to path.
+  base: isGitHubPages ? "/visualizing_intertextuality/" : "/",
+
   // The app’s title; used in the sidebar and webpage titles.
   title: "Visualizing Intertextuality",
 
@@ -30,6 +38,7 @@ export default {
   // toc: true, // whether to show the table of contents
   // pager: true, // whether to show previous & next links in the footer
   // output: "dist", // path to the output root for build
+  output: "docs", // recommended for GitHub pages.
   // search: true, // activate search
   // linkify: true, // convert URLs in Markdown to links
   // typographer: false, // smart quotes and other typographic improvements
