@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="generator" content="Observable Framework v1.13.3">
+<title>Full Intertext Diagram | Visualizing Intertextuality</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="preload" as="style" href="./_observablehq/theme-air,near-midnight.dcdbf18e.css">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="stylesheet" type="text/css" href="./_observablehq/theme-air,near-midnight.dcdbf18e.css">
+<link rel="modulepreload" href="./_observablehq/client.69715e39.js">
+<link rel="modulepreload" href="./_observablehq/runtime.e080113b.js">
+<link rel="modulepreload" href="./_observablehq/stdlib.ec062f48.js">
+<link rel="modulepreload" href="./_npm/d3-sankey@0.12.3/4d634262.js">
+<link rel="modulepreload" href="./_npm/d3@7.9.0/e780feca.js">
+<link rel="modulepreload" href="./_npm/d3-array@2.12.1/bca3792b.js">
+<link rel="modulepreload" href="./_npm/d3-shape@1.3.7/9a730356.js">
+<link rel="modulepreload" href="./_npm/d3-array@3.2.4/e93ca09f.js">
+<link rel="modulepreload" href="./_npm/d3-axis@3.0.0/0f2de24d.js">
+<link rel="modulepreload" href="./_npm/d3-brush@3.0.0/65eb105b.js">
+<link rel="modulepreload" href="./_npm/d3-chord@3.0.1/7ef8fb2e.js">
+<link rel="modulepreload" href="./_npm/d3-color@3.1.0/aeb57b94.js">
+<link rel="modulepreload" href="./_npm/d3-contour@4.0.2/1d2aed74.js">
+<link rel="modulepreload" href="./_npm/d3-delaunay@6.0.4/5ced1d52.js">
+<link rel="modulepreload" href="./_npm/d3-dispatch@3.0.1/9ba9c7f3.js">
+<link rel="modulepreload" href="./_npm/d3-drag@3.0.0/4202580c.js">
+<link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
+<link rel="modulepreload" href="./_npm/d3-ease@3.0.1/cdd7e898.js">
+<link rel="modulepreload" href="./_npm/d3-fetch@3.0.1/b4e2ad9a.js">
+<link rel="modulepreload" href="./_npm/d3-force@3.0.0/5e804d15.js">
+<link rel="modulepreload" href="./_npm/d3-format@3.1.0/86074ef6.js">
+<link rel="modulepreload" href="./_npm/d3-geo@3.1.1/40599fb3.js">
+<link rel="modulepreload" href="./_npm/d3-hierarchy@3.1.2/e49e792c.js">
+<link rel="modulepreload" href="./_npm/d3-interpolate@3.0.1/8d1e5425.js">
+<link rel="modulepreload" href="./_npm/d3-path@3.1.0/20d3f133.js">
+<link rel="modulepreload" href="./_npm/d3-polygon@3.0.1/7553081f.js">
+<link rel="modulepreload" href="./_npm/d3-quadtree@3.0.1/0dfd751c.js">
+<link rel="modulepreload" href="./_npm/d3-random@3.0.1/3c90ee06.js">
+<link rel="modulepreload" href="./_npm/d3-scale@4.0.2/843b6a76.js">
+<link rel="modulepreload" href="./_npm/d3-scale-chromatic@3.1.0/ba24c2e7.js">
+<link rel="modulepreload" href="./_npm/d3-selection@3.0.0/4d94e5b7.js">
+<link rel="modulepreload" href="./_npm/d3-shape@3.2.0/6d3a6726.js">
+<link rel="modulepreload" href="./_npm/d3-time@3.1.0/9f03c579.js">
+<link rel="modulepreload" href="./_npm/d3-time-format@4.1.0/07c9626f.js">
+<link rel="modulepreload" href="./_npm/d3-timer@3.0.1/b58a267d.js">
+<link rel="modulepreload" href="./_npm/d3-transition@3.0.1/004da2ac.js">
+<link rel="modulepreload" href="./_npm/d3-zoom@3.0.0/b5786b3f.js">
+<link rel="modulepreload" href="./_npm/internmap@1.0.1/b4c0ca9e.js">
+<link rel="modulepreload" href="./_npm/d3-path@1.0.9/b57ea69b.js">
+<link rel="modulepreload" href="./_npm/internmap@2.0.3/e08981d9.js">
+<link rel="modulepreload" href="./_npm/delaunator@5.0.1/02d43215.js">
+<link rel="modulepreload" href="./_npm/robust-predicates@3.0.2/aa00730b.js">
+<link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
+<script type="module">
+
+import {define} from "./_observablehq/client.69715e39.js";
+import {registerFile} from "./_observablehq/stdlib.ec062f48.js";
+
+registerFile("./data/intxt_network_graph.json", {"name":"./data/intxt_network_graph.json","mimeType":"application/json","path":"./_file/data/intxt_network_graph.ca9dc5c7.json","lastModified":1749923501085,"size":8923});
+registerFile("./data/intxts_full.json", {"name":"./data/intxts_full.json","mimeType":"application/json","path":"./_file/data/intxts_full.45032677.json","lastModified":1749923500993,"size":38851});
+registerFile("./data/meters.json", {"name":"./data/meters.json","mimeType":"application/json","path":"./_file/data/meters.bf657056.json","lastModified":1749923500121,"size":10007});
+registerFile("./data/nodegoat_data.json", {"name":"./data/nodegoat_data.json","mimeType":"application/json","path":"./_file/data/nodegoat_data.cf632694.json","lastModified":1749923501236,"size":776050});
+registerFile("./data/nodegoat_tables.json", {"name":"./data/nodegoat_tables.json","mimeType":"application/json","path":"./_file/data/nodegoat_tables.ac1e082b.json","lastModified":1749923500133,"size":91139});
+registerFile("./data/sankey_data.json", {"name":"./data/sankey_data.json","mimeType":"application/json","path":"./_file/data/sankey_data.d0294715.json","lastModified":1749923501182,"size":9870});
+
+define({id: "3e97f597", inputs: ["sankeyData"], outputs: ["nodes"], body: (sankeyData) => {
+const nodes = [];
+  
+for (let node in sankeyData.nodes) {
+  let nodeString = String(node)
+  nodes.push({
+    id: sankeyData.nodes[node].name,
+    author: sankeyData.nodes[node].author,
+    work: sankeyData.nodes[node].work
+  });
+}
+return {nodes};
+}});
+
+define({id: "c3406795", inputs: ["sankeyData"], outputs: ["links"], body: (sankeyData) => {
+const links = [];
+
+ for (let i in sankeyData.edges) {
+   let edge = sankeyData.edges[i];
+
+   links.push({
+     source: edge.source,
+     target: edge.target,
+     value: edge.num_words
+   });
+ }
+return {links};
+}});
+
+define({id: "b8591a60", inputs: ["SankeyChart","nodes","links","lookupIDTable","sankeyData","view"], outputs: ["chart"], body: (SankeyChart,nodes,links,lookupIDTable,sankeyData,view) => {
+// const chartNodes = [];
+// const chartLinks = [];
+// const chartData = {nodes: chartNodes, links: chartLinks}
+
+const chart = SankeyChart({nodes: nodes, links: links},
+{
+    nodeGroup: d => d.author,
+    nodeLabel: d => {
+        //chartNodes.push(d);
+                    let nodesFilter = nodes.filter(node => node.id === d.id);
+                    let nodeAuthorID;
+                    for (let n in nodesFilter) {nodeAuthorID = nodesFilter[n].author}
+                    return lookupIDTable.get(nodeAuthorID);
+                    },
+    nodeTitle: d => `${lookupIDTable.get(d.id).work}\n${lookupIDTable.get(d.id).section}`,
+    align: "center",
+    linkColor: "source",
+    linkTitle: d => {
+        //chartLinks.push(d);
+        let sourceNode = d.source.id;
+        let targetNode = d.target.id;
+        let linkSet = sankeyData.edges.filter(l => l.source === sourceNode && l.target === targetNode);
+        // let nodesFilterSource = nodes.filter(n => n.id === d.source.id);
+        // let sourceWordIDs = [];
+        let sourceWordIDs = [];
+        let targetWordIDs = [];
+        for (let i in linkSet) {
+            linkSet[i].source_words.map(w => sourceWordIDs.push(w));
+            linkSet[i].target_words.map(w => targetWordIDs.push(w));
+        }
+
+        sourceWordIDs = [...new Set(sourceWordIDs)];
+        targetWordIDs = [...new Set(targetWordIDs)];
+
+        let sourceWords = [];
+        let targetWords = [];
+
+        for (let i in sourceWordIDs) {sourceWords.push(lookupIDTable.get(sourceWordIDs[i]));}
+        sourceWords.sort((a,b) => {
+            if (a.lineNum < b.lineNum) {
+                return -1
+            } else if (a.lineNum > b.lineNum) {
+                return 1
+            } else {return 0}
+        })
+        for (let i in sourceWords) {sourceWords[i] = `${sourceWords[i].word} (line ${sourceWords[i].lineNum})`}
+        
+        for (let i in targetWordIDs) {targetWords.push(lookupIDTable.get(targetWordIDs[i]));}
+        targetWords.sort((a,b) => {
+            if (a.lineNum < b.lineNum) {
+                return -1
+            } else if (a.lineNum > b.lineNum) {
+                return 1
+            } else {return 0}
+        })
+        for (let i in targetWords) {targetWords[i] = `${targetWords[i].word} (line ${targetWords[i].lineNum})`}
+
+        return `${lookupIDTable.get(sourceNode).work}, ${lookupIDTable.get(sourceNode).section}: ${sourceWords.join(', ')}\n${lookupIDTable.get(targetNode).work}, ${lookupIDTable.get(targetNode).section}: ${targetWords.join(', ')}`;
+    }
+})
+
+
+view(chart)
+return {chart};
+}});
+
+define({id: "8dada556", inputs: ["chart","display"], body: async (chart,display) => {
+display(await(
+chart.nodes
+))
+}});
+
+define({id: "3ec8916a", inputs: ["chart","display"], body: async (chart,display) => {
+display(await(
+chart.links
+))
+}});
+
+define({id: "2934ea29", inputs: ["FileAttachment"], outputs: ["nodegoatModel"], body: (FileAttachment) => {
+// Attach extracted nodegoat objects (final output of Python data loader)
+const nodegoatModel = FileAttachment("./data/nodegoat_data.json").json()
+return {nodegoatModel};
+}});
+
+define({id: "943ba4bb", inputs: ["FileAttachment"], outputs: ["nodegoatTables"], body: (FileAttachment) => {
+// Attach restructured tables for querying
+const nodegoatTables = FileAttachment("./data/nodegoat_tables.json").json()
+return {nodegoatTables};
+}});
+
+define({id: "a72bc13f", inputs: ["FileAttachment"], outputs: ["meters"], body: (FileAttachment) => {
+// Attach meters table for querying.
+const meters = FileAttachment("./data/meters.json").json()
+return {meters};
+}});
+
+define({id: "1b56572f", inputs: ["FileAttachment"], outputs: ["intertextsTable"], body: (FileAttachment) => {
+// Attach full list of intertexts (used for network)
+const intertextsTable = FileAttachment("./data/intxts_full.json").json()
+return {intertextsTable};
+}});
+
+define({id: "f452e7ce", inputs: ["FileAttachment"], outputs: ["graphData"], body: (FileAttachment) => {
+// Attach networkx graph json
+const graphData = FileAttachment("./data/intxt_network_graph.json").json()
+return {graphData};
+}});
+
+define({id: "8989f40c", inputs: ["FileAttachment"], outputs: ["sankeyData"], body: (FileAttachment) => {
+// Attach sankey chart data
+const sankeyData = FileAttachment("./data/sankey_data.json").json()
+return {sankeyData};
+}});
+
+define({id: "5d380160", inputs: ["nodegoatTables"], outputs: ["lookupIDTable"], body: (nodegoatTables) => {
+const lookupIDTable = new Map();
+
+for (let i in nodegoatTables.word_instance_table) {
+	let item = nodegoatTables.word_instance_table[i];
+	let key = item.obj_id;
+	let word = item.word;
+	let line = item.line_num;
+	let def = {'word': word, 'lineNum': line};
+	lookupIDTable.set(key, def);
+}
+
+for (let i in nodegoatTables.author_table) {
+	let item = nodegoatTables.author_table[i];
+	let key = item.obj_id;
+	let def = item.author_name;
+	lookupIDTable.set(key, def);
+}
+
+// I may want to change this to a dictionary that includes author as well as title
+for (let i in nodegoatTables.work_table) {
+	let item = nodegoatTables.work_table[i];
+	let key = item.obj_id;
+	let def = item.title;
+	lookupIDTable.set(key, def);
+}
+return {lookupIDTable};
+}});
+
+define({id: "e165ccd7", inputs: ["nodegoatTables","lookupIDTable"], body: (nodegoatTables,lookupIDTable) => {
+for (let i in nodegoatTables.work_seg_table) {
+	let item = nodegoatTables.work_seg_table[i];
+	let section = item.work_section || '';
+	let subsec = item.work_subsection || '';
+	let key = item.obj_id;
+	let work_id = String(item.work_id);
+	let work = lookupIDTable.get(work_id);
+	let section_string;
+	if (section && subsec) {
+		section_string = `${section}, ${subsec}`;
+	} else if (section) {
+		section_string = `${section}`;
+	} else {
+		section_string = '';
+	}
+	let def = {'work': work, 'section': section_string};
+	lookupIDTable.set(key, def);
+}
+}});
+
+define({id: "3539cf12", inputs: ["d3","lookupIDTable"], outputs: ["d3Sankey","SankeyChart"], body: async (d3,lookupIDTable) => {
+const d3Sankey = await import("./_npm/d3-sankey@0.12.3/4d634262.js");
+//create customized SankeyChart() function
+// ORIGINAL VERSION:
+// Copyright 2021-2023 Observable, Inc.
+// Released under the ISC license.
+// https://observablehq.com/@d3/sankey-diagram
+
+
+
+function SankeyChart(
+  {
+    nodes, // an iterable of node objects (typically [{id}, …]); implied by links if missing
+    links // an iterable of link objects (typically [{source, target}, …])
+  },
+  {
+    format = ",", // a function or format specifier for values in titles
+    align = "justify", // convenience shorthand for nodeAlign
+    nodeId = (d) => d.id, // given d in nodes, returns a unique identifier (string)
+    nodeGroup, // given d in nodes, returns an (ordinal) value for color
+    nodeGroups, // an array of ordinal values representing the node groups
+    nodeLabel, // given d in (computed) nodes, text to label the associated rect
+    nodeTitle = (d) => `${d.id}\n${format(d.value)}`, // given d in (computed) nodes, hover text
+    nodeAlign = align, // Sankey node alignment strategy: left, right, justify, center
+    nodeSort, // comparator function to order nodes
+    nodeWidth = 15, // width of node rects
+    nodePadding = 10, // vertical separation between adjacent nodes
+    nodeLabelPadding = 6, // horizontal separation between node and label
+    nodeStroke = "currentColor", // stroke around node rects
+    nodeStrokeWidth, // width of stroke around node rects, in pixels
+    nodeStrokeOpacity, // opacity of stroke around node rects
+    nodeStrokeLinejoin, // line join for stroke around node rects
+    linkSource = ({source}) => source, // given d in links, returns a node identifier string
+    linkTarget = ({target}) => target, // given d in links, returns a node identifier string
+    linkValue = ({value}) => value, // given d in links, returns the quantitative value
+    linkPath = d3Sankey.sankeyLinkHorizontal(), // given d in (computed) links, returns the SVG path
+    linkTitle = (d) => `${d.source.id} → ${d.target.id}\n${format(d.value)}`, // given d in (computed) links
+    linkColor = "source-target", // source, target, source-target, or static color
+    linkStrokeOpacity = 0.5, // link stroke opacity
+    dark, // using dark mode?
+    linkMixBlendMode = dark ? "screen" : "multiply", // link blending mode
+    colors = d3.schemeTableau10, // array of colors
+    width = 640, // outer width, in pixels
+    height = 400, // outer height, in pixels
+    marginTop = 5, // top margin, in pixels
+    marginRight = 1, // right margin, in pixels
+    marginBottom = 5, // bottom margin, in pixels
+    marginLeft = 1 // left margin, in pixels
+  } = {}
+) {
+  // Convert nodeAlign from a name to a function (since d3-sankey is not part of core d3).
+  if (typeof nodeAlign !== "function")
+    nodeAlign =
+      {
+        left: d3Sankey.sankeyLeft,
+        right: d3Sankey.sankeyRight,
+        center: d3Sankey.sankeyCenter
+      }[nodeAlign] ?? d3Sankey.sankeyJustify;
+
+  // keep original node & link values
+  const origNodes = [...nodes];
+  const origLinks = [...links];
+
+  // Compute values.
+  const LS = d3.map(links, linkSource).map(intern);
+  const LT = d3.map(links, linkTarget).map(intern);
+  const LV = d3.map(links, linkValue);
+  if (nodes === undefined) nodes = Array.from(d3.union(LS, LT), (id) => ({id}));
+  const N = d3.map(nodes, nodeId).map(intern);
+  const G = nodeGroup == null ? null : d3.map(nodes, nodeGroup).map(intern);
+
+  // Replace the input nodes and links with mutable objects for the simulation.
+  nodes = d3.map(nodes, (_, i) => ({id: N[i]}));
+  links = d3.map(links, (_, i) => ({source: LS[i], target: LT[i], value: LV[i]}));
+
+  // Ignore a group-based linkColor option if no groups are specified.
+  if (!G && ["source", "target", "source-target"].includes(linkColor)) linkColor = "currentColor";
+
+  // Compute default domains.
+  if (G && nodeGroups === undefined) nodeGroups = G;
+
+  // Construct the scales.
+  const color = nodeGroup == null ? null : d3.scaleOrdinal(nodeGroups, colors);
+
+const browserWidth = window.innerWidth;
+
+  // Compute the Sankey layout.
+  d3Sankey
+    .sankey()
+    .nodeId(({index: i}) => N[i])
+    .nodeAlign(nodeAlign)
+    .nodeWidth(nodeWidth)
+    .nodePadding(nodePadding)
+    .nodeSort(nodeSort)
+    .iterations(2000)
+    .extent([
+      [marginLeft, marginTop],
+      [width - marginRight, height - marginBottom]
+    ])({nodes, links});
+
+  // Compute titles and labels using layout nodes, so as to access aggregate values.
+  if (typeof format !== "function") format = d3.format(format);
+  const Tl = nodeLabel === undefined ? N : nodeLabel == null ? null : d3.map(nodes, nodeLabel);
+  const Tt = nodeTitle == null ? null : d3.map(nodes, nodeTitle);
+  const Lt = linkTitle == null ? null : d3.map(links, linkTitle);
+
+  // A unique identifier for clip paths (to avoid conflicts).
+  const uid = `O-${Math.random().toString(16).slice(2)}`;
+
+//  const svg = d3
+const svg_outer = d3
+    .create("svg")
+    .attr("width", width)
+    .attr("height", width)
+    .attr("viewBox", [0, 0, width, width])
+    .attr("style", "max-width: 100%; height: auto; height: intrinsic")
+//    .attr("transform", "rotate(90,0,0) translate("+marginTop+",0)")
+//    .attr("style","border: 1px solid black")
+    ;
+
+  const svg = svg_outer.append("g")
+    .attr("transform", "rotate(90,0,0) translate(0,-"+(width*.75 + marginTop)+")")
+    .attr("id","outer_group")
+
+
+
+
+  const link = svg
+    .append("g")
+    .attr("fill", "none")
+    .attr("stroke-opacity", linkStrokeOpacity)
+    .attr("class","links")
+    .selectAll("g")
+    .data(links)
+const linkPathG = link
+    .join("g")
+    .attr("class","link")
+    .style("mix-blend-mode", linkMixBlendMode);
+
+  const node = svg
+    .append("g")
+    .attr("stroke", nodeStroke)
+    .attr("stroke-width", nodeStrokeWidth)
+    .attr("stroke-opacity", nodeStrokeOpacity)
+    .attr("stroke-linejoin", nodeStrokeLinejoin)
+    .attr("class","nodes")
+    .selectAll("g")
+    .data(nodes)
+    .join("g")
+    .attr("class","node")
+;
+
+    const nodeRect = node
+        .append("rect")
+        .attr("x", (d) => d.x0)
+        .attr("y", (d) => d.y0)
+        .attr("height", (d) => d.y1 - d.y0)
+        .attr("width", (d) => d.x1 - d.x0)
+        .attr("opacity","0.6");
+
+
+  if (G) node.attr("fill", ({index: i}) => color(G[i]));
+//  if (Tt) node.append("title").text(({index: i}) => Tt[i]);
+
+  if (linkColor === "source-target")
+    linkPathG
+      .append("linearGradient")
+      .attr("id", (d) => `${uid}-link-${d.index}`)
+      .attr("gradientUnits", "userSpaceOnUse")
+      .attr("x1", (d) => d.source.x1)
+      .attr("x2", (d) => d.target.x0)
+      .call((gradient) =>
+        gradient
+          .append("stop")
+          .attr("offset", "0%")
+          .attr("stop-color", ({source: {index: i}}) => color(G[i]))
+      )
+      .call((gradient) =>
+        gradient
+          .append("stop")
+          .attr("offset", "100%")
+          .attr("stop-color", ({target: {index: i}}) => color(G[i]))
+      );
+
+const linkPathGPath =  linkPathG
+    .append("path")
+    .attr("d", linkPath)
+    .attr(
+      "stroke",
+      linkColor === "source-target"
+        ? ({index: i}) => `url(#${uid}-link-${i})`
+        : linkColor === "source"
+        ? ({source: {index: i}}) => color(G[i])
+        : linkColor === "target"
+        ? ({target: {index: i}}) => color(G[i])
+        : linkColor
+    )
+    .attr("stroke-width", ({width}) => Math.max(1, width))
+   .call(Lt ? (path) => path.append("title").text(({index: i}) => Lt[i]) : () => {});
+
+linkPathGPath.each(function(d,i) {
+    let thisLink = d3.select(this); 
+    let thisLinkSource = origLinks[i].source;
+    let thisLinkTarget = origLinks[i].target;
+    return thisLink.attr("class",`source_${thisLinkSource} target_${thisLinkTarget}`);
+    })
+
+
+    linkPathGPath
+        .on("mouseover",function(){
+            let thisPath = d3.select(this);
+            let thisID = d3.select(this).attr("class");
+            thisID = thisID.split(' ');
+            let thisSiblings = d3.select(this.parentNode.parentNode).selectAll(`.${thisID[0]}`).filter(`.${thisID[1]}`);
+            // return thisPath.attr("stroke-opacity","1");
+            return thisSiblings.attr("stroke-opacity","1");
+        })
+        .on("mouseout",function(){
+            let thisPath = d3.select(this);
+            let thisID = d3.select(this).attr("class");
+            thisID = thisID.split(' ');
+            let thisSiblings = d3.select(this.parentNode.parentNode).selectAll(`.${thisID[0]}`).filter(`.${thisID[1]}`);
+            // return thisPath.attr("stroke-opacity",linkStrokeOpacity);
+            return thisSiblings.attr("stroke-opacity",linkStrokeOpacity);
+        })
+
+const svgSelect = d3.select(svg);
+console.log(svgSelect.parentNode);
+
+//    linkPathG.call(Lt ? (path) => path.append("rect").attr("width","10").attr("height","10").attr("stroke","black") : () => {});
+
+//   if (Tl)
+//     svg
+//       .append("g")
+//       .attr("font-family", "sans-serif")
+//       .attr("font-size", 10)
+//       .attr("fill", "currentColor")
+//       .selectAll("text")
+//       .data(nodes)
+//       .join("text")
+//       .attr("x", (d) => (d.x0 < width / 2 ? d.x1 + nodeLabelPadding : d.x0 - nodeLabelPadding))
+//       .attr("y", (d) => (d.y1 + d.y0) / 2)
+//       .attr("dy", "0.35em")
+//       .attr("text-anchor", (d) => (d.x0 < width / 2 ? "start" : "end"))
+//       .text(({index: i}) => Tl[i])
+//       ;
+
+// Add text label to node
+
+  if (Tl)
+
+{
+ 
+ let titleTextList = [];
+ node.each((d,i) => {
+    let titleText = Tl[i];
+    titleText = titleText.split(" ");
+    titleTextList.push(titleText);
+ })
+
+node.append("text")
+      .attr("font-family", "sans-serif")
+      .attr("font-size", 10)
+      .attr("fill", "black")
+      .attr("stroke","none")
+      .attr("x", (d) => (d.x0 < width / 2 ? d.x1 + nodeLabelPadding : d.x0 - nodeLabelPadding))
+      .attr("y", (d) => (d.y1 + d.y0) / 2)
+      //.attr("dy", "0.35em")
+      .attr("text-anchor", (d) => (d.x0 < width / 2 ? "start" : "end"))
+      .attr("dominant-baseline","middle")
+      .each(function(d,i) {
+    let thisNode;
+    let thisNodeText = titleTextList[i];
+    let j = thisNodeText.length;
+    thisNodeText = [thisNodeText.slice(0,j-1).join(' '),thisNodeText[(j-1)]];
+    thisNodeText = thisNodeText.filter(q => q !== "");
+    j = thisNodeText.length;
+    for (let k = 0; k < j; k++)
+    {let topMarg;
+        if (k === 0) {topMarg = `-${(j-1)/2}em`} else {topMarg = "1em"}
+        
+        thisNode = d3.select(this)
+        .append("tspan")
+        .attr("dy",topMarg)
+        .attr("x", d => (d.x0 < width / 2 ? d.x1 + nodeLabelPadding : d.x0 - nodeLabelPadding))
+        .text(thisNodeText[k]);
+    }
+    return thisNode;
+})
+
+}
+
+// add pop-up tooltips to nodes
+
+    if (Tt) {
+
+    const nodeLabelG = node
+        .append("g")
+        .attr("class","node_label_group")
+        .attr("transform", d => {
+            const labelTranslate = +`-${(d.y1 - d.y0)/2}`;
+            if (d.x0 < width / 2){
+            return `translate(${(d.x0) +  5}, ${d.y0}) rotate(-90,0,0) translate(${labelTranslate},${d.x1 - d.x0})`
+            }
+            return `translate(${(d.x0 - 55)}, ${d.y0})  rotate(-90,0,0) translate(${labelTranslate},0)`
+            })
+        .attr("opacity","0")
+        .attr("overflow","visible")
+        .style('pointer-events', 'none')
+        ;
+
+    nodeLabelG.append("rect")
+        .attr("height","50")
+        .attr("width","130")
+        .attr("stroke","black")
+        .attr("fill","none")
+        .attr("filter","drop-shadow(0 3px 4px rgba(0,0,0,.5))")
+        ;
+
+    const nodeLabelText = nodeLabelG.append("text")
+            .attr("x","5")
+            .attr("y",".5em")
+            .attr("font-size","11")
+            .attr("font-family","sans-serif")
+            .attr("font-weight","normal")
+            .attr("stroke","none")
+            .attr("fill","black")
+
+        nodeLabelText.append("tspan")
+            .attr("dy","1em")
+            .text((d,i) => {
+                let authorID = origNodes[i].author;
+                return lookupIDTable.get(authorID);
+            })
+        nodeLabelText.append("tspan")
+            .attr("x","5")
+            .attr("dy","1em")
+            .attr("font-style","italic")
+            .text((d,i) => {
+                let workID = origNodes[i].work;
+                return lookupIDTable.get(workID);})
+        nodeLabelText.append("tspan")
+            .attr("x","5")
+            .attr("dy","1em")
+            .text((d,i) => Tt[i].split("\n")[1])
+            ; 
+
+
+    nodeRect
+        .on("mouseover", function(event) {
+            //const [x,y] = d3.pointer(event, this);
+            d3.select(this).attr("opacity","1");
+            d3.select(this.nextSibling.nextSibling)
+                .attr("opacity","1")
+            d3.select(this.nextSibling.nextSibling.firstChild)
+                .attr("fill","white")
+
+                // .attr("transform", `translate(${x},${y}) rotate(-90,0,0)`)
+        })
+        .on("mouseout", function(event) {
+                d3.select(this).attr("opacity",".6");
+                d3.select(this.nextSibling.nextSibling)
+                .attr("opacity","0")
+            d3.select(this.nextSibling.nextSibling.firstChild)
+                .attr("fill","none")});
+
+    // nodeLabelG
+    //     .on("mouseover", function(event) {
+    //        const [x,y] = d3.pointer(event, this);
+    //         this
+    //             .attr("opacity","1")
+    //             .attr("transform", `translate(${x},${y}) rotate(-90,0,0)`)
+    //     })
+    //     .on("mouseout", function(event) {
+    //             this
+    //             .attr("opacity","0")});
+    }
+
+svg.selectAll(".node")
+    .on("mouseover", function(event) {
+        d3.select(this).raise();
+    })
+
+
+  function intern(value) {
+    return value !== null && typeof value === "object" ? value.valueOf() : value;
+  }
+
+  return Object.assign(svg_outer.node(), {scales: {color}, nodes: nodes, links: links});
+}
+
+return {d3Sankey,SankeyChart};
+}});
+
+</script>
+</head>
+<body>
+<input id="observablehq-sidebar-toggle" type="checkbox" title="Toggle sidebar">
+<label id="observablehq-sidebar-backdrop" for="observablehq-sidebar-toggle"></label>
+<nav id="observablehq-sidebar">
+  <ol>
+    <label id="observablehq-sidebar-close" for="observablehq-sidebar-toggle"></label>
+    <li class="observablehq-link"><a href="./">Visualizing Intertextuality</a></li>
+  </ol>
+  <ol>
+    <li class="observablehq-link"><a href="./about">About the Project</a></li>
+    <li class="observablehq-link observablehq-link-active"><a href="./sankey">Full Intertext Diagram</a></li>
+    <li class="observablehq-link"><a href="./thanks">Thanks and Acknowledgements</a></li>
+  </ol>
+</nav>
+<script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
+<div id="observablehq-center">
+<aside id="observablehq-toc" data-selector="h1:not(:first-of-type)[id], h2:first-child[id], :not(h1) + h2[id]">
+<nav>
+</nav>
+</aside>
+<main id="observablehq-main" class="observablehq">
+<h1 id="full-intertext-diagram" tabindex="-1"><a class="observablehq-header-anchor" href="#full-intertext-diagram">Full Intertext Diagram</a></h1>
+<p>The following diagram shows the connections between all intertexts currently in the database.</p>
+<p>Each rectangular node represents one section of a work (a <code>work segment</code>, as defined on <a href="./about#database-design">the About page</a>). A flow path linking two nodes represents words that have been identified as intertexts between the source text (higher up) and the target text (lower down); its width shows (in relative terms) <em>how many</em> words are borrowed.</p>
+<p>Mouse over a node to see the work and section that it represents. Mouse over a linking flow path to see the words it represents. (Currently, the latter may not work on mobile phones.)</p>
+<div style="font-size:smaller;">
+<p>Eventually, subsets of this diagram will appear on the main page for the currently-selected portion of a work.</p>
+<p><em>Some additional future work:</em></p>
+<ul>
+<li><em>making the nodes repositionable</em></li>
+<li><em>highlighting the entire set of flows connected to the currently-selected node</em></li>
+</ul>
+</div>
+<hr>
+<div class="observablehq observablehq--block"><!--:3e97f597:--></div>
+<div class="observablehq observablehq--block"><!--:c3406795:--></div>
+<div class="observablehq observablehq--block"><!--:b8591a60:--></div>
+<hr>
+<p>Anything below here will not appear in the final version.</p>
+<div class="observablehq observablehq--block"><observablehq-loading></observablehq-loading><!--:8dada556:--></div>
+<div class="observablehq observablehq--block"><observablehq-loading></observablehq-loading><!--:3ec8916a:--></div>
+<!-- LOAD DATA, ETC. BELOW THIS LINE -->
+<!-- Load data -->
+<div class="observablehq observablehq--block"><!--:2934ea29:--></div>
+<div class="observablehq observablehq--block"><!--:943ba4bb:--></div>
+<div class="observablehq observablehq--block"><!--:a72bc13f:--></div>
+<div class="observablehq observablehq--block"><!--:1b56572f:--></div>
+<div class="observablehq observablehq--block"><!--:f452e7ce:--></div>
+<div class="observablehq observablehq--block"><!--:8989f40c:--></div>
+<!-- End load data -->
+<!-- Create mapping of ID-to-name -->
+<div class="observablehq observablehq--block"><!--:5d380160:--></div>
+<div class="observablehq observablehq--block"><!--:e165ccd7:--></div>
+<!-- End mapping -->
+<div class="observablehq observablehq--block"><!--:3539cf12:--></div>
+</main>
+<footer id="observablehq-footer">
+<nav><a rel="prev" href="./about"><span>About the Project</span></a><a rel="next" href="./thanks"><span>Thanks and Acknowledgements</span></a></nav>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2025-06-14T17:51:19">Jun 14, 2025</a>.</div>
+</footer>
+</div>
+</body>
+</html>
