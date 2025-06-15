@@ -12,6 +12,8 @@ A project to visualize intertexts in Latin poetry using [nodegoat](https://nodeg
 
 View the code on [GitHub](https://github.com/dkrasne/visualizing_intertextuality).
 
+N.B. As Observable is phasing out its cloud hosting, the site will be migrating to http://dkrasne.github.io/visualizing_intertextuality. Please take note of the new address.
+
 
 <!-- Load data -->
 
