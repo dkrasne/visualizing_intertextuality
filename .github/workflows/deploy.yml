@@ -39,14 +39,11 @@ jobs:
         env:
           NODEGOAT_API_TOKEN: ${{ secrets.NODEGOAT_API_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #- name: Add .nojekyll
-      #  run: touch docs/.nojekyll
       - name: Commit and Push Changes
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add .
-      #    git add -f docs/
           git diff --quiet && git diff --staged --quiet || git commit -m "Auto-update model_json_backup.json and objects_json_backup.json"
           git push
         env:
