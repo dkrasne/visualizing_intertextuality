@@ -36,7 +36,7 @@ For a full discussion of each part of this chart, see [the project's About page]
 ```mermaid
 flowchart TD;
 	data[Manual data collection from commentaries, articles, and other publications]
-	nodegoat["Manual data entry into nodegoat database (<a href="https://pratt.darcykrasne.com/Portfolio/viz_intxt/nodegoat_model_2025-3-13.png">see model diagram here</a>)"]
+	nodegoat["Manual data entry into nodegoat database (<a href="https://pratt.darcykrasne.com/Portfolio/viz_intxt/nodegoat_model_2025-6-15.png">see model diagram here</a>)"]
 	python["Python data loader <code>nodegoat_data.json.py</code> performs API call from nodegoat, transforms data, and produces multiple JSON files"]
 	file1([meters.json])
 	file2([nodegoat_tables.json])
