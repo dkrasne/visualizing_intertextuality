@@ -1,7 +1,11 @@
 name: Deploy
 
 on:
+  # Run this workflow whenever a new commit is pushed to main.
   push: {branches: [main]}
+  # Run this workflow once per day, at 10:15 UTC (adjust time and uncomment when ready to use)
+  # schedule: [{cron: "15 10 * * *"}]
+  # Run this workflow when triggered manually in GitHub’s UI.
   workflow_dispatch: {}
 
 jobs:
@@ -9,11 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      DEPLOY_TARGET: gh-pages
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -28,14 +39,14 @@ jobs:
         env:
           NODEGOAT_API_TOKEN: ${{ secrets.NODEGOAT_API_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Add .nojekyll
-        run: touch docs/.nojekyll
+      #- name: Add .nojekyll
+      #  run: touch docs/.nojekyll
       - name: Commit and Push Changes
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add .
-          git add -f docs/
+      #    git add -f docs/
           git diff --quiet && git diff --staged --quiet || git commit -m "Auto-update model_json_backup.json and objects_json_backup.json"
           git push
         env:
@@ -44,3 +55,11 @@ jobs:
         run: npm run deploy -- --message "$(git log -1 --pretty=%s)"
         env:
           OBSERVABLE_TOKEN: ${{ secrets.OBSERVABLE_DEPLOY_TOKEN }}
+      - uses: actions/configure-pages@v4
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
