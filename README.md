@@ -1,6 +1,6 @@
 # Visualizing Intertextuality
 
-Website: https://visualizing-intertextuality.observablehq.cloud/visualizing-intertextuality/
+Website: https://dkrasne.github.io/visualizing-intertextuality/
 
 A project to visualize intertextuality in Latin poetry, using [nodegoat](https://nodegoat.net/) and [Observable Framework](https://observablehq.com/framework/).
 
@@ -20,6 +20,8 @@ Any files not listed below are part of the Observable Framework setup or are sol
 │  │  ├─ nodegoat_tables.json		# reformatted database tables from nodegoat (output by nodegoat_data.json.py)
 │  │  ├─ objects_json_backup.json	# backup of the nodegoat object data in case API call fails (output by nodegoat_data.json.py)
 │  │  └─ sankey_data.json		# intertexts formatted for sankey chart (output by nodegoat_data.json.py)
+│  ├─ js
+│  │  └─ global_constants.js		# a script for generating and exporting any constants used in multiple pages
 │  ├─ about.md				# about the project
 │  ├─ sankey.md				# full diagram of intertexts (markdown and JavaScript)
 │  └─ index.md				# the home page	(markdown and JavaScript)
@@ -31,7 +33,7 @@ Any files not listed below are part of the Observable Framework setup or are sol
 
 ## Diagram of data workflow
 
-For a full discussion of each part of this chart, see [the project's About page](https://visualizing-intertextuality.observablehq.cloud/visualizing-intertextuality/about).
+For a full discussion of each part of this chart, see [the project's About page](https://dkrasne.github.io/visualizing-intertextuality/about).
 
 ```mermaid
 flowchart TD;
