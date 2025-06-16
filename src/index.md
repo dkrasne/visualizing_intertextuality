@@ -8,14 +8,16 @@ toc: false
 
 **Developed by:** [Darcy Krasne](http://www.darcykrasne.com/)
 
-A project to visualize intertexts in Latin poetry using [nodegoat](https://nodegoat.net/), [Observable Framework](https://observablehq.com/framework/), and Python. (See [the about page](./about) for further details.)
+A project to visualize intertexts in Latin poetry using [nodegoat](https://nodegoat.net/), [Observable Framework](https://observablehq.com/framework/), [Python](https://www.python.org/), and [D3.js](https://d3js.org/). ([See the about page](./about) for further details, or [view the code on GitHub](https://github.com/dkrasne/visualizing_intertextuality).)
 
-View the code on [GitHub](https://github.com/dkrasne/visualizing_intertextuality).
-
-N.B. As Observable is phasing out its cloud hosting, the site will be migrating to http://dkrasne.github.io/visualizing_intertextuality. Please take note of the new address.
+*N.B. As Observable is phasing out its cloud hosting, this site will be migrating to http://dkrasne.github.io/visualizing_intertextuality. Please take note of the new address.*
 
 
 <!-- Load data -->
+
+```js
+import {createLookupIDTable} from './js/global_constants.js';
+```
 
 ```js
 // Attach extracted nodegoat objects (final output of Python data loader)
@@ -30,7 +32,7 @@ const nodegoatTables = FileAttachment("data/nodegoat_tables.json").json()
 const meters = FileAttachment("data/meters.json").json()
 ```
 ```js
-// Attach full list of intertexts (used for network)
+// Attach full list of intertexts (used for network and Sankey charts)
 const intertextsTable = FileAttachment("data/intxts_full.json").json()
 ```
 ```js
@@ -45,51 +47,7 @@ const sankeyData = FileAttachment("data/sankey_data.json").json()
 
 <!-- Create mapping of ID-to-name -->
 ```js
-const lookupIDTable = new Map();
-
-for (let i in nodegoatTables.word_instance_table) {
-	let item = nodegoatTables.word_instance_table[i];
-	let key = item.obj_id;
-	let word = item.word;
-	let line = item.line_num;
-	let def = {'word': word, 'lineNum': line};
-	lookupIDTable.set(key, def);
-}
-
-for (let i in nodegoatTables.author_table) {
-	let item = nodegoatTables.author_table[i];
-	let key = item.obj_id;
-	let def = item.author_name;
-	lookupIDTable.set(key, def);
-}
-
-// I may want to change this to a dictionary that includes author as well as title
-for (let i in nodegoatTables.work_table) {
-	let item = nodegoatTables.work_table[i];
-	let key = item.obj_id;
-	let def = item.title;
-	lookupIDTable.set(key, def);
-}
-```
-```js
-for (let i in nodegoatTables.work_seg_table) {
-	let item = nodegoatTables.work_seg_table[i];
-	let section = item.work_section || '';
-	let subsec = item.work_subsection || '';
-	let key = item.obj_id;
-	let work_id = String(item.work_id);
-	let work = lookupIDTable.get(work_id);
-	let section_string;
-	if (section && subsec) {
-		section_string = `${section}, ${subsec}`;
-	} else if (section) {
-		section_string = `${section}`;
-	} else {
-		section_string = '';
-	}
-	let def = {'work': work, 'section': section_string};
-	lookupIDTable.set(key, def);
-}
+const lookupIDTable = createLookupIDTable(nodegoatTables);
 ```
 <!-- End mapping -->
 
@@ -338,6 +296,31 @@ for (let inst in wordInstTable) {
 
 const wordsFiltered = wordInstArr.filter(inst => inst.line_num >= lineRange.firstLine && inst.line_num <= lineRange.lastLine);
 const lineArr = d3.range(lineRange.firstLine, lineRange.lastLine+1);
+
+const removedMonosyllables = [];
+
+// If an elided monosyllable and the following word are both present in the list of words with intertexts, remove the elided monosyllable; if the following word is present but has no intertexts, remove it from the list instead.
+for (let i in wordsFiltered) {
+	let word = wordsFiltered[i];
+	// check whether each word is an elided monosyllable
+	if (word.elided_monosyllable === true) {
+		// check whether the following word is in the database
+		let overlapCheck = wordsFiltered.filter(checkWord => checkWord.line_num === word.line_num && checkWord.start_pos_id === word.start_pos_id);
+		if (overlapCheck.length > 1) {
+			let checkWord = overlapCheck.filter(remainingWord => remainingWord.obj_id !== word.obj_id)[0];
+			// if the following word has any intertexts, don't show the elided monosyllable
+			if (checkWord.directIntertexts + checkWord.indirectIntertexts > 0) {
+				let removedWord = wordsFiltered.splice(i, 1);
+				removedMonosyllables.push(removedWord);
+			}
+			// if the following word has no intertexts, don't show it, and keep the elided monosyllable
+			else {
+				let followingWordIndex = wordsFiltered.findIndex(item => item.obj_id === checkWord.obj_id);
+				let removedWord = wordsFiltered.splice(followingWordIndex, 1);
+			}
+		}
+	}
+}
 ```
 
 
@@ -583,7 +566,8 @@ if (!plotDisplay) {
 
 display(
 
-html`<p style="max-width:none; font-size:smaller;">Click on a cell to freeze the popup information. <b>Direct intertexts</b> are those where a scholar has suggested a direct link between the present word and a word in an earlier text. <b>Indirect intertexts</b> are intertexts at further remove (i.e., where a direct or indirect intertext refers to another, still earlier, passage). Currently, the project does not include intratexts (allusions to other passages within the same text).</p>
+html`
+<p style="max-width:none; font-size:smaller;">Click on a cell to freeze the popup information. <b>Direct intertexts</b> are those where a scholar has suggested a direct link between the present word and a word in an earlier text. <b>Indirect intertexts</b> are intertexts at further remove (i.e., where a direct or indirect intertext refers to another, still earlier, passage). Currently, the project does not include intratexts (allusions to other passages within the same text).</p>
 
 <p style="max-width:none; font-size:smaller;"><b>Two caveats:</b> absence of a word does not necessarily mean that there are no intertexts, just that they are not yet in the database; and lines appear in numeric order, even if editors agree that they should be transposed.</p></div>
 
@@ -599,7 +583,14 @@ ${plotDisplay}
 	<p>Selected word object ID: ${plotCurrSelect ? plotCurrSelect.wordObj.obj_id : "none"}<br>
 	Selected word: ${plotCurrSelect ? plotCurrSelect.word : "none"}</p>
 </div>
-</div>`
+</div>
+
+${removedMonosyllables.length > 0 ? display(
+	html`
+	<p style="max-width:none; font-size:smaller;">N.B. ${removedMonosyllables.length} elided ${removedMonosyllables.length === 1 ? 'monosyllable' : 'monosyllables'} ${removedMonosyllables.length === 1 ? 'is' : 'are'} not shown above: elided monosyllables are only shown when the word following them either is itself not in the database or has no intertexts in the database.</p>
+	`
+) : null}
+`
 )}
 
 ```
