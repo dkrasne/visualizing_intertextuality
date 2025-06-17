@@ -1,8 +1,5 @@
 //import {FileAttachment} from "npm:@observablehq/stdlib";
 
-// Attach restructured tables for querying
-//const nodegoatTables = FileAttachment("../data/nodegoat_tables.json").json()
-
 function createLookupIDTable(nodegoatTables) {
     const lookupIDTable = new Map();
 
