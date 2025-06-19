@@ -16,7 +16,8 @@ A project to visualize intertexts in Latin poetry using [nodegoat](https://nodeg
 <!-- Load data -->
 
 ```js
-import {createLookupIDTable} from './js/global_constants.js';
+import {createLookupIDTable, authorColors} from './js/global_constants.js';
+import {SankeyChart} from './js/sankey_function.js';
 ```
 
 ```js
@@ -295,6 +296,18 @@ for (let inst in wordInstTable) {
 }
 
 const wordsFiltered = wordInstArr.filter(inst => inst.line_num >= lineRange.firstLine && inst.line_num <= lineRange.lastLine);
+
+if (wordsFiltered.length === 0) {wordsFiltered.push(
+	{obj_id: "",
+  word: "",
+  lemma_id: "",
+  work_segment_id: "",
+  line_num: 0,
+  line_num_modifier: null,
+  start_pos_id: "",
+  end_pos_id: ""}
+)}
+
 const lineArr = d3.range(lineRange.firstLine, lineRange.lastLine+1);
 
 const removedMonosyllables = [];
@@ -321,24 +334,13 @@ for (let i in wordsFiltered) {
 		}
 	}
 }
-```
 
 
-```js
+// I ORIGINALLY HAD A CELL BREAK HERE; SOME THINGS WON'T WORK WHEN IT EXISTS, BUT IF I ENCOUNTER OTHER ISSUES, IT MAY BE THAT REMOVING THE BREAK IS THEIR CAUSE.
+
 // Get intertexts
 
 const wordLvlIntxts = nodegoatTables.word_lvl_intxt_table;
-
-if (wordsFiltered.length === 0) {wordsFiltered.push(
-	{obj_id: "",
-  word: "",
-  lemma_id: "",
-  work_segment_id: "",
-  line_num: 0,
-  line_num_modifier: null,
-  start_pos_id: "",
-  end_pos_id: ""}
-)}
 
 for (let word in wordsFiltered) {
 	wordsFiltered[word].posIDs = [];
@@ -578,7 +580,11 @@ html`
 ${plotDisplay}
 </div>
 <div>
-	<p>Eventually there will be a network visualization in this space. For now, you can see <a href="./sankey">a diagram of the full set of available intertexts</a> to get a sense of what that visualization might look like.</p>
+	${plotCurrSelect ? 
+		display(html`<p>There will eventually be a diagram here to show the intertexts with the currently selected word.</p>`) : 
+		display(html`<p style="font-size:smaller;">A full explanation of how to read and interact with the following chart can be found on <a href="./sankey">the Full Intertext Diagram page</a>.</p>
+	${display(sectionSankey)}`)}
+
 	<p><i>The following information will eventually not be displayed.</i></p>
 	<p>Selected word object ID: ${plotCurrSelect ? plotCurrSelect.wordObj.obj_id : "none"}<br>
 	Selected word: ${plotCurrSelect ? plotCurrSelect.word : "none"}</p>
@@ -605,257 +611,91 @@ else {
 
 <hr>
 
-<!--
+# Sandbox
 
-## Attempting network
+Everything below here will not be in the final project.
+
+
+## Working on intertexts networks
 
 ```js
-const width = 640;
-const height = 640;
-
-const links = graphData.links.map((d) => Object.create(d));
-const nodes = graphData.nodes.map((d) => Object.create(d));
-
-const color = d3.scaleOrdinal(d3.schemeObservable10);
-
-const simulation = d3.forceSimulation(nodes)
-    .force("link", d3.forceLink(links).id((d) => d.id))
-    .force("charge", d3.forceManyBody())
-    .force("center", d3.forceCenter(width / 2, height / 2))
-    .on("tick", ticked);
-
-const svg = d3.create("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("viewBox", [0, 0, width, height])
-    .attr("style", "max-width: 100%; height: auto;");
+// chart if no word is selected: filtered Sankey based on current passage
 
 
-// a combination of ChatGPT and Elijah Meeks
-const marker = svg.append("defs")
-	.append("marker")
-  .attr("id", "arrow")
-  .attr("viewBox", "0 0 10 10")
-  .attr("refX", 20)
-  .attr("refY", 5)
-  .attr("markerUnits", 'userSpaceOnUse')
-  .attr("markerWidth", 6)
-  .attr("markerHeight", 6)
-  .attr("orient", "auto")
-  .append("path")
-  .attr("d", "M 0 0 L 10 5 L 0 10 z")
-  .attr("fill", "black")
-  .attr("fill-opacity", 0.6);
+// Get the IDs of all words involved in intertexts in the currently-selected passage
+let passageWordIntxts = wordsFiltered.length > 0 ? 
+		Array.from(new Set(wordsFiltered.map(word => word.directIntertextIDs.concat(word.indirectIntertextIDs)).flat())) : 
+		[];
 
-const link = svg.append("g")
-    .attr("stroke", "var(--theme-foreground-faint)")
-    .attr("stroke-opacity", 0.6)
-  .selectAll("line")
-  .data(links)
-  .join("line")
-    .attr("stroke-width", (d) => Math.sqrt(d.weight))
-	.attr("marker-end", "url(#arrow)");
+// Filter the full table of intertexts to just those that include the relevant words
+let intertextsTableCopy = JSON.parse(JSON.stringify(intertextsTable));
+let passageIntxts = intertextsTableCopy.filter(intxt => passageWordIntxts.includes(intxt.source_word_id) || passageWordIntxts.includes(intxt.target_word_id));
 
-const node = svg.append("g")
-    .attr("stroke", "var(--theme-background)")
-    .attr("stroke-width", 1.5)
-  .selectAll("circle")
-  .data(nodes)
-  .join("circle")
-    .attr("r", (d) => {
-    let proto = Object.getPrototypeOf(d);
-	let numProps = Object.keys(proto).length - 2;
-    return Math.sqrt(numProps) * 5})
-    .attr("fill", (d) => color(d.author))
-    .call(drag(simulation));
+// Get the IDs for those intertexts, both the word-level intertext IDs and the word-level intertext group IDs
+let intxtIDs = passageIntxts.map(intxt => [intxt.intxt_grp_id, intxt.intxt_id]).flat().filter(id => id !== null);
 
-node.append("title")
-    .text((d) => lookupIDTable.get(d.id).section ? `${lookupIDTable.get(d.id).work}, ${lookupIDTable.get(d.id).section}` : lookupIDTable.get(d.id).work);
+// FILTER SANKEY DATA //
 
-function ticked() {
-  link
-      .attr("x1", (d) => d.source.x)
-      .attr("y1", (d) => d.source.y)
-      .attr("x2", (d) => d.target.x)
-      .attr("y2", (d) => d.target.y);
+// Filter the work-segment edges based on those intertexts
+let sankeyEdges = JSON.parse(JSON.stringify(sankeyData.edges)); // prevents the filtering from affecting the actual data
+let sankeyFilteredEdgesArr =  sankeyEdges.filter(edge => intxtIDs.includes(edge.id));
 
-  node
-      .attr("cx", (d) => d.x)
-      .attr("cy", (d) => d.y);
+// Remove words from those edges that aren't included in the current selection (target words should only be words in the selected passage, and source words should only be those that the current passage has intertexts with)
+for (let i in sankeyFilteredEdgesArr) {
+	let edge = sankeyFilteredEdgesArr[i];
+	edge.source_words = edge.source_words.filter(wordID => passageWordIntxts.includes(wordID));
+	let wordList = wordsFiltered.map(word => word.obj_id);
+	edge.target_words = edge.target_words.filter(wordID => wordList.includes(wordID) || passageWordIntxts.includes(wordID));
 }
 
-display(svg.node());
+// Remove any edges that now have empty target-word lists
+const sankeyFilteredEdges = sankeyFilteredEdgesArr.filter(edge => edge.target_words.length > 0);
+
+// Recalculate the weight of those edges
+sankeyFilteredEdges.forEach(edge => edge.num_words = (edge.source_words.length + edge.target_words.length)/2);
+
+// Filter the nodes to just those work segements that still have edges connected
+
+const sankeyFilteredNodes = sankeyData.nodes.filter(node => sankeyFilteredEdges.map(edge => edge.source).concat(sankeyFilteredEdges.map(edge => edge.target)).includes(node.name));
+
+```
+
+
+`wordsFiltered`
+```js
+wordsFiltered
 ```
 
 ```js
-function drag(simulation) {
-
-  function dragstarted(event) {
-    if (!event.active) simulation.alphaTarget(0.3).restart();
-    event.subject.fx = event.subject.x;
-    event.subject.fy = event.subject.y;
-  }
-
-  function dragged(event) {
-    event.subject.fx = event.x;
-    event.subject.fy = event.y;
-  }
-
-  function dragended(event) {
-    if (!event.active) simulation.alphaTarget(0);
-    event.subject.fx = null;
-    event.subject.fy = null;
-  }
-
-  return d3.drag()
-      .on("start", dragstarted)
-      .on("drag", dragged)
-      .on("end", dragended);
-}
+//intxtIDs
 ```
+`sankeyFilteredEdges`
 ```js
-nodes
+sankeyFilteredEdges
 ```
+
+`sankeyFilteredNodes`
 ```js
-links
+sankeyFilteredNodes
 ```
 
 
 ```js
-// Create maps to store total counts and assign indices for each source-target pair.
-const edgeCountMap = new Map();
-const edgeIndexMap = new Map();
+const intertextsWordFiltered = plotCurrSelect ? intertextsTable.filter(intxt => [intxt.source_word_id, intxt.target_word_id].includes(plotCurrSelect.wordObj.obj_id)) : null;
 
-// Loop through links to annotate them.
-graphData.links.forEach(link => {
-  // Assume link.source and link.target are objects with an "id" property.
-  const key = `${link.source.id}-${link.target.id}`;
-  // Get the current index for this pair (starting at 0).
-  const currentIndex = edgeIndexMap.get(key) || 0;
-  // Assign this edge its index.
-  link.edgeIndex = currentIndex;
-  // Update the index for the next edge.
-  edgeIndexMap.set(key, currentIndex + 1);
-  // Also count the total number of edges for this pair.
-  edgeCountMap.set(key, (edgeCountMap.get(key) || 0) + 1);
-});
+// const intxtsWordFilteredLvls = {};
 
-// (Optional) Log the edge counts to verify.
-// console.log("Edge counts:", [...edgeCountMap.entries()]);
+// if (plotCurrSelect && intxtCnt > 0) {
+// 	let currWordIntxts = intertextsTable.filter(intxt => [intxt.source_word_id, intxt.target_word_id].includes(plotCurrSelect.wordObj.obj_id))
+// 	if (currWordIntxts.length > 0) {
 
+// 	}
+// }
 ```
 
 ```js
-
-const links2 = graphData.links.map((d) => Object.create(d));
-const nodes2 = graphData.nodes.map((d) => Object.create(d));
-
-
-const svg2 = html`<svg width=800 height=600 style="border:1px solid black"><defs></defs></svg>`;
-
-const simulation2 = d3.forceSimulation(nodes2)
-    .force("link", d3.forceLink(links2).id((d) => d.id))
-    .force("charge", d3.forceManyBody())
-    .force("center", d3.forceCenter(width / 2, height / 2))
-
-const selection = d3.select(svg2);
-
-// Define a small offset to prevent overlap (adjust as needed)
-const linkOffset = 3;
-const curveStrength = 30; // Adjust curve height
-
-// Find min/max values in your node positions
-const xExtent = d3.extent(nodes2, d => d.x);
-const yExtent = d3.extent(nodes2, d => d.y);
-
-// Create scaling functions to map node positions to canvas size
-const xScale = d3.scaleLinear().domain(xExtent).range([50, 750]); // Keep some margin
-const yScale = d3.scaleLinear().domain(yExtent).range([50, 550]);
-
-d3.select(svg2)
-  .selectAll("path")
-  .data(links2)
-  .join("path")
-  .attr("d", d => {
-    const x1 = xScale(d.source.x);
-    const y1 = yScale(d.source.y);
-    const x2 = xScale(d.target.x);
-    const y2 = yScale(d.target.y);
-    
-    const key = `${d.source.id}-${d.target.id}`;
-    const totalEdges = edgeCountMap.get(key); // Total edges for this pair
-    const index = d.edgeIndex;               // This edge's index
-    
-    // Calculate curve offset.
-    // The formula centers the edges: if there is an odd number, the middle edge is straight;
-    // if even, they are symmetrically curved.
-    const curveOffset = ((index + 1) - (totalEdges + 1) / 2) * curveStrength;
-    
-    // Compute midpoint for the quadratic Bézier curve.
-    const midX = (x1 + x2) / 2;
-    const midY = (y1 + y2) / 2 - curveOffset;
-    
-    return `M ${x1},${y1} Q ${midX},${midY} ${x2},${y2}`;
-  })
-  .attr("fill", "none")
-  .attr("stroke", "black")
-  .attr("stroke-width", 1);
-
-/* 
-// Apply scaling when setting positions
-// Draw offset links (edges)
-selection
-  .selectAll("line")
-  .data(graphData.links)
-  .join("line")
-  .attr("x1", d => xScale(d.source.x) + (d.key ? linkOffset * (d.key % 2 ? 1 : -1) : 0))
-  .attr("y1", d => yScale(d.source.y) + (d.key ? linkOffset * (d.key % 2 ? -1 : 1) : 0))
-  .attr("x2", d => xScale(d.target.x) + (d.key ? linkOffset * (d.key % 2 ? -1 : 1) : 0))
-  .attr("y2", d => yScale(d.target.y) + (d.key ? linkOffset * (d.key % 2 ? 1 : -1) : 0))
-  .attr("stroke", "black")
-  .attr("stroke-width", 1);
-*/
-
-// Draw nodes (circles)
-selection
-  .selectAll("circle")
-  .data(nodes2)
-  .join("circle")
-  .attr("cx", d => xScale(d.x))
-  .attr("cy", d => yScale(d.y))
-  .attr("r", 5)
-  .attr("fill", "black");
-
-
-
-
-const defs = d3.select(svg2).select("defs");
-
-defs.append("marker")
-  .attr("id", "arrow")
-  .attr("viewBox", "0 0 10 10")
-  .attr("refX", 20)
-  .attr("refY", 5)
-  .attr("markerWidth", 6)
-  .attr("markerHeight", 6)
-  .attr("orient", "auto")
-  .append("path")
-  .attr("d", "M 0 0 L 10 5 L 0 10 z")
-  .attr("fill", "black");
-
-// Now, update the edges to use the arrowheads
-d3.select(svg2)
-  .selectAll("path")
-  .attr("marker-end", "url(#arrow)");
-
-
+intertextsWordFiltered
 ```
-
-```js
-view(svg2)
-```
-
--->
 
 <hr>
 
@@ -872,12 +712,15 @@ nodegoatModel
 
 Data after initial transformation:
 
+`nodegoatTables`
 ```js
 nodegoatTables
 ```
+`meters`
 ```js
 meters
 ```
+`intertextsTable`
 ```js
 intertextsTable
 ```
@@ -885,10 +728,6 @@ intertextsTable
 </details>
 
 <hr>
-
-# Sandbox
-
-Everything below here will not be in the final project.
 
 ## Data Checks
 
@@ -944,116 +783,106 @@ lookupIDTable
 ```
 
 
-<hr>
-
-## Testing stuff goes below here.
 
 ```js
-csvSamp
-```
-
-```js
-const workArr = [];
-for (let item in csvSamp) {
-	if (item !== 'columns') {
-		let work = csvSamp[item].work
-		if (!workArr.includes(work)) {
-			workArr.push(work);
-		}
-	}
-};
-const work = view(Inputs.select([null].concat(workArr), {label: "Work"}))
-```
-
-The selected work is *${work}*.
-
-<!-- Some information on Framework's reactivity: https://medium.com/@stxmendez/how-observable-implements-reactive-programming-784bcc02382d -->
-
-```js
-const csvItems = [];
-for (let item in csvSamp) {
-	csvItems.push(item);
+const nodes = [];
+  
+for (let node in sankeyFilteredNodes) {
+  let nodeString = String(node)
+  nodes.push({
+    id: sankeyFilteredNodes[node].name,
+    author: sankeyFilteredNodes[node].author,
+    work: sankeyFilteredNodes[node].work
+  });
 }
 ```
 
 ```js
-csvItems
-```
+const links = [];
 
+ for (let i in sankeyFilteredEdges) {
+   let edge = sankeyFilteredEdges[i];
 
-```
-let lineMin;
-let lineMax;
-
-lineMin = 1; // this will actually need to change depending on the range of the selection
-lineMax = 10; // this will actually need to change depending on the range of the selection
-
-const lineRange = [];
-
-for (let i = lineMin; i <= lineMax; i++) {
-	lineRange.push(i);
-}
-```
-
-```
-lineRange
-```
-
-```
-const numX = workArr.length; // this will actually be determined by the appropriate length for a given meter
-const numY = lineRange.length;
-const cellSize = 20;
-const gridHeight = numY * cellSize;
-const gridWidth = numX * cellSize;
-```
-
-```
-Plot.plot({
-	color: {scheme: "Blues", legend: true},
-	marks: [
-		Plot.cell(
-			csvSamp,
-			Plot.group(
-				{fill: "count"},
-				{
-					x: "work",
-					y: "line",
-					fill: "word",
-//					filter: (d) => d.line >= lineMin && d.line <= lineMax && d.work === work,
-					filter: null,
-					tip: true // Info on customizing tooltip using 'format': https://observablehq.com/plot/marks/tip
-				}
-			)
-		),
-//		Plot.axisY({ticks: []}),
-	],
-	x: {
-		padding: 0, 
-		axis: "both",  // set to null for no axis
-		tickRotate: -30,
-//		label: null  // use this to remove the label for the axis
-	},
-	y: {
-		padding: 0, 
-		domain: d3.range(lineMin, lineMax + 1),
-		tickSize: 0
-	},
-	width: gridWidth + 100,
-	height: gridHeight + 100,
-	marginTop: 50,
-	marginRight: 50,
-	marginBottom: 50,
-	marginLeft: 50
-})
-```
-
-
-
-
-```js
-const csvSamp = FileAttachment("data/sample_csv_loader.csv").csv({typed: true})
+   links.push({
+     source: edge.source,
+     target: edge.target,
+     value: edge.num_words
+   });
+ }
 ```
 
 ```js
-Inputs.table(csvSamp)
+// const chartNodes = [];
+// const chartLinks = [];
+// const chartData = {nodes: chartNodes, links: chartLinks}
+
+const sectionSankey = nodes.length > 0 && links.length > 0 ? SankeyChart({nodes: nodes, links: links, lookupIDTable: lookupIDTable},
+{
+    nodeGroup: d => d.author,
+    nodeLabel: d => {
+        //chartNodes.push(d);
+                    let nodesFilter = nodes.filter(node => node.id === d.id);
+                    let nodeAuthorID;
+                    for (let n in nodesFilter) {nodeAuthorID = nodesFilter[n].author}
+                    return lookupIDTable.get(nodeAuthorID);
+                    },
+    nodeTitle: d => `${lookupIDTable.get(d.id).work}\n${lookupIDTable.get(d.id).section}`,
+    nodeSort: (a,b) => {
+        let nodeA = sankeyData.nodes.find(work => work.name === a.id);
+        let nodeB = sankeyData.nodes.find(work => work.name === b.id);
+        // Sort so that authors go A-Z left-to-right (= bottom-to-top)
+        let authorComp = d3.descending(lookupIDTable.get(nodeA.author), lookupIDTable.get(nodeB.author));
+        if (authorComp !== 0) return authorComp; // if the authors aren't the same, don't go any further in sorting
+        // Within authors, sort so that all work sections are in order by work
+        // eventually may sort additionally by work section
+        return d3.descending(lookupIDTable.get(nodeA.work), lookupIDTable.get(nodeB.work));
+    },
+    align: "center",
+    colors: authorColors,
+    linkColor: "source",
+    linkTitle: d => {
+        //chartLinks.push(d);
+        let sourceNode = d.source.id;
+        let targetNode = d.target.id;
+        let linkSet = sankeyData.edges.filter(l => l.source === sourceNode && l.target === targetNode);
+        // let nodesFilterSource = nodes.filter(n => n.id === d.source.id);
+        // let sourceWordIDs = [];
+        let sourceWordIDs = [];
+        let targetWordIDs = [];
+        for (let i in linkSet) {
+            linkSet[i].source_words.map(w => sourceWordIDs.push(w));
+            linkSet[i].target_words.map(w => targetWordIDs.push(w));
+        }
+
+        sourceWordIDs = [...new Set(sourceWordIDs)];
+        targetWordIDs = [...new Set(targetWordIDs)];
+
+        let sourceWords = [];
+        let targetWords = [];
+
+        for (let i in sourceWordIDs) {sourceWords.push(lookupIDTable.get(sourceWordIDs[i]));}
+        sourceWords.sort((a,b) => {
+            if (a.lineNum < b.lineNum) {
+                return -1
+            } else if (a.lineNum > b.lineNum) {
+                return 1
+            } else {return 0}
+        })
+        for (let i in sourceWords) {sourceWords[i] = `${sourceWords[i].word} (line ${sourceWords[i].lineNum})`}
+        
+        for (let i in targetWordIDs) {targetWords.push(lookupIDTable.get(targetWordIDs[i]));}
+        targetWords.sort((a,b) => {
+            if (a.lineNum < b.lineNum) {
+                return -1
+            } else if (a.lineNum > b.lineNum) {
+                return 1
+            } else {return 0}
+        })
+        for (let i in targetWords) {targetWords[i] = `${targetWords[i].word} (line ${targetWords[i].lineNum})`}
+
+        return `${lookupIDTable.get(sourceNode).work}, ${lookupIDTable.get(sourceNode).section}: ${sourceWords.join(', ')}\n${lookupIDTable.get(targetNode).work}, ${lookupIDTable.get(targetNode).section}: ${targetWords.join(', ')}`;
+    }
+}) :
+null
+
 ```

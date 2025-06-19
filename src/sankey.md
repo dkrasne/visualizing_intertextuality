@@ -17,6 +17,7 @@ Eventually, subsets of this diagram will appear on the main page for the current
 *Some additional future work:*
 - *making the nodes repositionable*
 - *highlighting the entire set of flows connected to the currently-selected node*
+- *find a way to group work sections under their single work*
 
 </div>
 <hr>
@@ -64,8 +65,20 @@ const chart = SankeyChart({nodes: nodes, links: links, lookupIDTable: lookupIDTa
                     return lookupIDTable.get(nodeAuthorID);
                     },
     nodeTitle: d => `${lookupIDTable.get(d.id).work}\n${lookupIDTable.get(d.id).section}`,
+    nodeSort: (a,b) => {
+        let nodeA = sankeyData.nodes.find(work => work.name === a.id);
+        let nodeB = sankeyData.nodes.find(work => work.name === b.id);
+        // Sort so that authors go A-Z left-to-right (= bottom-to-top)
+        let authorComp = d3.descending(lookupIDTable.get(nodeA.author), lookupIDTable.get(nodeB.author));
+        if (authorComp !== 0) return authorComp; // if the authors aren't the same, don't go any further in sorting
+        // Within authors, sort so that all work sections are in order by work
+        // eventually may sort additionally by work section
+        return d3.descending(lookupIDTable.get(nodeA.work), lookupIDTable.get(nodeB.work));
+    },
     align: "center",
-    linkColor: "source",
+    //colors: d3.schemeSpectral[11], // should be able to create a bigger range by bringing colorcet colors in via Python
+    colors: authorColors,
+//    linkColor: "source",
     linkTitle: d => {
         //chartLinks.push(d);
         let sourceNode = d.source.id;
@@ -159,7 +172,7 @@ const sankeyData = FileAttachment("data/sankey_data.json").json()
 <!-- Import modules and constants -->
 
 ```js
-import {createLookupIDTable} from './js/global_constants.js';
+import {createLookupIDTable, authorColors} from './js/global_constants.js';
 import {SankeyChart} from './js/sankey_function.js';
 ```
 
