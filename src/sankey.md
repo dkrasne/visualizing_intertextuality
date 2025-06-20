@@ -17,7 +17,6 @@ Eventually, subsets of this diagram will appear on the main page for the current
 *Some additional future work:*
 - *making the nodes repositionable*
 - *highlighting the entire set of flows connected to the currently-selected node*
-- *find a way to group work sections under their single work*
 
 </div>
 <hr>
@@ -78,7 +77,7 @@ const chart = SankeyChart({nodes: nodes, links: links, lookupIDTable: lookupIDTa
     align: "center",
     //colors: d3.schemeSpectral[11], // should be able to create a bigger range by bringing colorcet colors in via Python
     colors: authorColors,
-//    linkColor: "source",
+    linkColor: "source",
     linkTitle: d => {
         //chartLinks.push(d);
         let sourceNode = d.source.id;

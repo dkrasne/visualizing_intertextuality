@@ -12,6 +12,115 @@ A project to visualize intertexts in Latin poetry using [nodegoat](https://nodeg
 
 *N.B. As Observable is phasing out its cloud hosting, this site will be migrating to http://dkrasne.github.io/visualizing_intertextuality. Please take note of the new address.*
 
+## Select passage to view
+
+<div class="tip">Currently there is a limited set of intertexts in the database. Choose Valerius Flaccus, <i>Argonautica</i>, Book 1, lines 1&ndash;4 or Book 2, lines 475&ndash;476 to see what the display looks like. You can also <a href="./sankey">view this diagram</a> to get a rough idea of what the full network of intertexts currently looks like.</div>
+
+<!-- Author, Work, and Work Section Selectors -->
+
+<div class="grid grid-cols-3">
+	<div class="card">
+		${authorPicker}
+	</div>
+	<div class="card">
+		${workPicker}
+	</div>
+	<div class="card">
+		${workSegPicker}
+	</div>
+</div>
+
+<!-- Starting and Ending Line Selectors -->
+
+<div class="grid grid-cols-2">
+<div class="card">
+${lineMinPicker}
+</div>
+<div class="card">
+${lineMaxPicker}
+</div>
+</div>
+
+## Visualizations
+
+
+<!-- Webpage -->
+
+```js
+let bgColor = "#ccccff";
+
+if (!plotDisplay) {
+	display(html`<p style="max-width:none">Based on information currently in the database, there are no intertexts in the specified passage (or you have made no selection yet).</p>`)
+} else {
+
+display(
+
+html`
+<div class="grid grid-cols-2">
+	<div class="card" style="background-color:${bgColor}; padding-top: 30px;">
+
+		<h2 style="padding-bottom: 10px;">${passageDetails.authorName}, <i>${passageDetails.workTitle}</i>, ${passageDetails.workSegName}: lines ${lineRange.firstLine}&ndash;${lineRange.lastLine}</h2>
+
+		${plotDisplay}
+
+		${removedMonosyllables.length > 0 ? display(
+			html`
+			<p style="max-width:none; font-size:smaller;">N.B. ${removedMonosyllables.length} elided ${removedMonosyllables.length === 1 ? 'monosyllable' : 'monosyllables'} ${removedMonosyllables.length === 1 ? 'is' : 'are'} not shown above: elided monosyllables are only shown when the word following them either is itself not in the database or has no intertexts in the database.</p>
+			`
+		) : null}
+
+	</div>
+
+	<div>
+		<h4>How to use this chart</h4>
+		<p style="max-width:none; font-size:smaller;">Click on a cell to freeze the popup information. <b>Direct intertexts</b> are those where a scholar has suggested a direct link between the present word and a word in an earlier text. <b>Indirect intertexts</b> are intertexts at further remove (i.e., where a direct or indirect intertext refers to another, still earlier, passage). Currently, the project does not include intratexts (allusions to other passages within the same text).</p>
+
+		<p style="max-width:none; font-size:smaller;"><b>Two caveats:</b> absence of a word does not necessarily mean that there are no intertexts, just that they are not yet in the database; and lines appear in numeric order, even if editors agree that they should be transposed.</p>
+
+		<p style="max-width:none; font-size:smaller;"><i>More coming soon!</i></p>
+	</div>
+</div>
+
+<div class="grid grid-cols-2" style="margin-top: 2em;">
+	<div>
+		${
+			display(html`
+			<h4>The intertextual ancestry of the current passage</h4>
+			<p style="font-size:smaller;">A full explanation of how to read and interact with the chart below (and its current limitations) can be found on <a href="./sankey">the Full Intertext Diagram page</a>.</p>
+			${display(sectionSankey)}`)
+		}
+	</div>
+	<div>
+		${!plotCurrSelect ? display(html`<p><i>Mouse over a &ldquo;word&rdquo; block in the passage display in order to see the lineage for that particular word. (Click on the word to freeze the display.)</i></p>`) :
+		display(html`
+			<h4 style="max-width:none;">The intertextual lineage of <i>${plotCurrSelect.word}</i> (line ${plotCurrSelect.wordObj.line_num})</h4>
+			<p style="font-size:smaller;">This visualization shows both the intertextual ancestry and descent of the selected word. Mouse over a rectangular node to see what text a given word occurs in; mouse over a link between two words to see what type(s) of allusive referentiality connect those two words. (The latter currently will not work on mobile devices.)</p>
+				${plotCurrSelect ? display(wordSankey) : null}
+			<p style="font-size:smaller; font-weight: bold;">N.B. This chart is still under development.</p>
+		`)
+		}
+	</div>
+</div>
+`
+)}
+
+```
+
+<hr>
+
+```js
+if (!plotDisplay) {display(html`<p></p>`)}
+else {
+	display(html`<p>The selected datapoint, which will serve as the starting point of the generated network (this will eventually not be displayed):</p>`)
+	if (plotCurrSelect) {display(plotCurrSelect)} else {display(html`<p><i>No current selection in plot.</i></p>`)}
+	}
+```
+
+<hr>
+
+
+<!-- DATA LOADING AND MANIPULATION; VISUALIZATION CREATION -->
+
 
 <!-- Load data -->
 
@@ -52,10 +161,6 @@ const lookupIDTable = createLookupIDTable(nodegoatTables);
 ```
 <!-- End mapping -->
 
-
-## Select passage to view
-
-<div class="tip">Currently there is a limited set of intertexts in the database. Choose Valerius Flaccus, <i>Argonautica</i>, Book 1, lines 1&ndash;4 or Book 2, lines 475&ndash;476 to see what the display looks like. You can also <a href="./sankey">view this diagram</a> to get a rough idea of what the full network of intertexts currently looks like.</div>
 
 ```js
 // Create authors dropdown
@@ -118,18 +223,6 @@ for (let workSeg in workSegTable) {
 const workSegPicker = Inputs.select(new Map([[null, null]].concat(workSegList)), {label: "Select work section:", value: null, sort: true});
 const workSegID = view(workSegPicker);
 ```
-
-<div class="grid grid-cols-3">
-	<div class="card">
-		${authorPicker}
-	</div>
-	<div class="card">
-		${workPicker}
-	</div>
-	<div class="card">
-		${workSegPicker}
-	</div>
-</div>
 
 ```js
 const passageDetails = {};
@@ -205,15 +298,6 @@ const lineMaxPicker = Inputs.number([workSegVars.workSegLineMin, workSegVars.wor
 									placeholder: workSegVars.workSegLineMax});
 const endLine = view(lineMaxPicker);
 ```
-
-<div class="grid grid-cols-2">
-<div class="card">
-${lineMinPicker}
-</div>
-<div class="card">
-${lineMaxPicker}
-</div>
-</div>
 
 ```js
 // Set default numbers
@@ -336,8 +420,6 @@ for (let i in wordsFiltered) {
 }
 
 
-// I ORIGINALLY HAD A CELL BREAK HERE; SOME THINGS WON'T WORK WHEN IT EXISTS, BUT IF I ENCOUNTER OTHER ISSUES, IT MAY BE THAT REMOVING THE BREAK IS THEIR CAUSE.
-
 // Get intertexts
 
 const wordLvlIntxts = nodegoatTables.word_lvl_intxt_table;
@@ -454,8 +536,7 @@ if (intertextsArr.length > 0) {
 
 ```
 
-
-## Visualization
+<!-- VISUALIZATIONS -->
 
 <!-- Create grid -->
 
@@ -549,77 +630,16 @@ const plotDisplay = intertextsArr.every(intxt => intxt.intxtCnt === 0) ? null : 
 ```
 
 ```js
+// Assign whichever cell is selected in the cell chart to a constant
 const plotCurrSelect = !plotDisplay ? null : Generators.input(plotDisplay);
 ```
 
-```js
-let bgColor = "#ccccff"; // this is a nice blue that works well
-/* the following are attempts to make a more "papyrus"-like background that still contrasts with the lightest green */
-/*
-bgColor = "#ddcc88";
-bgColor = "#daba91"; // taken from an actual papyrus pixel
-bgColor = "#ccaf87"; // taken from an actual papyrus pixel
-bgColor = "#d4b48c"; // average of the previous two colors
-*/
+<!-- Intertext Sankeys (passage-level and word-level) -->
 
-if (!plotDisplay) {
-	display(html`<p>Based on information currently in the database, there are no intertexts in the specified passage.</p>`)
-} else {
-
-display(
-
-html`
-<p style="max-width:none; font-size:smaller;">Click on a cell to freeze the popup information. <b>Direct intertexts</b> are those where a scholar has suggested a direct link between the present word and a word in an earlier text. <b>Indirect intertexts</b> are intertexts at further remove (i.e., where a direct or indirect intertext refers to another, still earlier, passage). Currently, the project does not include intratexts (allusions to other passages within the same text).</p>
-
-<p style="max-width:none; font-size:smaller;"><b>Two caveats:</b> absence of a word does not necessarily mean that there are no intertexts, just that they are not yet in the database; and lines appear in numeric order, even if editors agree that they should be transposed.</p></div>
-
-<div class="grid grid-cols-2"><div class="card" style="background-color:${bgColor}; padding-top: 30px;">
-
-<h2 style="padding-bottom: 10px;">${passageDetails.authorName}, <i>${passageDetails.workTitle}</i>, ${passageDetails.workSegName}: lines ${lineRange.firstLine}&ndash;${lineRange.lastLine}</h2>
-
-${plotDisplay}
-</div>
-<div>
-	${plotCurrSelect ? 
-		display(html`<p>There will eventually be a diagram here to show the intertexts with the currently selected word.</p>`) : 
-		display(html`<p style="font-size:smaller;">A full explanation of how to read and interact with the following chart can be found on <a href="./sankey">the Full Intertext Diagram page</a>.</p>
-	${display(sectionSankey)}`)}
-
-	<p><i>The following information will eventually not be displayed.</i></p>
-	<p>Selected word object ID: ${plotCurrSelect ? plotCurrSelect.wordObj.obj_id : "none"}<br>
-	Selected word: ${plotCurrSelect ? plotCurrSelect.word : "none"}</p>
-</div>
-</div>
-
-${removedMonosyllables.length > 0 ? display(
-	html`
-	<p style="max-width:none; font-size:smaller;">N.B. ${removedMonosyllables.length} elided ${removedMonosyllables.length === 1 ? 'monosyllable' : 'monosyllables'} ${removedMonosyllables.length === 1 ? 'is' : 'are'} not shown above: elided monosyllables are only shown when the word following them either is itself not in the database or has no intertexts in the database.</p>
-	`
-) : null}
-`
-)}
-
-```
+<!-- Data preparation -->
 
 ```js
-if (!plotDisplay) {display(html`<p></p>`)}
-else {
-	display(html`<p>The selected datapoint, which will serve as the starting point of the generated network (this will eventually not be displayed):</p>`)
-	if (plotCurrSelect) {display(plotCurrSelect)} else {display(html`<p><i>No current selection in plot.</i></p>`)}
-	}
-```
-
-<hr>
-
-# Sandbox
-
-Everything below here will not be in the final project.
-
-
-## Working on intertexts networks
-
-```js
-// chart if no word is selected: filtered Sankey based on current passage
+// data prep for chart if no word is selected: filtered work-section Sankey diagram (=full intertext diagram) based on current passage
 
 
 // Get the IDs of all words involved in intertexts in the currently-selected passage
@@ -628,7 +648,7 @@ let passageWordIntxts = wordsFiltered.length > 0 ?
 		[];
 
 // Filter the full table of intertexts to just those that include the relevant words
-let intertextsTableCopy = JSON.parse(JSON.stringify(intertextsTable));
+const intertextsTableCopy = JSON.parse(JSON.stringify(intertextsTable));
 let passageIntxts = intertextsTableCopy.filter(intxt => passageWordIntxts.includes(intxt.source_word_id) || passageWordIntxts.includes(intxt.target_word_id));
 
 // Get the IDs for those intertexts, both the word-level intertext IDs and the word-level intertext group IDs
@@ -660,41 +680,236 @@ const sankeyFilteredNodes = sankeyData.nodes.filter(node => sankeyFilteredEdges.
 
 ```
 
+```js
+// data prep for chart if a word is selected: Sankey based on word-to-word connections
+
+const ancestorIntertexts = [];
+const descendantIntertexts = [];
+
+let currWordId;
+let ancestorWordIDs = [];
+let descendantWordIDs = [];
+
+if (plotCurrSelect) {
+	
+	currWordId = plotCurrSelect.wordObj.obj_id;	// set current word ID to the selected word
+
+	// create functions for getting a word's immediate ancestors or descendants
+	function getWordAncestors(currWordId){
+		for (let i in intertextsTable) {
+			let intxt = intertextsTable[i];
+			// for each intertext in the intertexts table, if its target ID matches the focus word (either the selected word or one of its ancestors), add it to the list of ancestor intertexts and add its source to the list of words to be processed.
+			if (currWordId === intxt.target_word_id) {
+				ancestorIntertexts.push(intxt);
+				ancestorWordIDs.push(intxt.source_word_id);
+			}
+		}
+	}
+	function getWordDescendants(currWordId){
+		for (let i in intertextsTable) {
+			let intxt = intertextsTable[i];
+			// for each intertext in the intertexts table, if its source ID matches the focus word (either the selected word or one of its descendants), add it to the list of descendant intertexts and add its target to the list of words to be processed.
+			if (currWordId === intxt.source_word_id) {
+				descendantIntertexts.push(intxt);
+				descendantWordIDs.push(intxt.target_word_id);
+			}
+		}
+	}
+
+	getWordAncestors(currWordId);
+	getWordDescendants(currWordId);
+
+	while (ancestorWordIDs.length > 0) {
+		currWordId = ancestorWordIDs[0];
+		getWordAncestors(currWordId);
+		ancestorWordIDs.shift();
+	}
+
+	while (descendantWordIDs.length > 0) {
+		currWordId = descendantWordIDs[0];
+		getWordDescendants(currWordId);
+		descendantWordIDs.shift();
+	}
+}
+
+const intertextsWordFiltered = Array.from(new Set(ancestorIntertexts.concat(descendantIntertexts)));
+
+const wordIntxtNodeIDs = Array.from(new Set(intertextsWordFiltered.map(intxt => (Object.values({source_word_id: intxt.source_word_id, target_word_id: intxt.target_word_id}))).flat()));
+
+let wordInstanceTable = JSON.parse(JSON.stringify(nodegoatTables.word_instance_table));
+const wordIntxtNodes = wordIntxtNodeIDs.map(id => wordInstanceTable.filter(word => word.obj_id === id)[0]);
+wordIntxtNodes.forEach(obj => obj.id = obj.obj_id);
+wordIntxtNodes.forEach(obj => delete obj.obj_id);
+
+const wordIntxtEdges = [];
+
+for (let i in intertextsWordFiltered) {
+	let intxt = intertextsWordFiltered[i];
+	wordIntxtEdges.push({source: intxt.source_word_id, target: intxt.target_word_id, value: 1, id: intxt.intxt_id, matchTypes: intxt.match_type_ids});
+}
+```
+
+<!-- Sankey charts -->
+
+```js
+const nodes = [];
+  
+for (let node in sankeyFilteredNodes) {
+  nodes.push({
+    id: sankeyFilteredNodes[node].name,
+    author: sankeyFilteredNodes[node].author,
+    work: sankeyFilteredNodes[node].work
+  });
+}
+```
+
+```js
+const links = [];
+
+ for (let i in sankeyFilteredEdges) {
+   let edge = sankeyFilteredEdges[i];
+   links.push({
+     source: edge.source,
+     target: edge.target,
+     value: edge.num_words
+   });
+ }
+```
+
+```js
+// Create work section Sankey chart for selected passage
+
+const sectionSankey = nodes.length > 0 && links.length > 0 ? 
+	SankeyChart({nodes: nodes, links: links, lookupIDTable: lookupIDTable},
+		{
+			nodeGroup: d => d.author,
+			nodeLabel: d => {
+							let nodesFilter = nodes.filter(node => node.id === d.id);
+							let nodeAuthorID;
+							for (let n in nodesFilter) {nodeAuthorID = nodesFilter[n].author}
+							return lookupIDTable.get(nodeAuthorID);
+							},
+			nodeTitle: d => `${lookupIDTable.get(d.id).work}\n${lookupIDTable.get(d.id).section}`,
+			nodeSort: (a,b) => {
+				let nodeA = sankeyData.nodes.find(work => work.name === a.id);
+				let nodeB = sankeyData.nodes.find(work => work.name === b.id);
+				// Sort so that authors go A-Z left-to-right (= bottom-to-top)
+				let authorComp = d3.descending(lookupIDTable.get(nodeA.author), lookupIDTable.get(nodeB.author));
+				if (authorComp !== 0) return authorComp; // if the authors aren't the same, don't go any further in sorting
+				// Within authors, sort so that all work sections are in order by work
+				// eventually may sort additionally by work section
+				return d3.descending(lookupIDTable.get(nodeA.work), lookupIDTable.get(nodeB.work));
+			},
+			align: "center",
+			colors: authorColors,
+			linkColor: "source",
+			linkTitle: d => {
+				let sourceNode = d.source.id;
+				let targetNode = d.target.id;
+				let linkSet = sankeyData.edges.filter(l => l.source === sourceNode && l.target === targetNode);
+				let sourceWordIDs = [];
+				let targetWordIDs = [];
+				for (let i in linkSet) {
+					linkSet[i].source_words.map(w => sourceWordIDs.push(w));
+					linkSet[i].target_words.map(w => targetWordIDs.push(w));
+				}
+
+				sourceWordIDs = [...new Set(sourceWordIDs)];
+				targetWordIDs = [...new Set(targetWordIDs)];
+
+				let sourceWords = [];
+				let targetWords = [];
+
+				for (let i in sourceWordIDs) {sourceWords.push(lookupIDTable.get(sourceWordIDs[i]));}
+				sourceWords.sort((a,b) => {
+					if (a.lineNum < b.lineNum) {
+						return -1
+					} else if (a.lineNum > b.lineNum) {
+						return 1
+					} else {return 0}
+				})
+				for (let i in sourceWords) {sourceWords[i] = `${sourceWords[i].word} (line ${sourceWords[i].lineNum})`}
+				
+				for (let i in targetWordIDs) {targetWords.push(lookupIDTable.get(targetWordIDs[i]));}
+				targetWords.sort((a,b) => {
+					if (a.lineNum < b.lineNum) {
+						return -1
+					} else if (a.lineNum > b.lineNum) {
+						return 1
+					} else {return 0}
+				})
+				for (let i in targetWords) {targetWords[i] = `${targetWords[i].word} (line ${targetWords[i].lineNum})`}
+
+				return `${lookupIDTable.get(sourceNode).work}, ${lookupIDTable.get(sourceNode).section}: ${sourceWords.join(', ')}\n${lookupIDTable.get(targetNode).work}, ${lookupIDTable.get(targetNode).section}: ${targetWords.join(', ')}`;
+			}
+		}) :
+	null
+
+```
+
+
+```js
+// Create word-level Sankey chart for selected word
+
+const wordSankey = wordIntxtNodes.length > 0 && wordIntxtEdges.length > 0 ? 
+	SankeyChart({nodes: wordIntxtNodes, links: wordIntxtEdges, lookupIDTable: lookupIDTable},
+		{
+			sankeyType: "word",
+			nodeLabel: d => lookupIDTable.get(d.id).word,
+			rotateLabel: true,
+			align: "center",
+			nodeTitle: d => "",
+			linkTitle: d => {
+				let matchTypeIDs = wordIntxtEdges.filter(edge => edge.source === d.source.id && edge.target === d.target.id)[0].matchTypes;
+				let matchTypes = [];
+				for (let i in matchTypeIDs) {
+					matchTypes.push(nodegoatTables.match_type_class_table.filter(mt => mt.match_type_id === matchTypeIDs[i])[0].match_type);
+				}
+				return `\u2022 ${matchTypes.join('\n\u2022 ')}`;
+			}
+		}) :
+	null
+
+```
+
+# Sandbox
+
+Everything below here will not be in the final project.
+
+
+## Working on intertexts networks
+
+
 
 `wordsFiltered`
 ```js
 wordsFiltered
 ```
 
-```js
-//intxtIDs
-```
-`sankeyFilteredEdges`
-```js
-sankeyFilteredEdges
-```
-
-`sankeyFilteredNodes`
-```js
-sankeyFilteredNodes
-```
 
 
-```js
-const intertextsWordFiltered = plotCurrSelect ? intertextsTable.filter(intxt => [intxt.source_word_id, intxt.target_word_id].includes(plotCurrSelect.wordObj.obj_id)) : null;
-
-// const intxtsWordFilteredLvls = {};
-
-// if (plotCurrSelect && intxtCnt > 0) {
-// 	let currWordIntxts = intertextsTable.filter(intxt => [intxt.source_word_id, intxt.target_word_id].includes(plotCurrSelect.wordObj.obj_id))
-// 	if (currWordIntxts.length > 0) {
-
-// 	}
-// }
-```
-
+`intertextsWordFiltered`
 ```js
 intertextsWordFiltered
+```
+
+`wordIntxtNodes`
+```js
+wordIntxtNodes
+```
+
+`wordIntxtEdges`
+```js
+wordIntxtEdges
+```
+
+`wordSankey.nodes`
+```js
+wordSankey ? wordSankey.nodes : null
+```
+`wordSankey.links`
+```js
+wordSankey ? wordSankey.links : null
 ```
 
 <hr>
@@ -782,107 +997,3 @@ sankeyData
 lookupIDTable
 ```
 
-
-
-```js
-const nodes = [];
-  
-for (let node in sankeyFilteredNodes) {
-  let nodeString = String(node)
-  nodes.push({
-    id: sankeyFilteredNodes[node].name,
-    author: sankeyFilteredNodes[node].author,
-    work: sankeyFilteredNodes[node].work
-  });
-}
-```
-
-```js
-const links = [];
-
- for (let i in sankeyFilteredEdges) {
-   let edge = sankeyFilteredEdges[i];
-
-   links.push({
-     source: edge.source,
-     target: edge.target,
-     value: edge.num_words
-   });
- }
-```
-
-```js
-// const chartNodes = [];
-// const chartLinks = [];
-// const chartData = {nodes: chartNodes, links: chartLinks}
-
-const sectionSankey = nodes.length > 0 && links.length > 0 ? SankeyChart({nodes: nodes, links: links, lookupIDTable: lookupIDTable},
-{
-    nodeGroup: d => d.author,
-    nodeLabel: d => {
-        //chartNodes.push(d);
-                    let nodesFilter = nodes.filter(node => node.id === d.id);
-                    let nodeAuthorID;
-                    for (let n in nodesFilter) {nodeAuthorID = nodesFilter[n].author}
-                    return lookupIDTable.get(nodeAuthorID);
-                    },
-    nodeTitle: d => `${lookupIDTable.get(d.id).work}\n${lookupIDTable.get(d.id).section}`,
-    nodeSort: (a,b) => {
-        let nodeA = sankeyData.nodes.find(work => work.name === a.id);
-        let nodeB = sankeyData.nodes.find(work => work.name === b.id);
-        // Sort so that authors go A-Z left-to-right (= bottom-to-top)
-        let authorComp = d3.descending(lookupIDTable.get(nodeA.author), lookupIDTable.get(nodeB.author));
-        if (authorComp !== 0) return authorComp; // if the authors aren't the same, don't go any further in sorting
-        // Within authors, sort so that all work sections are in order by work
-        // eventually may sort additionally by work section
-        return d3.descending(lookupIDTable.get(nodeA.work), lookupIDTable.get(nodeB.work));
-    },
-    align: "center",
-    colors: authorColors,
-    linkColor: "source",
-    linkTitle: d => {
-        //chartLinks.push(d);
-        let sourceNode = d.source.id;
-        let targetNode = d.target.id;
-        let linkSet = sankeyData.edges.filter(l => l.source === sourceNode && l.target === targetNode);
-        // let nodesFilterSource = nodes.filter(n => n.id === d.source.id);
-        // let sourceWordIDs = [];
-        let sourceWordIDs = [];
-        let targetWordIDs = [];
-        for (let i in linkSet) {
-            linkSet[i].source_words.map(w => sourceWordIDs.push(w));
-            linkSet[i].target_words.map(w => targetWordIDs.push(w));
-        }
-
-        sourceWordIDs = [...new Set(sourceWordIDs)];
-        targetWordIDs = [...new Set(targetWordIDs)];
-
-        let sourceWords = [];
-        let targetWords = [];
-
-        for (let i in sourceWordIDs) {sourceWords.push(lookupIDTable.get(sourceWordIDs[i]));}
-        sourceWords.sort((a,b) => {
-            if (a.lineNum < b.lineNum) {
-                return -1
-            } else if (a.lineNum > b.lineNum) {
-                return 1
-            } else {return 0}
-        })
-        for (let i in sourceWords) {sourceWords[i] = `${sourceWords[i].word} (line ${sourceWords[i].lineNum})`}
-        
-        for (let i in targetWordIDs) {targetWords.push(lookupIDTable.get(targetWordIDs[i]));}
-        targetWords.sort((a,b) => {
-            if (a.lineNum < b.lineNum) {
-                return -1
-            } else if (a.lineNum > b.lineNum) {
-                return 1
-            } else {return 0}
-        })
-        for (let i in targetWords) {targetWords[i] = `${targetWords[i].word} (line ${targetWords[i].lineNum})`}
-
-        return `${lookupIDTable.get(sourceNode).work}, ${lookupIDTable.get(sourceNode).section}: ${sourceWords.join(', ')}\n${lookupIDTable.get(targetNode).work}, ${lookupIDTable.get(targetNode).section}: ${targetWords.join(', ')}`;
-    }
-}) :
-null
-
-```

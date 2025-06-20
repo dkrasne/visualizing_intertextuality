@@ -10,7 +10,10 @@ function createLookupIDTable(nodegoatTables) {
         let key = item.obj_id;
         let word = item.word;
         let line = item.line_num;
-        let def = {'word': word, 'lineNum': line};
+        let workSegID = item.work_segment_id;
+        let workID = nodegoatTables.work_seg_table.filter(workSeg => workSeg.obj_id === workSegID)[0].work_id;
+        let authorID = nodegoatTables.work_table.filter(work => work.obj_id === workID)[0].author_id;
+        let def = {'word': word, 'lineNum': line, 'workSegID': workSegID, 'workID': workID, 'authorID': authorID};
         lookupIDTable.set(key, def);
     }
 

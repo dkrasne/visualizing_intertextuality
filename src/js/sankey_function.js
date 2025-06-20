@@ -46,7 +46,9 @@ function SankeyChart(
     marginTop = 5, // top margin, in pixels
     marginRight = 1, // right margin, in pixels
     marginBottom = 5, // bottom margin, in pixels
-    marginLeft = 1 // left margin, in pixels
+    marginLeft = 1, // left margin, in pixels
+    sankeyType = "passage", // passage or word
+    rotateLabel = false, // should the node label be parallel to the node?
   } = {}
 ) {
   // Convert nodeAlign from a name to a function (since d3-sankey is not part of core d3).
@@ -226,7 +228,6 @@ linkPathGPath.each(function(d,i) {
         })
 
 const svgSelect = d3.select(svg);
-console.log(svgSelect.parentNode);
 
 //    linkPathG.call(Lt ? (path) => path.append("rect").attr("width","10").attr("height","10").attr("stroke","black") : () => {});
 
@@ -248,7 +249,7 @@ console.log(svgSelect.parentNode);
 
 // Add text label to node
 
-  if (Tl)
+  if (Tl && sankeyType === "passage")
 
 {
  
@@ -291,7 +292,77 @@ node.append("text")
 
 }
 
+else if (Tl && sankeyType === "word") {
+  node.selectAll("text.node_label").remove();
+    let wordList = [];
+  node.each((d,i) => {
+    let word = Tl[i];
+    wordList.push(word);
+  })
+  node
+    .append("text")
+    .attr("font-family", "sans-serif")
+    .attr("font-size", 10)
+    .attr("fill", "black")
+    .attr("stroke","none")
+    // .attr("x", (d) => (d.x0 < width / 2 ? d.x1 + nodeLabelPadding : d.x0 - nodeLabelPadding))
+    // .attr("y", (d) => (d.y1 + d.y0) / 2)
+    // .attr("dy", "0.35em")
+    // .attr("text-anchor", (d) => (d.x0 < width / 2 ? "start" : "end"))
+    .each(function(d,i) {
+      d3.select(this)
+      .append("tspan")
+        .text(wordList[i]);
+    })
+    .each(function(d) {
+      const label = d3.select(this);
+      const centerX = (d.x0 + d.x1) / 2;
+      const centerY = (d.y0 + d.y1) / 2;
+
+      if (rotateLabel) {
+        label
+          .attr("transform", `rotate(-90, ${centerX}, ${centerY})`)
+          .attr("x", centerX)
+          .attr("y", centerY)
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "middle")
+          .attr("fill", "white")
+          ;
+        
+      } else {
+        const x = d.x0 < width / 2 ? d.x1 + nodeLabelPadding : d.x0 - nodeLabelPadding;
+        const y = centerY;
+
+        label
+          .attr("x", x)
+          .attr("y", y)
+          .attr("dy", "0.35em")
+          .attr("text-anchor", d.x0 < width / 2 ? "start" : "end");
+      }
+    })
+  ;
+}
+
 // add pop-up tooltips to nodes
+
+// const tooltipNodes = svg
+//   .append("g")
+//     .attr("class", "tooltip")
+//     .attr("transform", "rotate(-90,0,0)");
+
+//   tooltipNodes
+//     .append("rect")
+//       .attr("height", "50")
+//       .attr("width", "140")
+//       .attr("stroke","black")
+//       .attr("fill","white")
+//       .attr("filter","drop-shadow(0 3px 4px rgba(0,0,0,.5))");
+  
+//   const tooltipNodesText = tooltipNodes.append("text");
+
+// const updateTooltipText = (data) => {
+
+// }
 
     if (Tt) {
 
@@ -312,7 +383,7 @@ node.append("text")
 
     nodeLabelG.append("rect")
         .attr("height","50")
-        .attr("width","130")
+        .attr("width","140")
         .attr("stroke","black")
         .attr("fill","none")
         .attr("filter","drop-shadow(0 3px 4px rgba(0,0,0,.5))")
@@ -327,6 +398,7 @@ node.append("text")
             .attr("stroke","none")
             .attr("fill","black")
 
+    if (sankeyType === "passage") {
         nodeLabelText.append("tspan")
             .attr("dy","1em")
             .text((d,i) => {
@@ -339,12 +411,35 @@ node.append("text")
             .attr("font-style","italic")
             .text((d,i) => {
                 let workID = origNodes[i].work;
-                return lookupIDTable.get(workID);})
+                return lookupIDTable.get(workID);});
         nodeLabelText.append("tspan")
             .attr("x","5")
             .attr("dy","1em")
             .text((d,i) => Tt[i].split("\n")[1])
-            ; 
+            ; }
+    else if (sankeyType === "word") {
+        nodeLabelText.append("tspan")
+          .attr("dy", "1em")
+          .text((d,i) => lookupIDTable.get(lookupIDTable.get(origNodes[i].id).authorID));
+        nodeLabelText.append("tspan")
+          .attr("x", "5")
+          .attr("dy", "1em")
+          .attr("font-style", "italic")
+          .text((d,i) => lookupIDTable.get(lookupIDTable.get(origNodes[i].id).workID));
+        
+        nodeLabelText.append("tspan")
+          .attr("x", "5")
+          .attr("dy", "1em")
+          .text((d,i) => {
+            if (lookupIDTable.get(lookupIDTable.get(origNodes[i].id).workSegID).section !== ''){
+            return lookupIDTable.get(lookupIDTable.get(origNodes[i].id).workSegID).section}
+          })
+        
+        nodeLabelText.append("tspan")
+          .text((d,i) => ` (line ${lookupIDTable.get(origNodes[i].id).lineNum})`)
+
+          
+    }
 
 
     nodeRect
@@ -382,6 +477,11 @@ svg.selectAll(".node")
         d3.select(this).raise();
     })
 
+
+
+  function getTextSize(selection) {
+    selection.each(function(d) { d.bbox = this.getBBox(); console.log(d.bbox);})
+  }
 
   function intern(value) {
     return value !== null && typeof value === "object" ? value.valueOf() : value;
