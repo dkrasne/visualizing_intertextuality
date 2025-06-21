@@ -8,7 +8,7 @@ The following diagram shows the connections between all intertexts currently in 
 
 Each rectangular node represents one section of a work (a `work segment`, as defined on <a href="./about#database-design">the About page</a>). A flow path linking two nodes represents words that have been identified as intertexts between the source text (higher up) and the target text (lower down); its width shows (in relative terms) *how many* words are borrowed.
 
-Mouse over a node to see the work and section that it represents. Mouse over a linking flow path to see the words it represents. (Currently, the latter may not work on mobile phones.)
+Mouse over a node to see the work and section that it represents. Mouse over a linking flow path to see the words it represents.
 
 <div style="font-size:smaller;">
 
@@ -20,6 +20,13 @@ Eventually, subsets of this diagram will appear on the main page for the current
 
 </div>
 <hr>
+
+<div>
+
+```js
+display(chart)
+```
+</div>
 
 ```js
 const nodes = [];
@@ -43,7 +50,9 @@ const links = [];
    links.push({
      source: edge.source,
      target: edge.target,
-     value: edge.num_words
+     value: edge.num_words,
+	 source_words: edge.source_words,
+	 target_words: edge.target_words
    });
  }
 ```
@@ -78,52 +87,51 @@ const chart = SankeyChart({nodes: nodes, links: links, lookupIDTable: lookupIDTa
     //colors: d3.schemeSpectral[11], // should be able to create a bigger range by bringing colorcet colors in via Python
     colors: authorColors,
     linkColor: "source",
-    linkTitle: d => {
-        //chartLinks.push(d);
-        let sourceNode = d.source.id;
-        let targetNode = d.target.id;
-        let linkSet = sankeyData.edges.filter(l => l.source === sourceNode && l.target === targetNode);
-        // let nodesFilterSource = nodes.filter(n => n.id === d.source.id);
-        // let sourceWordIDs = [];
-        let sourceWordIDs = [];
-        let targetWordIDs = [];
-        for (let i in linkSet) {
-            linkSet[i].source_words.map(w => sourceWordIDs.push(w));
-            linkSet[i].target_words.map(w => targetWordIDs.push(w));
-        }
+    // linkTitle: d => {
+    //     //chartLinks.push(d);
+    //     let sourceNode = d.source.id;
+    //     let targetNode = d.target.id;
+    //     let linkSet = sankeyData.edges.filter(l => l.source === sourceNode && l.target === targetNode);
+    //     // let nodesFilterSource = nodes.filter(n => n.id === d.source.id);
+    //     // let sourceWordIDs = [];
+    //     let sourceWordIDs = [];
+    //     let targetWordIDs = [];
+    //     for (let i in linkSet) {
+    //         linkSet[i].source_words.map(w => sourceWordIDs.push(w));
+    //         linkSet[i].target_words.map(w => targetWordIDs.push(w));
+    //     }
 
-        sourceWordIDs = [...new Set(sourceWordIDs)];
-        targetWordIDs = [...new Set(targetWordIDs)];
+    //     sourceWordIDs = [...new Set(sourceWordIDs)];
+    //     targetWordIDs = [...new Set(targetWordIDs)];
 
-        let sourceWords = [];
-        let targetWords = [];
+    //     let sourceWords = [];
+    //     let targetWords = [];
 
-        for (let i in sourceWordIDs) {sourceWords.push(lookupIDTable.get(sourceWordIDs[i]));}
-        sourceWords.sort((a,b) => {
-            if (a.lineNum < b.lineNum) {
-                return -1
-            } else if (a.lineNum > b.lineNum) {
-                return 1
-            } else {return 0}
-        })
-        for (let i in sourceWords) {sourceWords[i] = `${sourceWords[i].word} (line ${sourceWords[i].lineNum})`}
+    //     for (let i in sourceWordIDs) {sourceWords.push(lookupIDTable.get(sourceWordIDs[i]));}
+    //     sourceWords.sort((a,b) => {
+    //         if (a.lineNum < b.lineNum) {
+    //             return -1
+    //         } else if (a.lineNum > b.lineNum) {
+    //             return 1
+    //         } else {return 0}
+    //     })
+    //     for (let i in sourceWords) {sourceWords[i] = `${sourceWords[i].word} (line ${sourceWords[i].lineNum})`}
         
-        for (let i in targetWordIDs) {targetWords.push(lookupIDTable.get(targetWordIDs[i]));}
-        targetWords.sort((a,b) => {
-            if (a.lineNum < b.lineNum) {
-                return -1
-            } else if (a.lineNum > b.lineNum) {
-                return 1
-            } else {return 0}
-        })
-        for (let i in targetWords) {targetWords[i] = `${targetWords[i].word} (line ${targetWords[i].lineNum})`}
+    //     for (let i in targetWordIDs) {targetWords.push(lookupIDTable.get(targetWordIDs[i]));}
+    //     targetWords.sort((a,b) => {
+    //         if (a.lineNum < b.lineNum) {
+    //             return -1
+    //         } else if (a.lineNum > b.lineNum) {
+    //             return 1
+    //         } else {return 0}
+    //     })
+    //     for (let i in targetWords) {targetWords[i] = `${targetWords[i].word} (line ${targetWords[i].lineNum})`}
 
-        return `${lookupIDTable.get(sourceNode).work}, ${lookupIDTable.get(sourceNode).section}: ${sourceWords.join(', ')}\n${lookupIDTable.get(targetNode).work}, ${lookupIDTable.get(targetNode).section}: ${targetWords.join(', ')}`;
-    }
+    //     return `${lookupIDTable.get(sourceNode).work}, ${lookupIDTable.get(sourceNode).section}: ${sourceWords.join(', ')}\n${lookupIDTable.get(targetNode).work}, ${lookupIDTable.get(targetNode).section}: ${targetWords.join(', ')}`;
+    // }
+    linkTitle: null
 })
 
-
-view(chart)
 ```
 
 <hr>

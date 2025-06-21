@@ -80,8 +80,6 @@ html`
 		<p style="font-size:smaller;">A <b>missing</b> word (represented as a gap) is not currently in the database. A word shown with <b>zero total intertexts</b> is either in the database only as the ancestor of another word, or has not yet been assigned to any intertextual relationships.</p>
 
 		<p style="font-size:smaller;">For a fuller explanation of the data and its representation, see <a href="./about">the About page</a>.</p>
-
-		<!-- <p style="max-width:none; font-size:smaller;"><i>More coming soon!</i></p> -->
 	</div>
 </div>
 
@@ -98,7 +96,7 @@ html`
 		${!plotCurrSelect ? display(html`<p style="border: 2px solid black; padding: 1em;"><i>Mouse over a &ldquo;word&rdquo; block in the passage display in order to see the lineage for that particular word. (Click on the word to freeze the display.)</i></p>`) :
 		display(html`
 			<h4 style="max-width:none;">The intertextual lineage of <i>${plotCurrSelect.word}</i> (line ${plotCurrSelect.wordObj.line_num})</h4>
-			<p style="font-size:smaller;">This visualization shows both the intertextual ancestry and descent of the selected word. Mouse over a rectangular node to see what text a given word occurs in; mouse over a link between two words to see what type(s) of allusive referentiality connect those two words. (The latter currently will not work on mobile devices.)</p>
+			<p style="font-size:smaller;">This visualization shows both the intertextual ancestry and descent of the selected word. Mouse over a rectangular node to see what text a given word occurs in; mouse over a link between two words to see what type(s) of allusive referentiality connect those two words.</p>
 				${wordSankey ? display(wordSankey) : display(html`<p><b><i>The selected word has no intertexts in the database.</i></b></p>`)}
 			<p style="font-size:smaller; font-weight: bold;">N.B. This chart is still under development.</p>
 		`)
@@ -780,7 +778,9 @@ const links = [];
    links.push({
      source: edge.source,
      target: edge.target,
-     value: edge.num_words
+     value: edge.num_words,
+	 source_words: edge.source_words,
+	 target_words: edge.target_words
    });
  }
 ```
@@ -812,45 +812,7 @@ const sectionSankey = nodes.length > 0 && links.length > 0 ?
 			align: "center",
 			colors: authorColors,
 			linkColor: "source",
-			linkTitle: d => {
-				let sourceNode = d.source.id;
-				let targetNode = d.target.id;
-				let linkSet = sankeyData.edges.filter(l => l.source === sourceNode && l.target === targetNode);
-				let sourceWordIDs = [];
-				let targetWordIDs = [];
-				for (let i in linkSet) {
-					linkSet[i].source_words.map(w => sourceWordIDs.push(w));
-					linkSet[i].target_words.map(w => targetWordIDs.push(w));
-				}
-
-				sourceWordIDs = [...new Set(sourceWordIDs)];
-				targetWordIDs = [...new Set(targetWordIDs)];
-
-				let sourceWords = [];
-				let targetWords = [];
-
-				for (let i in sourceWordIDs) {sourceWords.push(lookupIDTable.get(sourceWordIDs[i]));}
-				sourceWords.sort((a,b) => {
-					if (a.lineNum < b.lineNum) {
-						return -1
-					} else if (a.lineNum > b.lineNum) {
-						return 1
-					} else {return 0}
-				})
-				for (let i in sourceWords) {sourceWords[i] = `${sourceWords[i].word} (line ${sourceWords[i].lineNum})`}
-				
-				for (let i in targetWordIDs) {targetWords.push(lookupIDTable.get(targetWordIDs[i]));}
-				targetWords.sort((a,b) => {
-					if (a.lineNum < b.lineNum) {
-						return -1
-					} else if (a.lineNum > b.lineNum) {
-						return 1
-					} else {return 0}
-				})
-				for (let i in targetWords) {targetWords[i] = `${targetWords[i].word} (line ${targetWords[i].lineNum})`}
-
-				return `${lookupIDTable.get(sourceNode).work}, ${lookupIDTable.get(sourceNode).section}: ${sourceWords.join(', ')}\n${lookupIDTable.get(targetNode).work}, ${lookupIDTable.get(targetNode).section}: ${targetWords.join(', ')}`;
-			}
+			linkTitle: null
 		}) :
 	null
 
@@ -868,14 +830,7 @@ const wordSankey = wordIntxtNodes.length > 0 && wordIntxtEdges.length > 0 ?
 			rotateLabel: true,
 			align: "center",
 			nodeTitle: d => "",
-			linkTitle: d => {
-				let matchTypeIDs = wordIntxtEdges.filter(edge => edge.source === d.source.id && edge.target === d.target.id)[0].matchTypes;
-				let matchTypes = [];
-				for (let i in matchTypeIDs) {
-					matchTypes.push(nodegoatTables.match_type_class_table.filter(mt => mt.match_type_id === matchTypeIDs[i])[0].match_type);
-				}
-				return `\u2022 ${matchTypes.join('\n\u2022 ')}`;
-			},
+			linkTitle: null,
 			nodeSort: (a, b) => {
 				let nodeA = lookupIDTable.get(a.id);
 				let nodeB = lookupIDTable.get(b.id);

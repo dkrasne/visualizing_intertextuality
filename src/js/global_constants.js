@@ -51,6 +51,13 @@ function createLookupIDTable(nodegoatTables) {
         lookupIDTable.set(key, def);
     }
 
+    for (let i in nodegoatTables.match_type_class_table) {
+        let item = nodegoatTables.match_type_class_table[i];
+        let key = item.match_type_id;
+        let def = item.match_type;
+        lookupIDTable.set(key, def);
+    }
+
     return lookupIDTable;
 }
 

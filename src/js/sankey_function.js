@@ -116,7 +116,7 @@ const svg_outer = d3
     .attr("width", width)
     .attr("height", width)
     .attr("viewBox", [0, 0, width, width])
-    .attr("style", "max-width: 100%; height: auto; height: intrinsic")
+    .attr("style", "max-width: 100%; height: auto; height: intrinsic; overflow: visible")
 //    .attr("transform", "rotate(90,0,0) translate("+marginTop+",0)")
 //    .attr("style","border: 1px solid black")
     ;
@@ -246,6 +246,145 @@ const svgSelect = d3.select(svg);
 //       .attr("text-anchor", (d) => (d.x0 < width / 2 ? "start" : "end"))
 //       .text(({index: i}) => Tl[i])
 //       ;
+
+
+
+// add pop-up tooltips to links
+
+const tooltipLinks = svg
+  .append("g")
+    .attr("class", "tooltip")
+    .attr("transform", "rotate(-90,0,0) translate(50,-10)")
+    .attr("opacity", "0");
+
+const tooltipLinksBox = tooltipLinks
+    .append("rect")
+//      .attr("height", "50")
+//      .attr("width", "140")
+      .attr("stroke","black")
+      .attr("fill","white")
+      .attr("filter","drop-shadow(0 3px 4px rgba(0,0,0,.5))");
+  
+
+  linkPathGPath
+        .on("mouseenter", (e,d) => {
+            const tooltipLinksText = tooltipLinks
+              .append("text")
+                .attr("class", "tooltip-link-text")
+                .attr("x","5")
+                .attr("y",".5em")
+                .attr("font-size","12")
+                .attr("font-family","sans-serif")
+                .attr("font-weight","normal")
+                .attr("stroke","none")
+                .attr("fill","black");
+            
+            //d3.select(".tooltip").raise();
+
+            // set x and y based on location of where mouse enters the link
+            let x = e.layerY;
+            let y = e.layerX;
+            tooltipLinks
+              .attr("transform", `rotate(-90,0,0) translate(${(x-10)*-1},${y+10})`)
+              .attr("opacity", "1")
+              ;
+
+            if (sankeyType === "word") {
+              let matchTypeIDs = origLinks.filter(edge => edge.source === d.source.id && edge.target === d.target.id)[0].matchTypes;
+              let matchTypes = [];
+              for (let i in matchTypeIDs) {
+                let mt = lookupIDTable.get(matchTypeIDs[i]);
+                matchTypes.push(mt);
+                let textrow = tooltipLinksText
+                  .append("tspan")
+                    .attr("x", "5")
+                    .attr("dy", "1em")
+                    .attr("class", "tooltip-link-text-line");
+                textrow.text(`\u2022 ${mt}`);
+                }
+              }
+
+            if (sankeyType === "passage") {
+              let sourceNode = d.source.id;
+              let targetNode = d.target.id;
+              let linkSet = origLinks.filter(l => l.source === sourceNode && l.target === targetNode);
+              console.log(linkSet);
+              let sourceWordIDs = [];
+              let targetWordIDs = [];
+              for (let i in linkSet) {
+                linkSet[i].source_words.map(w => sourceWordIDs.push(w));
+                linkSet[i].target_words.map(w => targetWordIDs.push(w));
+              }
+
+              sourceWordIDs = [...new Set(sourceWordIDs)];
+              targetWordIDs = [...new Set(targetWordIDs)];
+
+              let sourceWords = [];
+              let targetWords = [];
+
+              for (let i in sourceWordIDs) {sourceWords.push(lookupIDTable.get(sourceWordIDs[i]));}
+              sourceWords.sort((a,b) => {
+                if (a.lineNum < b.lineNum) {
+                  return -1
+                } else if (a.lineNum > b.lineNum) {
+                  return 1
+                } else {return 0}
+              })
+
+              for (let i in sourceWords) {sourceWords[i] = `${sourceWords[i].word} (line ${sourceWords[i].lineNum})`}
+              
+              for (let i in targetWordIDs) {targetWords.push(lookupIDTable.get(targetWordIDs[i]));}
+
+              targetWords.sort((a,b) => {
+                if (a.lineNum < b.lineNum) {
+                  return -1
+                } else if (a.lineNum > b.lineNum) {
+                  return 1
+                } else {return 0}
+              })
+              
+              for (let i in targetWords) {targetWords[i] = `${targetWords[i].word} (line ${targetWords[i].lineNum})`}
+
+              let textLines = [];
+              textLines.push(`${lookupIDTable.get(sourceNode).work}, ${lookupIDTable.get(sourceNode).section}: ${sourceWords.join(', ')}`)
+              textLines.push(`${lookupIDTable.get(targetNode).work}, ${lookupIDTable.get(targetNode).section}: ${targetWords.join(', ')}`)
+
+              for (let i in textLines) {
+                let textrow = tooltipLinksText
+                  .append("tspan")
+                    .attr("x", "5")
+                    .attr("dy", "1em")
+                    .attr("class", "tooltip-link-text-line");
+                textrow.text(textLines[i]);
+              }
+
+            }
+
+
+
+                let linkText = d3.selectAll(".tooltip-link-text");
+                linkText.each(function() {
+                  let width = this.getBBox().width;
+                  let height = this.getBBox().height;
+//                  console.log(this.getBBox())
+                tooltipLinksBox.attr("width", width + 15).attr("height", height+15);
+                })
+
+            })
+        .on("mouseleave", (e,d) => {
+            d3.selectAll(".tooltip-link-text").remove();
+            tooltipLinks
+              .attr("transform", "rotate(-90,0,0) translate(50,-10)")
+              .attr("opacity", "0")
+              ;
+        })
+
+const updateTooltipLinksText = (data) => {
+
+}
+
+
+
 
 // Add text label to node
 
@@ -485,15 +624,36 @@ if (sankeyType === "word") {
   ;
 }
 
-  // function getTextSize(selection) {
-  //   selection.each(function(d) { d.bbox = this.getBBox(); console.log(d.bbox);})
-  // }
 
+// In order to not have tool-tips behind an adjacent SVG (thanks to ChatGPT!)
+  const container = document.createElement("div");
+  container.style.position = "relative";
+  container.style.display = "inline-block";
+  container.style.zIndex = 0;
+
+  container.appendChild(svg_outer.node());
+
+  svg_outer.node().addEventListener("mouseenter", () => {
+    container.style.zIndex = 1000;
+  });
+  svg_outer.node().addEventListener("mouseleave", () => {
+    container.style.zIndex = 0;
+  });
+
+// from the original function
   function intern(value) {
     return value !== null && typeof value === "object" ? value.valueOf() : value;
   }
 
-  return Object.assign(svg_outer.node(), {scales: {color}, nodes: nodes, links: links});
+// modified again to accommodate tool-tip overlaps
+return Object.assign(container, {
+    svg: svg_outer.node(),
+    scales: { color },
+    nodes,
+    links
+  });
+
+  //  return Object.assign(svg_outer.node(), {scales: {color}, nodes: nodes, links: links});
 }
 
 
