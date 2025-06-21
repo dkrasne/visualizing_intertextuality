@@ -293,8 +293,7 @@ node.append("text")
 }
 
 else if (Tl && sankeyType === "word") {
-  node.selectAll("text.node_label").remove();
-    let wordList = [];
+  let wordList = [];
   node.each((d,i) => {
     let word = Tl[i];
     wordList.push(word);
@@ -305,10 +304,6 @@ else if (Tl && sankeyType === "word") {
     .attr("font-size", 10)
     .attr("fill", "black")
     .attr("stroke","none")
-    // .attr("x", (d) => (d.x0 < width / 2 ? d.x1 + nodeLabelPadding : d.x0 - nodeLabelPadding))
-    // .attr("y", (d) => (d.y1 + d.y0) / 2)
-    // .attr("dy", "0.35em")
-    // .attr("text-anchor", (d) => (d.x0 < width / 2 ? "start" : "end"))
     .each(function(d,i) {
       d3.select(this)
       .append("tspan")
@@ -417,26 +412,27 @@ else if (Tl && sankeyType === "word") {
             .attr("dy","1em")
             .text((d,i) => Tt[i].split("\n")[1])
             ; }
+
     else if (sankeyType === "word") {
         nodeLabelText.append("tspan")
           .attr("dy", "1em")
-          .text((d,i) => lookupIDTable.get(lookupIDTable.get(origNodes[i].id).authorID));
+          .text(d => lookupIDTable.get(lookupIDTable.get(d.id).authorID));
         nodeLabelText.append("tspan")
           .attr("x", "5")
           .attr("dy", "1em")
           .attr("font-style", "italic")
-          .text((d,i) => lookupIDTable.get(lookupIDTable.get(origNodes[i].id).workID));
+          .text(d => lookupIDTable.get(lookupIDTable.get(d.id).workID));
         
         nodeLabelText.append("tspan")
           .attr("x", "5")
           .attr("dy", "1em")
-          .text((d,i) => {
-            if (lookupIDTable.get(lookupIDTable.get(origNodes[i].id).workSegID).section !== ''){
-            return lookupIDTable.get(lookupIDTable.get(origNodes[i].id).workSegID).section}
+          .text(d => {
+            if (lookupIDTable.get(lookupIDTable.get(d.id).workSegID).section !== ''){
+            return lookupIDTable.get(lookupIDTable.get(d.id).workSegID).section}
           })
         
         nodeLabelText.append("tspan")
-          .text((d,i) => ` (line ${lookupIDTable.get(origNodes[i].id).lineNum})`)
+          .text(d => ` (line ${lookupIDTable.get(d.id).lineNum})`)
 
           
     }
@@ -478,10 +474,20 @@ svg.selectAll(".node")
     })
 
 
+if (sankeyType === "word") {
+  node
+    .attr("stroke", (d,i) => {
+     if (origNodes[i].color) {return origNodes[i].color;}
+    })
+    .attr("stroke-width", (d,i) => {
+     if (origNodes[i].color) {return 3;}
+    })
+  ;
+}
 
-  function getTextSize(selection) {
-    selection.each(function(d) { d.bbox = this.getBBox(); console.log(d.bbox);})
-  }
+  // function getTextSize(selection) {
+  //   selection.each(function(d) { d.bbox = this.getBBox(); console.log(d.bbox);})
+  // }
 
   function intern(value) {
     return value !== null && typeof value === "object" ? value.valueOf() : value;

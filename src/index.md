@@ -73,11 +73,15 @@ html`
 
 	<div>
 		<h4>How to use this chart</h4>
-		<p style="max-width:none; font-size:smaller;">Click on a cell to freeze the popup information. <b>Direct intertexts</b> are those where a scholar has suggested a direct link between the present word and a word in an earlier text. <b>Indirect intertexts</b> are intertexts at further remove (i.e., where a direct or indirect intertext refers to another, still earlier, passage). Currently, the project does not include intratexts (allusions to other passages within the same text).</p>
+		<p style="font-size:smaller;">Click on a cell to freeze the popup information. <b>Direct intertexts</b> are those where a scholar has suggested a direct link between the present word and a word in an earlier text. <b>Indirect intertexts</b> are intertexts at further remove (i.e., where a direct or indirect intertext refers to another, still earlier, passage). Currently, the project does not include intratexts (allusions to other passages within the same text).</p>
 
-		<p style="max-width:none; font-size:smaller;"><b>Two caveats:</b> absence of a word does not necessarily mean that there are no intertexts, just that they are not yet in the database; and lines appear in numeric order, even if editors agree that they should be transposed.</p>
+		<p style="font-size:smaller;"><b>Two caveats:</b> absence of a word does not necessarily mean that there are no intertexts, just that they are not yet in the database; and lines appear in numeric order, even if editors agree that they should be transposed.</p>
 
-		<p style="max-width:none; font-size:smaller;"><i>More coming soon!</i></p>
+		<p style="font-size:smaller;">A <b>missing</b> word (represented as a gap) is not currently in the database. A word shown with <b>zero total intertexts</b> is either in the database only as the ancestor of another word, or has not yet been assigned to any intertextual relationships.</p>
+
+		<p style="font-size:smaller;">For a fuller explanation of the data and its representation, see <a href="./about">the About page</a>.</p>
+
+		<!-- <p style="max-width:none; font-size:smaller;"><i>More coming soon!</i></p> -->
 	</div>
 </div>
 
@@ -85,17 +89,17 @@ html`
 	<div>
 		${
 			display(html`
-			<h4>The intertextual ancestry of the current passage</h4>
+			<h4>The intertextual ancestry of the selected passage</h4>
 			<p style="font-size:smaller;">A full explanation of how to read and interact with the chart below (and its current limitations) can be found on <a href="./sankey">the Full Intertext Diagram page</a>.</p>
 			${display(sectionSankey)}`)
 		}
 	</div>
 	<div>
-		${!plotCurrSelect ? display(html`<p><i>Mouse over a &ldquo;word&rdquo; block in the passage display in order to see the lineage for that particular word. (Click on the word to freeze the display.)</i></p>`) :
+		${!plotCurrSelect ? display(html`<p style="border: 2px solid black; padding: 1em;"><i>Mouse over a &ldquo;word&rdquo; block in the passage display in order to see the lineage for that particular word. (Click on the word to freeze the display.)</i></p>`) :
 		display(html`
 			<h4 style="max-width:none;">The intertextual lineage of <i>${plotCurrSelect.word}</i> (line ${plotCurrSelect.wordObj.line_num})</h4>
 			<p style="font-size:smaller;">This visualization shows both the intertextual ancestry and descent of the selected word. Mouse over a rectangular node to see what text a given word occurs in; mouse over a link between two words to see what type(s) of allusive referentiality connect those two words. (The latter currently will not work on mobile devices.)</p>
-				${plotCurrSelect ? display(wordSankey) : null}
+				${wordSankey ? display(wordSankey) : display(html`<p><b><i>The selected word has no intertexts in the database.</i></b></p>`)}
 			<p style="font-size:smaller; font-weight: bold;">N.B. This chart is still under development.</p>
 		`)
 		}
@@ -740,6 +744,11 @@ let wordInstanceTable = JSON.parse(JSON.stringify(nodegoatTables.word_instance_t
 const wordIntxtNodes = wordIntxtNodeIDs.map(id => wordInstanceTable.filter(word => word.obj_id === id)[0]);
 wordIntxtNodes.forEach(obj => obj.id = obj.obj_id);
 wordIntxtNodes.forEach(obj => delete obj.obj_id);
+for (let i in wordIntxtNodes) {
+	if (wordIntxtNodes[i].id === plotCurrSelect.wordObj.obj_id) {
+		wordIntxtNodes[i].color = "#0088ff";
+	}
+}
 
 const wordIntxtEdges = [];
 
@@ -793,7 +802,7 @@ const sectionSankey = nodes.length > 0 && links.length > 0 ?
 			nodeSort: (a,b) => {
 				let nodeA = sankeyData.nodes.find(work => work.name === a.id);
 				let nodeB = sankeyData.nodes.find(work => work.name === b.id);
-				// Sort so that authors go A-Z left-to-right (= bottom-to-top)
+				// Sort so that authors go A-Z left-to-right (= bottom-to-top); d3.descending returns -1, 0, or 1
 				let authorComp = d3.descending(lookupIDTable.get(nodeA.author), lookupIDTable.get(nodeB.author));
 				if (authorComp !== 0) return authorComp; // if the authors aren't the same, don't go any further in sorting
 				// Within authors, sort so that all work sections are in order by work
@@ -866,11 +875,27 @@ const wordSankey = wordIntxtNodes.length > 0 && wordIntxtEdges.length > 0 ?
 					matchTypes.push(nodegoatTables.match_type_class_table.filter(mt => mt.match_type_id === matchTypeIDs[i])[0].match_type);
 				}
 				return `\u2022 ${matchTypes.join('\n\u2022 ')}`;
+			},
+			nodeSort: (a, b) => {
+				let nodeA = lookupIDTable.get(a.id);
+				let nodeB = lookupIDTable.get(b.id);
+				let authorComp = d3.descending(lookupIDTable.get(nodeA.authorID),lookupIDTable.get(nodeB.authorID));
+				let workComp = d3.descending(lookupIDTable.get(nodeA.workID),lookupIDTable.get(nodeB.workID));
+				let workSegComp = d3.descending(lookupIDTable.get(nodeA.workSegID),lookupIDTable.get(nodeB.workSegID));
+				let lineComp = d3.descending(nodeA.lineNum,nodeB.lineNum);
+				if (authorComp !== 0) {return authorComp;}
+				else if (workComp !== 0) {return workComp;}
+				else if (workSegComp !== 0) {return workSegComp;}
+				else {return lineComp;}
 			}
+			// by author, then work, then work section, then line
 		}) :
 	null
 
 ```
+
+
+
 
 # Sandbox
 
