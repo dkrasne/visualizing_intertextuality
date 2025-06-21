@@ -49,6 +49,7 @@ function SankeyChart(
     marginLeft = 1, // left margin, in pixels
     sankeyType = "passage", // passage or word
     rotateLabel = false, // should the node label be parallel to the node?
+    nodeDrag = false, // should the nodes be repositionable?
   } = {}
 ) {
   // Convert nodeAlign from a name to a function (since d3-sankey is not part of core d3).
@@ -308,7 +309,6 @@ const tooltipLinksBox = tooltipLinks
               let sourceNode = d.source.id;
               let targetNode = d.target.id;
               let linkSet = origLinks.filter(l => l.source === sourceNode && l.target === targetNode);
-              console.log(linkSet);
               let sourceWordIDs = [];
               let targetWordIDs = [];
               for (let i in linkSet) {

@@ -83,7 +83,7 @@ There is currently no database of intertexts. Some benchmark datasets exist for 
 <figure>
 <a href="https://pratt.darcykrasne.com/Portfolio/viz_intxt/nodegoat_model_2025-6-15.png"><img src="./images/nodegoat_model_2025-6-15.png" style="max-width: 100%;" alt="A representation of a database, showing objects connected by lines"></a>
 <figcaption>
-The database model, as of 13 March 2025.
+The database model, as of 15 June 2025.
 </figcaption>
 </figure>
 
@@ -140,7 +140,7 @@ def table_to_df(table, cols_dict):
 
 It joins the disparate metrical data into a single dataframe and then returns it to a single restructured JSON object; and it converts each of the other dataframes to a JSON object, which are collectively stored in an array. These are all saved to files that are automatically committed to GitHub.
 
-In the next stage of the project, the same Python data loader also creates network nodes and edges from the data. (This is [currently in progress](./sankey) as a [Sankey diagram](https://en.wikipedia.org/wiki/Sankey_diagram); I chose this over a traditional network graph since the sequential nature of an intertextual network makes it well-suited to visualizing as a flow-path.) While part of the network creation is done automatically by the d3 Sankey module, the initial preparation of nodes and edges is performed in the data loader.
+The same Python data loader also creates network nodes and edges from the data in order to enable visualization of the intertexts as [Sankey diagrams](https://en.wikipedia.org/wiki/Sankey_diagram). (I chose these over traditional network graphs since the sequential nature of an intertextual network makes it well-suited to visualizing as a flow-path.) While part of the network creation is done automatically by the d3 Sankey module, the initial preparation of nodes and edges is performed in the data loader; further filtering, when necessary, is done on the fly based on the user's selections.
 
 <p><details>
 <summary>Click to view the two custom functions for this stage.</summary>
@@ -212,14 +212,11 @@ def prep_sankey(df):
         author = df[df.source_work_seg_id == work_seg].reset_index(drop=True).loc[0,"source_author_id"]
         work = df[df.source_work_seg_id == work_seg].reset_index(drop=True).loc[0,"source_work_id"]
         nodes.append({"name": work_seg, "author": author, "work": work})
-    # print(len(nodes))
     for work_seg in list(df.target_work_seg_id.unique()):
         if work_seg not in [item["name"] for item in nodes]:
             author = df[df.target_work_seg_id == work_seg].reset_index(drop=True).loc[0,"target_author_id"]
             work = df[df.target_work_seg_id == work_seg].reset_index(drop=True).loc[0,"target_work_id"]
             nodes.append({"name": work_seg, "author": author, "work": work})
-    # print(len(nodes))
-    # print(nodes)
     nodes_edges_dict["nodes"] = nodes
     def make_edge(id, df, grp=True):
         source = df.loc[0, "source_work_seg_id"]
@@ -246,7 +243,6 @@ def prep_sankey(df):
     for id in no_grp_ids:
         sub_df = no_grp_df.query(f"intxt_id == '{id}'").reset_index(drop=True)
         edges.append(make_edge(id, sub_df, grp=False))
-    # print(edges)
     nodes_edges_dict["edges"] = edges
     return nodes_edges_dict
 
@@ -423,89 +419,19 @@ const intertextsArr = intertextsArrComplete.filter(pos => pos.word); // only inc
 
 #### Visualization
 
-The basic motivation was to make the display resemble the layout of the poem, while not showing information that doesn't exist. The background color was chosen to enable visibility of the palest values while still enabling contrast with all shades on the scale, including for individuals with color vision deficiencies.
+The main visualization is intended to resemble the layout of the poem, for purposes of familiarity and visual analysis. It shows the density of intertexts that stand behind each word of the poem. While the accuracy of the display is naturally conditional on the contents of the database, it will ultimately allow users to ask questions such as "where in these lines are intertexts concentrated?" Instructions for reading the chart &mdash; including reminders of the data's fallability &mdash; are presented alongside.
 
-For the Sankey diagram, the standard horizontal layout was rotated both to accommodate the future lengthening of the network and to convey a sense of the &ldquo;descent&rdquo; or &ldquo;inheritance&rdquo; analogy between earlier and later texts. The colors (which distinguish between authors) are currently drawn from the default [Tableau10](https://d3js.org/d3-scale-chromatic/categorical#schemeTableau10), but since there will eventually be repetitions once more than ten authors are in the database, they are reinforced by the inclusion of the author&rsquo;s name. (The names are rotated sideways in order not to overrun the boundaries of smaller nodes; [this study on the readability of tilted text](http://www.dgp.toronto.edu/~ravin/papers/ecscw2005_textorientation.pdf) suggests that there is not a significant difference in the readibility of sideways text read top-to-bottom or bottom-to-top.) I have also added a custom tool-tip popup for the nodes (and will subsequently do so for the links), since the default Sankey module only uses the HTML &lt;title&gt;, which does not render on all touch-screen devices:
+Also displayed on the main page are two Sankey diagrams &mdash; one shown by default, as soon as a passage is selected, and one shown once the user selects a word in the &ldquo;poetry&rdquo; visualization. These both show the intertextual "family tree": one showing the texts that stand behind the selected passage, and the other showing the individual words in other poems that have intertextual connections with a single, selected word. The first of these is a filtered version of the diagram that can be viewed on the [Full Intertext Diagram](./sankey) page. All the Sankey diagrams have popups to provide the user with additional information.
 
-```js run=false
-if (Tt) {
-    const nodeLabelG = node
-        .append("g")
-        .attr("class","node_label_group")
-        .attr("transform", d => {
-            const labelTranslate = +`-${(d.y1 - d.y0)/2}`;
-            if (d.x0 < width / 2){
-            return `translate(${(d.x0) +  5}, ${d.y0}) rotate(-90,0,0) translate(${labelTranslate},${d.x1 - d.x0})`
-            }
-            return `translate(${(d.x0 - 55)}, ${d.y0})  rotate(-90,0,0) translate(${labelTranslate},0)`
-            })
-        .attr("opacity","0")
-        .attr("overflow","visible")
-        .style('pointer-events', 'none');
-
-    nodeLabelG.append("rect")
-        .attr("height","50")
-        .attr("width","130")
-        .attr("stroke","black")
-        .attr("fill","none")
-        .attr("filter","drop-shadow(0 3px 4px rgba(0,0,0,.5))");
-
-    const nodeLabelText = nodeLabelG.append("text")
-            .attr("x","5")
-            .attr("y",".5em")
-            .attr("font-size","11")
-            .attr("font-family","sans-serif")
-            .attr("font-weight","normal")
-            .attr("stroke","none")
-            .attr("fill","black");
-
-    nodeLabelText.append("tspan")
-        .attr("dy","1em")
-        .text((d,i) => {
-            let authorID = origNodes[i].author;
-            return lookupIDTable.get(authorID);
-        });
-    nodeLabelText.append("tspan")
-        .attr("x","5")
-        .attr("dy","1em")
-        .attr("font-style","italic")
-        .text((d,i) => {
-            let workID = origNodes[i].work;
-            return lookupIDTable.get(workID);});
-    nodeLabelText.append("tspan")
-        .attr("x","5")
-        .attr("dy","1em")
-        .text((d,i) => Tt[i].split("\n")[1]); 
-
-    nodeRect
-        .on("mouseover", function(event) {
-            d3.select(this).attr("opacity","1");
-            d3.select(this.nextSibling.nextSibling)
-                .attr("opacity","1")
-            d3.select(this.nextSibling.nextSibling.firstChild)
-                .attr("fill","white")
-        })
-        .on("mouseout", function(event) {
-                d3.select(this).attr("opacity",".6");
-                d3.select(this.nextSibling.nextSibling)
-                .attr("opacity","0")
-            d3.select(this.nextSibling.nextSibling.firstChild)
-                .attr("fill","none")});
-}
-
-svg.selectAll(".node")
-    .on("mouseover", function(event) {
-        d3.select(this).raise();
-    })
-```
+The colors (which distinguish between authors in the passage-level and full intertext diagrams) are drawn from the [`Glasbey` colormap](https://colorcet.holoviz.org/user_guide/Categorical.html) provided by the Python library `colorcet`. While the Glasbey colors are perceptually dissimilar to the extent possible, a large number of authors will still cause difficulty in distinguishing between shades; accordingly, they are reinforced by the inclusion of the author&rsquo;s name. (The names are rotated sideways in order not to overrun the boundaries of smaller nodes; [this study on the readability of tilted text](http://www.dgp.toronto.edu/~ravin/papers/ecscw2005_textorientation.pdf) suggests that there is not a significant difference in the readibility of sideways text read top-to-bottom or bottom-to-top.)
 
 
 ## Next Steps
 
-Currently underway are the entry of additional intertexts into the database and the creation of an intertextuality network from the selected word, using [D3.js](https://d3js.org/), as described above. Following that, in addition to continuing database input, attention will focus on providing a display of what the intertexts are, as well as tweaking the code to handle elisions, extranumerical lines (such as 845a, which would come between 845 and 846), and alternative readings. A few additional potential long-term developments are:
+In addition to continuing database input, the code needs to be tweaked in order to handle anonymous works, extranumerical lines (such as 845a, which would come between 845 and 846), and alternative readings. A few additional potential long-term developments are:
 
 - an option to view only direct intertext density
-- an option to view &ldquo;descendant&rdquo; intertexts instead of &ldquo;ancestor&rdquo; intertexts
+- an option to view &ldquo;descendant&rdquo; intertexts instead of &ldquo;ancestor&rdquo; intertexts in the density display
 - collaboration with projects on automated detection of text reuse (such as [Tesserae](https://tesserae.caset.buffalo.edu/) or [F&#x012b;lum](http://tools.qcrit.org/filum)) to enhance the database, with a reduction of manual labor
 
 Other requests and suggestions for future development are welcome [at the GitHub page](https://github.com/dkrasne/visualizing_intertextuality).
@@ -534,10 +460,10 @@ In learning how to use Framework and setting up my site, I encountered a few sna
 2. Second, after setting up [an automated deployment using GitHub Actions every time I pushed changes to GitHub](https://observablehq.com/framework/deploying#automated-deploys), I encountered two problems. First, because I was importing a couple of packages in my Python data loader, I was getting an error message when running the build that the package wasn't found, [a problem that had already been documented and solved here](https://talk.observablehq.com/t/github-actions-with-pandas-data-loader-on-observable-framework/9309). But even after following the documented steps, I continued to get the error message, and GitHub was telling me that the deploy had failed, but without an *actual* failure (i.e., the site was correctly updating on Observable Framework). The solution was to *also* add a new line to Framework's `package.json` file:
 
 ```json
-# ...
+// ...
 "observable": "observable",
-"install": "pip install -r requirements.txt"
-#...
+"install": "pip install -r requirements.txt"    // this is the new line
+// ...
 ```
 
 3. Third, when using GitHub Actions and a deploy.yml script for an automated deploy, any API keys need to be added to both Observable Framework secrets *and* GitHub Secrets, as well as adding them in the build step of the `deploy.yml` script:
@@ -565,3 +491,5 @@ In learning how to use Framework and setting up my site, I encountered a few sna
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
+
+> An alternative approach to this might have been to output a .zip file instead of a JSON file from the data loader, since Observable Framework can attach files directly from a zip archive.

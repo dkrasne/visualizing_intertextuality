@@ -98,7 +98,6 @@ html`
 			<h4 style="max-width:none;">The intertextual lineage of <i>${plotCurrSelect.word}</i> (line ${plotCurrSelect.wordObj.line_num})</h4>
 			<p style="font-size:smaller;">This visualization shows both the intertextual ancestry and descent of the selected word. Mouse over a rectangular node to see what text a given word occurs in; mouse over a link between two words to see what type(s) of allusive referentiality connect those two words.</p>
 				${wordSankey ? display(wordSankey) : display(html`<p><b><i>The selected word has no intertexts in the database.</i></b></p>`)}
-			<p style="font-size:smaller; font-weight: bold;">N.B. This chart is still under development.</p>
 		`)
 		}
 	</div>
