@@ -8,7 +8,7 @@ toc: false
 
 **Developed by:** [Darcy Krasne](http://www.darcykrasne.com/)
 
-A project to visualize intertexts in Latin poetry using [nodegoat](https://nodegoat.net/), [Observable Framework](https://observablehq.com/framework/), [Python](https://www.python.org/), and [D3.js](https://d3js.org/). ([See the about page](./about) for further details, or [view the code on GitHub](https://github.com/dkrasne/visualizing_intertextuality).)
+A project to visualize intertexts in Latin poetry using [nodegoat](https://nodegoat.net/), [Observable Framework](https://observablehq.com/framework/), [Python](https://www.python.org/), [JavaScript](https://en.wikipedia.org/wiki/JavaScript), and [D3.js](https://d3js.org/). ([See the about page](./about) for further details, or [view the code on GitHub](https://github.com/dkrasne/visualizing_intertextuality).)
 
 *N.B. As Observable is phasing out its cloud hosting, this site will be migrating to http://dkrasne.github.io/visualizing_intertextuality. Please take note of the new address.*
 

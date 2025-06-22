@@ -128,7 +128,6 @@ const svg_outer = d3
 
 
 
-
   const link = svg
     .append("g")
     .attr("fill", "none")
@@ -256,7 +255,8 @@ const tooltipLinks = svg
   .append("g")
     .attr("class", "tooltip")
     .attr("transform", "rotate(-90,0,0) translate(50,-10)")
-    .attr("opacity", "0");
+    .attr("opacity", "0")
+    ;
 
 const tooltipLinksBox = tooltipLinks
     .append("rect")
@@ -268,7 +268,7 @@ const tooltipLinksBox = tooltipLinks
   
 
   linkPathGPath
-        .on("mouseenter", (e,d) => {
+        .on("mouseenter", function (e,d) {
             const tooltipLinksText = tooltipLinks
               .append("text")
                 .attr("class", "tooltip-link-text")
@@ -279,14 +279,13 @@ const tooltipLinksBox = tooltipLinks
                 .attr("font-weight","normal")
                 .attr("stroke","none")
                 .attr("fill","black");
-            
-            //d3.select(".tooltip").raise();
 
             // set x and y based on location of where mouse enters the link
-            let x = e.layerY;
-            let y = e.layerX;
+            // Pointer(X,Y) is based on the unrotated X/Y (so opposites); max X is ~620, max Y is ~400 in both the smaller and larger viz            
+            let [y,x] = d3.pointer(e, this);
+
             tooltipLinks
-              .attr("transform", `rotate(-90,0,0) translate(${(x-10)*-1},${y+10})`)
+              .attr("transform", `rotate(-90,0,0) translate(${(x*-1)+20},${(y+20)})`)
               .attr("opacity", "1")
               ;
 
