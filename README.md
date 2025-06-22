@@ -1,6 +1,6 @@
 # Visualizing Intertextuality
 
-Website: https://dkrasne.github.io/visualizing-intertextuality/
+Website: https://dkrasne.github.io/visualizing_intertextuality/
 
 A project to visualize intertextuality in Latin poetry, using [nodegoat](https://nodegoat.net/) and [Observable Framework](https://observablehq.com/framework/).
 
@@ -33,7 +33,7 @@ Any files not listed below are part of the Observable Framework setup or are sol
 
 ## Diagram of data workflow
 
-For a full discussion of each part of this chart, see [the project's About page](https://dkrasne.github.io/visualizing-intertextuality/about).
+For a full discussion of each part of this chart, see [the project's About page](https://dkrasne.github.io/visualizing_intertextuality/about).
 
 ```mermaid
 flowchart TD;
