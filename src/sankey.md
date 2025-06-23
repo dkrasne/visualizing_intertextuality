@@ -89,48 +89,8 @@ const chart = SankeyChart({nodes: nodes, links: links, lookupIDTable: lookupIDTa
     //colors: d3.schemeSpectral[11], // should be able to create a bigger range by bringing colorcet colors in via Python
     colors: authorColors,
     linkColor: "source",
-    // linkTitle: d => {
-    //     //chartLinks.push(d);
-    //     let sourceNode = d.source.id;
-    //     let targetNode = d.target.id;
-    //     let linkSet = sankeyData.edges.filter(l => l.source === sourceNode && l.target === targetNode);
-    //     // let nodesFilterSource = nodes.filter(n => n.id === d.source.id);
-    //     // let sourceWordIDs = [];
-    //     let sourceWordIDs = [];
-    //     let targetWordIDs = [];
-    //     for (let i in linkSet) {
-    //         linkSet[i].source_words.map(w => sourceWordIDs.push(w));
-    //         linkSet[i].target_words.map(w => targetWordIDs.push(w));
-    //     }
-
-    //     sourceWordIDs = [...new Set(sourceWordIDs)];
-    //     targetWordIDs = [...new Set(targetWordIDs)];
-
-    //     let sourceWords = [];
-    //     let targetWords = [];
-
-    //     for (let i in sourceWordIDs) {sourceWords.push(lookupIDTable.get(sourceWordIDs[i]));}
-    //     sourceWords.sort((a,b) => {
-    //         if (a.lineNum < b.lineNum) {
-    //             return -1
-    //         } else if (a.lineNum > b.lineNum) {
-    //             return 1
-    //         } else {return 0}
-    //     })
-    //     for (let i in sourceWords) {sourceWords[i] = `${sourceWords[i].word} (line ${sourceWords[i].lineNum})`}
-        
-    //     for (let i in targetWordIDs) {targetWords.push(lookupIDTable.get(targetWordIDs[i]));}
-    //     targetWords.sort((a,b) => {
-    //         if (a.lineNum < b.lineNum) {
-    //             return -1
-    //         } else if (a.lineNum > b.lineNum) {
-    //             return 1
-    //         } else {return 0}
-    //     })
-    //     for (let i in targetWords) {targetWords[i] = `${targetWords[i].word} (line ${targetWords[i].lineNum})`}
-
-    //     return `${lookupIDTable.get(sourceNode).work}, ${lookupIDTable.get(sourceNode).section}: ${sourceWords.join(', ')}\n${lookupIDTable.get(targetNode).work}, ${lookupIDTable.get(targetNode).section}: ${targetWords.join(', ')}`;
-    // }
+    height: 750,
+    width: 1000,
     linkTitle: null
 })
 
