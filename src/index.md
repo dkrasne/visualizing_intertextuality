@@ -73,7 +73,9 @@ html`
 
 	<div>
 		<h4>How to use this chart</h4>
-		<p style="font-size:smaller;">Click on a cell to freeze the popup information. <b>Direct intertexts</b> are those where a scholar has suggested a direct link between the present word and a word in an earlier text. <b>Indirect intertexts</b> are intertexts at further remove (i.e., where a direct or indirect intertext refers to another, still earlier, passage). Currently, the project does not include intratexts (allusions to other passages within the same text).</p>
+		<p style="font-size:smaller;">Mouse over a cell to see a popup that shows what word it represents and how many direct and indirect intertexts it has; click on a cell to freeze the popup information. Mousing over or clicking on a cell will also display a visualization below of that word&rsquo;s intertextual lineage.</p>
+		
+		<p style="font-size:smaller;"><b>Direct intertexts</b> are those where a scholar has suggested a direct link between the present word and a word in an earlier text. <b>Indirect intertexts</b> are intertexts at further remove (i.e., where a direct or indirect intertext refers to another, still earlier, passage). Currently, the project does not include intratexts (allusions to other passages within the same text).</p>
 
 		<p style="font-size:smaller;"><b>Two caveats:</b> absence of a word does not necessarily mean that there are no intertexts, just that they are not yet in the database; and lines appear in numeric order, even if editors agree that they should be transposed.</p>
 
@@ -88,12 +90,16 @@ html`
 		${
 			display(html`
 			<h4>The intertextual ancestry of the selected passage</h4>
-			<p style="font-size:smaller;">A full explanation of how to read and interact with the chart below (and its current limitations) can be found on <a href="./sankey">the Full Intertext Diagram page</a>.</p>
+			<p style="font-size:smaller;">Mouse over a node to see the work and section that it represents. Mouse over a linking flow path to see the word(s) it represents.</p>
+			<p style="font-size:smaller;">A full explanation of how to read this visualization (and of its current limitations) can be found on <a href="./sankey">the Full Intertext Diagram page</a>.</p>
 			${display(sectionSankey)}`)
 		}
 	</div>
 	<div>
-		${!plotCurrSelect ? display(html`<p style="border: 2px solid black; padding: 1em;"><i>Mouse over a &ldquo;word&rdquo; block in the passage display in order to see the lineage for that particular word. (Click on the word to freeze the display.)</i></p>`) :
+		${!plotCurrSelect ? 
+		display(html`
+			<p style="border: 2px solid black; padding: 1em;"><i>Mouse over a word in the passage display density chart above in order to see the lineage for that particular word. (Click on the word to freeze the display.)</i></p>
+		`) :
 		display(html`
 			<h4 style="max-width:none;">The intertextual lineage of <i>${plotCurrSelect.word}</i> (line ${plotCurrSelect.wordObj.line_num})</h4>
 			<p style="font-size:smaller;">This visualization shows both the intertextual ancestry and descent of the selected word. Mouse over a rectangular node to see what text a given word occurs in; mouse over a link between two words to see what type(s) of allusive referentiality connect those two words.</p>
@@ -171,8 +177,7 @@ const authorTable = nodegoatTables.author_table;
 
 /* If there are any surviving bilingual poets, there may need to be a second filtering step at the works table. */
 
-		// filter to authors that have written poetry in plottable meters
-
+// filter to authors that have written poetry in plottable meters
 
 let proseID = "20849306";
 
@@ -182,20 +187,15 @@ let workFilter = nodegoatTables.work_table.filter(work => workSegFilter.includes
 let authorFilter = nodegoatTables.author_table.filter(author => workFilter.includes(author.obj_id));
 
 
-// for (let author in authorTable) {
-// 	if (authorTable[author].language === "Latin") {
 for (let author in authorFilter) {
 	if (authorFilter[author].language === "Latin") {
-		
-
-//		const authorSet = [authorTable[author].author_name, authorTable[author].obj_id];
-		
 		const authorSet = [authorFilter[author].author_name, authorFilter[author].obj_id];
-
-
 		authorList.push(authorSet);
 	}
 }
+
+// Add catch-all for anonymous authors -- but something like this may actually need to happen in the data-loader phase.
+// authorList.push(["Anonymous works", "000"]);
 
 const authorPicker = Inputs.select(new Map([[null,null]].concat(authorList)), {label: "Select author:", value: null, sort: true});
 const authorID = view(authorPicker);

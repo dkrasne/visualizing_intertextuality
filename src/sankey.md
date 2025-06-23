@@ -12,7 +12,7 @@ Mouse over a node to see the work and section that it represents. Mouse over a l
 
 <div style="font-size:smaller;">
 
-Eventually, subsets of this diagram will appear on the main page for the currently-selected portion of a work.
+A subset of this diagram is shown on the main page for the currently-selected portion of a work.
 
 *Some additional future work:*
 - *making the nodes repositionable*
