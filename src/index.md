@@ -822,10 +822,12 @@ const sectionSankey = nodes.length > 0 && links.length > 0 ?
 				let nodeB = sankeyData.nodes.find(work => work.name === b.id);
 				// Sort so that authors go A-Z left-to-right (= bottom-to-top); d3.descending returns -1, 0, or 1
 				let authorComp = d3.descending(lookupIDTable.get(nodeA.author), lookupIDTable.get(nodeB.author));
-				if (authorComp !== 0) return authorComp; // if the authors aren't the same, don't go any further in sorting
 				// Within authors, sort so that all work sections are in order by work
-				// eventually may sort additionally by work section
-				return d3.descending(lookupIDTable.get(nodeA.work), lookupIDTable.get(nodeB.work));
+				let workComp = d3.descending(lookupIDTable.get(nodeA.work), lookupIDTable.get(nodeB.work));
+				let workSegComp = d3.descending(lookupIDTable.get(a.id).section,lookupIDTable.get(b.id).section);
+				if (authorComp !== 0) return authorComp; // if the authors aren't the same, don't go any further in sorting
+				if (workComp !== 0) return workComp;
+				return workSegComp; // sort by work section
 			},
 			align: "center",
 			colors: authorColors,
