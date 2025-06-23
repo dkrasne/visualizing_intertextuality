@@ -159,7 +159,8 @@ const linkPathG = link
         .attr("y", (d) => d.y0)
         .attr("height", (d) => d.y1 - d.y0)
         .attr("width", (d) => d.x1 - d.x0)
-        .attr("opacity","0.6");
+        .attr("opacity","0.6")
+        .attr("class", "node-box");
 
 
   if (G) node.attr("fill", ({index: i}) => color(G[i]));
@@ -403,6 +404,7 @@ node.append("text")
       .attr("font-size", 10)
       .attr("fill", "black")
       .attr("stroke","none")
+      .style('pointer-events', 'none')
       .attr("x", (d) => (d.x0 < width / 2 ? d.x1 + nodeLabelPadding : d.x0 - nodeLabelPadding))
       .attr("y", (d) => (d.y1 + d.y0) / 2)
       //.attr("dy", "0.35em")
@@ -436,19 +438,31 @@ else if (Tl && sankeyType === "word") {
     let word = Tl[i];
     wordList.push(word);
   })
+
+  //let nodeTextBg = node.append("rect").attr("class","node-word-text-bg");
+
+  
   node
     .append("text")
     .attr("font-family", "sans-serif")
-    .attr("font-size", 10)
+    .attr("font-size", 12)
     .attr("fill", "black")
     .attr("stroke","none")
+    .attr("class", "node-word-text")
+    .style('pointer-events', 'none')
     .each(function(d,i) {
+      d3.select(this)
+      .attr("id", `text-${d.id}`);
+
       d3.select(this)
       .append("tspan")
         .text(wordList[i]);
     })
     .each(function(d) {
+
+      // label rotation help from ChatGPT
       const label = d3.select(this);
+      
       const centerX = (d.x0 + d.x1) / 2;
       const centerY = (d.y0 + d.y1) / 2;
 
@@ -460,7 +474,17 @@ else if (Tl && sankeyType === "word") {
           .attr("text-anchor", "middle")
           .attr("dominant-baseline", "middle")
           .attr("fill", "white")
+          .attr("stroke", "black")
+          .attr("stroke-width", ".5px")
+          .attr("font-weight", "bold")
           ;
+
+      // d3.selectAll(".node-word-text").each(function(d, i) {
+      //   // this works to get the size of each word tspan, but still need to create the rectangle above and set its size here
+      //   let bgWidth = this.firstChild.getBBox().height;
+      //   let bgHeight = this.firstChild.getBBox().width;        
+      // })
+
         
       } else {
         const x = d.x0 < width / 2 ? d.x1 + nodeLabelPadding : d.x0 - nodeLabelPadding;
@@ -475,6 +499,7 @@ else if (Tl && sankeyType === "word") {
     })
   ;
 }
+
 
 // add pop-up tooltips to nodes
 

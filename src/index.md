@@ -171,9 +171,28 @@ const authorTable = nodegoatTables.author_table;
 
 /* If there are any surviving bilingual poets, there may need to be a second filtering step at the works table. */
 
-for (let author in authorTable) {
-	if (authorTable[author].language === "Latin") {
-		const authorSet = [authorTable[author].author_name, authorTable[author].obj_id];
+		// filter to authors that have written poetry in plottable meters
+
+
+let proseID = "20849306";
+
+let workSegFilter = nodegoatTables.work_seg_table.filter(workSeg => workSeg.meter_id !== proseID).map(workSeg => workSeg.work_id);
+let workFilter = nodegoatTables.work_table.filter(work => workSegFilter.includes(work.obj_id)).map(work => work.author_id);
+
+let authorFilter = nodegoatTables.author_table.filter(author => workFilter.includes(author.obj_id));
+
+
+// for (let author in authorTable) {
+// 	if (authorTable[author].language === "Latin") {
+for (let author in authorFilter) {
+	if (authorFilter[author].language === "Latin") {
+		
+
+//		const authorSet = [authorTable[author].author_name, authorTable[author].obj_id];
+		
+		const authorSet = [authorFilter[author].author_name, authorFilter[author].obj_id];
+
+
 		authorList.push(authorSet);
 	}
 }
