@@ -57,9 +57,9 @@ display(
 
 html`
 <div class="grid grid-cols-2">
-	<div class="card" style="background-color:${bgColor}; padding-top: 30px;">
+	<div class="card" style="background-color:${bgColor}; padding: 20px 20px 0 20px;">
 
-		<h2 style="padding-bottom: 10px;">${passageDetails.authorName}, <i>${passageDetails.workTitle}</i>, ${passageDetails.workSegName}: lines ${lineRange.firstLine}&ndash;${lineRange.lastLine}</h2>
+		<h2 style="padding-bottom: 10px; font-size:large;">${passageDetails.authorName}, <i>${passageDetails.workTitle}</i>, ${passageDetails.workSegName}: lines ${lineRange.firstLine}&ndash;${lineRange.lastLine}</h2>
 
 		${plotDisplay}
 
@@ -366,7 +366,7 @@ if (linePattern === 1) {		// for stichic meters
 			i += 1;
 		}
 	}
-} else {	// for meters with stanzas or multi-line patterns
+} else {	// for stanzaic meters
 	for (let line in linePatternArr){
 		let currPatternLine = linePatternArr[line];
 		i = 1;
@@ -589,6 +589,16 @@ The grid will be ${gridY} cells tall.
 ```js
 // Create plot, conditional on the existence of intertexts
 
+// set tick range; increase step every ten (max) intertexts
+let step;
+if (d3.max(intxtCnts)%10 === 0) {
+	step = d3.max(intxtCnts)/10;
+}
+else {
+	step = Math.floor(d3.max(intxtCnts)/10) + 1;
+};
+let tickRange = d3.range(Math.min(...intxtCnts), Math.max(...intxtCnts)+1, step);
+
 const plotDisplay = intertextsArr.every(intxt => intxt.intxtCnt === 0) ? null : Plot.plot({
 	grid: true,
 	x: {
@@ -605,7 +615,7 @@ const plotDisplay = intertextsArr.every(intxt => intxt.intxtCnt === 0) ? null : 
 	color: {scheme: "Greens", 
 		legend: true, 
 		label: "Total Intertexts (direct & indirect)",
-		ticks: d3.range(Math.min(...intxtCnts), Math.max(...intxtCnts)+1),
+		ticks: tickRange,
 		tickFormat: d => Math.floor(d),
 		},
 	marks: [
