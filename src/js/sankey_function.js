@@ -276,7 +276,7 @@ const tooltipLinksBox = tooltipLinks
                 .attr("class", "tooltip-link-text")
                 .attr("x","5")
                 .attr("y",".5em")
-                .attr("font-size","12")
+                .attr("font-size","14")
                 .attr("font-family","sans-serif")
                 .attr("font-weight","normal")
                 .attr("stroke","none")
@@ -417,10 +417,6 @@ const tooltipLinksBox = tooltipLinks
               ;
         })
 
-const updateTooltipLinksText = (data) => {
-
-}
-
 
 
 
@@ -541,133 +537,130 @@ else if (Tl && sankeyType === "word") {
 
 // add pop-up tooltips to nodes
 
-// const tooltipNodes = svg
-//   .append("g")
-//     .attr("class", "tooltip")
-//     .attr("transform", "rotate(-90,0,0)");
+const tooltipNodes = svg
+  .append("g")
+    .attr("class", "tooltip-node")
+    .attr("transform", "rotate(-90,0,0) translate(50,-10)")
+    .attr("opacity", "0")
+    .style('pointer-events', 'none')
+    ;
 
-//   tooltipNodes
-//     .append("rect")
-//       .attr("height", "50")
-//       .attr("width", "140")
-//       .attr("stroke","black")
-//       .attr("fill","white")
-//       .attr("filter","drop-shadow(0 3px 4px rgba(0,0,0,.5))");
+const tooltipNodesBox = tooltipNodes
+    .append("rect")
+      // .attr("height", "50") // get rid of this once I'm done
+      // .attr("width", "140") // get rid of this once I'm done
+      .attr("stroke","black")
+      .attr("fill","white")
+      .attr("filter","drop-shadow(0 3px 4px rgba(0,0,0,.5))");
   
-//   const tooltipNodesText = tooltipNodes.append("text");
+nodeRect
+  .on("mouseenter", function (e,d) {
+    tooltipNodes
+      .attr("opacity", "1");
+    const tooltipNodesText = tooltipNodes
+      .append("text")
+        .attr("class", "tooltip-node-text")
+        .attr("x","5")
+        .attr("y",".5em")
+        .attr("font-size","14")
+        .attr("font-family","sans-serif")
+        .attr("font-weight","normal")
+        .attr("stroke","none")
+        .attr("fill","black");
 
-// const updateTooltipText = (data) => {
-
-// }
-
-    if (Tt) {
-
-    const nodeLabelG = node
-        .append("g")
-        .attr("class","node_label_group")
-        .attr("transform", d => {
-            const labelTranslate = +`-${(d.y1 - d.y0)/2}`;
-            if (d.x0 < width / 2){
-            return `translate(${(d.x0) +  5}, ${d.y0}) rotate(-90,0,0) translate(${labelTranslate},${d.x1 - d.x0})`
-            }
-            return `translate(${(d.x0 - 55)}, ${d.y0})  rotate(-90,0,0) translate(${labelTranslate},0)`
-            })
-        .attr("opacity","0")
-        .attr("overflow","visible")
-        .style('pointer-events', 'none')
-        ;
-
-    nodeLabelG.append("rect")
-        .attr("height","50")
-        .attr("width","140")
-        .attr("stroke","black")
-        .attr("fill","none")
-        .attr("filter","drop-shadow(0 3px 4px rgba(0,0,0,.5))")
-        ;
-
-    const nodeLabelText = nodeLabelG.append("text")
-            .attr("x","5")
-            .attr("y",".5em")
-            .attr("font-size","11")
-            .attr("font-family","sans-serif")
-            .attr("font-weight","normal")
-            .attr("stroke","none")
-            .attr("fill","black")
+    let thisNode = origNodes.find(node => node.id === d.id);
 
     if (sankeyType === "passage") {
-        nodeLabelText.append("tspan")
+
+      let authorID = thisNode.author;
+      let workID = thisNode.work;
+      let workSection = lookupIDTable.get(thisNode.id).section;
+
+        tooltipNodesText.append("tspan")
             .attr("dy","1em")
-            .text((d,i) => {
-                let authorID = origNodes[i].author;
-                return lookupIDTable.get(authorID);
-            })
-        nodeLabelText.append("tspan")
-            .attr("x","5")
-            .attr("dy","1em")
+            .text(`${lookupIDTable.get(authorID)}, `)
+        tooltipNodesText.append("tspan")
+            // .attr("x","5")
+            // .attr("dy","1em")
             .attr("font-style","italic")
-            .text((d,i) => {
-                let workID = origNodes[i].work;
-                return lookupIDTable.get(workID);});
-        nodeLabelText.append("tspan")
+            .text(lookupIDTable.get(workID));
+        tooltipNodesText.append("tspan")
             .attr("x","5")
             .attr("dy","1em")
-            .text((d,i) => Tt[i].split("\n")[1])
-            ; }
+            .text(workSection);
+    } else if (sankeyType === "word") {
+      console.log(thisNode);
+      let thisWord = lookupIDTable.get(thisNode.id);
+      let author = lookupIDTable.get(thisWord.authorID);
+      let work = lookupIDTable.get(thisWord.workID);
+      let workSeg = lookupIDTable.get(thisWord.workSegID).section ? lookupIDTable.get(thisWord.workSegID).section : '';
+      let proseCheck = lookupIDTable.get(thisWord.workSegID).meterID === proseID ? true : false;
+      let linePrefix = proseCheck ? '\u00a7' : 'line';
 
-    else if (sankeyType === "word") {
-        nodeLabelText.append("tspan")
-          .attr("dy", "1em")
-          .text(d => lookupIDTable.get(lookupIDTable.get(d.id).authorID));
-        nodeLabelText.append("tspan")
-          .attr("x", "5")
-          .attr("dy", "1em")
-          .attr("font-style", "italic")
-          .text(d => lookupIDTable.get(lookupIDTable.get(d.id).workID));
-        
-        nodeLabelText.append("tspan")
-          .attr("x", "5")
-          .attr("dy", "1em")
-          .text(d => {
-            if (lookupIDTable.get(lookupIDTable.get(d.id).workSegID).section !== ''){
-            return lookupIDTable.get(lookupIDTable.get(d.id).workSegID).section}
-          })
-        
-        nodeLabelText.append("tspan")
-          .text(d => ` (line ${lookupIDTable.get(d.id).lineNum})`)
-
+      tooltipNodesText.append("tspan")
+        .attr("dy", "1em")
+        .text(`${author}, `);
+      tooltipNodesText.append("tspan")
+        // .attr("x", "5")
+        // .attr("dy", "1em")
+        .attr("font-style", "italic")
+        .text(work);
+      
+      tooltipNodesText.append("tspan")
+        .attr("x", "5")
+        .attr("dy", "1em")
+        .text(workSeg);
+      
+      tooltipNodesText.append("tspan")
+        .text(` (${linePrefix} ${thisNode.line_num})`);
           
     }
 
+  let nodeText = d3.selectAll(".tooltip-node-text");
 
-    nodeRect
-        .on("mouseover", function(event) {
-            //const [x,y] = d3.pointer(event, this);
-            d3.select(this).attr("opacity","1");
-            d3.select(this.nextSibling.nextSibling)
-                .attr("opacity","1")
-            d3.select(this.nextSibling.nextSibling.firstChild)
-                .attr("fill","white")
+  // set height and width of node tooltip
 
-                // .attr("transform", `translate(${x},${y}) rotate(-90,0,0)`)
-        })
-        .on("mouseout", function(event) {
-                d3.select(this).attr("opacity",".6");
-                d3.select(this.nextSibling.nextSibling)
-                .attr("opacity","0")
-            d3.select(this.nextSibling.nextSibling.firstChild)
-                .attr("fill","none")});
+  let nodeBoxWidth;
+  let nodeBoxHeight;
+    nodeText.each(function() {
+      nodeBoxWidth = this.getBBox().width;
+      nodeBoxHeight = this.getBBox().height;
+      tooltipNodesBox
+        .attr("width", nodeBoxWidth + 15)
+        .attr("height", nodeBoxHeight+15);
+    })
 
-    // nodeLabelG
-    //     .on("mouseover", function(event) {
-    //        const [x,y] = d3.pointer(event, this);
-    //         this
-    //             .attr("opacity","1")
-    //             .attr("transform", `translate(${x},${y}) rotate(-90,0,0)`)
-    //     })
-    //     .on("mouseout", function(event) {
-    //             this
-    //             .attr("opacity","0")});
+
+  // based on height and width of tooltip box, place box relative to node
+
+    let nodeRectHeight = d.x1 - d.x0;
+    let nodeRectWidth = d.y1 - d.y0;
+
+    let nodeLeft = d.y1;
+    let nodeRight = d.y0;
+    let nodeTop = d.x0;
+    let nodeBottom = d.x1;
+
+    if (d.x0 < width / 2) {
+      tooltipNodes
+        .attr("transform", `rotate(-90,0,0) translate(${(nodeLeft * -1) + nodeRectWidth/2}, ${nodeBottom + marginTop})`)
+    } else {
+      tooltipNodes
+        .attr("transform", `rotate(-90,0,0) translate(${(nodeLeft * -1) + nodeRectWidth/2}, ${nodeTop - nodeBoxHeight - nodeRectHeight - marginTop})`)
+
     }
+
+    })
+  .on("mouseleave", (e,d) => {
+    d3.selectAll(".tooltip-node-text").remove();
+    tooltipNodes
+      .attr("transform", "rotate(-90,0,0) translate(50,-10)")
+      .attr("opacity", "0")
+      ;
+  });
+
+
+
 
 svg.selectAll(".node")
     .on("mouseover", function(event) {
