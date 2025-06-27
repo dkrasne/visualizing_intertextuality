@@ -7,6 +7,7 @@
 
 import * as d3Sankey from "npm:d3-sankey@0.12.3";
 import * as d3 from "npm:d3";
+import {proseID} from "./global_constants.js";
 
 function SankeyChart(
   {
@@ -306,6 +307,7 @@ const tooltipLinksBox = tooltipLinks
               }
 
             if (sankeyType === "passage") {
+              // List words by line
               let sourceNode = d.source.id;
               let targetNode = d.target.id;
               let linkSet = origLinks.filter(l => l.source === sourceNode && l.target === targetNode);
@@ -322,42 +324,78 @@ const tooltipLinksBox = tooltipLinks
               let sourceWords = [];
               let targetWords = [];
 
-              for (let i in sourceWordIDs) {sourceWords.push(lookupIDTable.get(sourceWordIDs[i]));}
-              sourceWords.sort((a,b) => {
-                if (a.lineNum < b.lineNum) {
-                  return -1
-                } else if (a.lineNum > b.lineNum) {
-                  return 1
-                } else {return 0}
-              })
+              for (let id of sourceWordIDs) {sourceWords.push(lookupIDTable.get(id));}
+              for (let id of targetWordIDs) {targetWords.push(lookupIDTable.get(id));}
 
-              for (let i in sourceWords) {sourceWords[i] = `${sourceWords[i].word} (line ${sourceWords[i].lineNum})`}
+              // sort words by line number, then by starting position in line
+              sourceWords.sort((a,b) => d3.ascending(a.lineNum, b.lineNum) || d3.ascending(a.startPos, b.startPos));
+              targetWords.sort((a,b) => d3.ascending(a.lineNum, b.lineNum) || d3.ascending(a.startPos, b.startPos));
               
-              for (let i in targetWordIDs) {targetWords.push(lookupIDTable.get(targetWordIDs[i]));}
+              // get a list of the line numbers
+              let sourceLineNums = new Set(sourceWords.map(word => word.lineNum));
+              let targetLineNums = new Set(targetWords.map(word => word.lineNum));
 
-              targetWords.sort((a,b) => {
-                if (a.lineNum < b.lineNum) {
-                  return -1
-                } else if (a.lineNum > b.lineNum) {
-                  return 1
-                } else {return 0}
-              })
+              let textLinesSource = [];
+              let textLinesTarget = [];
+
+              // push author, then work, then section into text array
+              let sourceAuthor = lookupIDTable.get(sourceNode).authorID;
+              let targetAuthor = lookupIDTable.get(targetNode).authorID;
               
-              for (let i in targetWords) {targetWords[i] = `${targetWords[i].word} (line ${targetWords[i].lineNum})`}
+              textLinesSource.push(`${lookupIDTable.get(sourceAuthor)}, `);
+              textLinesSource.push(`${lookupIDTable.get(sourceNode).work}`);
+              textLinesSource.push(`, ${lookupIDTable.get(sourceNode).section}`);
+              let firstLineLen = textLinesSource.length;  // set the number of elements that will be in the first line of text (i.e., author, work, section)
+              textLinesTarget.push(`${lookupIDTable.get(targetAuthor)}, `);
+              textLinesTarget.push(`${lookupIDTable.get(targetNode).work}`);
+              textLinesTarget.push(`, ${lookupIDTable.get(targetNode).section}`);
 
-              let textLines = [];
-              textLines.push(`${lookupIDTable.get(sourceNode).work}, ${lookupIDTable.get(sourceNode).section}: ${sourceWords.join(', ')}`)
-              textLines.push(`${lookupIDTable.get(targetNode).work}, ${lookupIDTable.get(targetNode).section}: ${targetWords.join(', ')}`)
-
-              for (let i in textLines) {
-                let textrow = tooltipLinksText
-                  .append("tspan")
-                    .attr("x", "5")
-                    .attr("dy", "1em")
-                    .attr("class", "tooltip-link-text-line");
-                textrow.text(textLines[i]);
+              // push the line and words of that line into text array
+              for (let line of sourceLineNums) {
+                let proseCheck = lookupIDTable.get(sourceNode).meterID === proseID ? true : false; // check whether source segment is prose or poetry
+                let linePrefix = 'line';
+                if (proseCheck) { // if prose, prefix section symbol instead of 'line'
+                  linePrefix = '\u00a7';
+                }
+                let text = `${linePrefix} ${line}: `;
+                let words = sourceWords.filter(word => word.lineNum === line).map(word => word.word).join(', ');
+                text += words;
+                textLinesSource.push(text);
               }
 
+              for (let line of targetLineNums) {
+                let text = `line ${line}: `;
+                let words = targetWords.filter(word => word.lineNum === line).map(word => word.word).join(', ');
+                text += words;
+                textLinesTarget.push(text);
+              }
+
+              // create tspan with appropriate styling for each element of the text array
+              for (let arr of [textLinesSource, textLinesTarget]) {
+                for (let i in arr) {
+                  let indent = "5";
+                  if (i > 0) {
+                    indent = "10";
+                  }
+                  let textrow = tooltipLinksText
+                    .append("tspan")
+                      .attr("class", "tooltip-link-text-line");
+                  if (i == 0) {
+                    textrow
+                      .attr("x", indent)
+                      .attr("dy", "1em");
+                  } else if (i == 1) { // using loose equality b/c i is apparently a text representation of the number
+                    textrow
+                      .attr("font-style", "italic");  // italicize title, which is the second element of the array
+                  } else if (i >= firstLineLen) { // once we're past the elements of the first line, make an indented new line for each element
+                    textrow
+                      .attr("x", indent)
+                      .attr("dy", "1em");
+                  }
+                  textrow.text(arr[i]); // set the text for the tspan
+                }
+              }
+              
             }
 
 

@@ -132,7 +132,7 @@ else {
 <!-- Load data -->
 
 ```js
-import {createLookupIDTable, authorColors} from './js/global_constants.js';
+import {createLookupIDTable, authorColors, proseID} from './js/global_constants.js';
 import {SankeyChart} from './js/sankey_function.js';
 ```
 
@@ -179,7 +179,7 @@ const authorTable = nodegoatTables.author_table;
 
 // filter to authors that have written poetry in plottable meters
 
-let proseID = "20849306";
+//let proseID = "20849306";
 
 let workSegFilter = nodegoatTables.work_seg_table.filter(workSeg => workSeg.meter_id !== proseID).map(workSeg => workSeg.work_id);
 let workFilter = nodegoatTables.work_table.filter(work => workSegFilter.includes(work.obj_id)).map(work => work.author_id);
