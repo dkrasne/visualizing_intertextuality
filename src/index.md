@@ -826,7 +826,7 @@ const sectionSankey = nodes.length > 0 && links.length > 0 ?
 							for (let n in nodesFilter) {nodeAuthorID = nodesFilter[n].author}
 							return lookupIDTable.get(nodeAuthorID);
 							},
-			nodeTitle: d => `${lookupIDTable.get(d.id).work}\n${lookupIDTable.get(d.id).section}`,
+			nodeTitle: null,
 			nodeSort: (a,b) => {
 				let nodeA = sankeyData.nodes.find(work => work.name === a.id);
 				let nodeB = sankeyData.nodes.find(work => work.name === b.id);
@@ -859,7 +859,7 @@ const wordSankey = wordIntxtNodes.length > 0 && wordIntxtEdges.length > 0 ?
 			nodeLabel: d => lookupIDTable.get(d.id).word,
 			rotateLabel: true,
 			align: "center",
-			nodeTitle: d => "",
+			nodeTitle: null,
 			linkTitle: null,
 			nodeSort: (a, b) => {
 				let nodeA = lookupIDTable.get(a.id);

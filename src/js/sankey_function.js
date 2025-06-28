@@ -229,7 +229,7 @@ linkPathGPath.each(function(d,i) {
             return thisSiblings.attr("stroke-opacity",linkStrokeOpacity);
         })
 
-const svgSelect = d3.select(svg);
+// const svgSelect = d3.select(svg);
 
 //    linkPathG.call(Lt ? (path) => path.append("rect").attr("width","10").attr("height","10").attr("stroke","black") : () => {});
 
@@ -276,7 +276,7 @@ const tooltipLinksBox = tooltipLinks
                 .attr("class", "tooltip-link-text")
                 .attr("x","5")
                 .attr("y",".5em")
-                .attr("font-size","14")
+                .attr("font-size","15")
                 .attr("font-family","sans-serif")
                 .attr("font-weight","normal")
                 .attr("stroke","none")
@@ -375,7 +375,7 @@ const tooltipLinksBox = tooltipLinks
                 for (let i in arr) {
                   let indent = "5";
                   if (i > 0) {
-                    indent = "10";
+                    indent = "15";
                   }
                   let textrow = tooltipLinksText
                     .append("tspan")
@@ -404,7 +404,6 @@ const tooltipLinksBox = tooltipLinks
                 linkText.each(function() {
                   let width = this.getBBox().width;
                   let height = this.getBBox().height;
-//                  console.log(this.getBBox())
                 tooltipLinksBox.attr("width", width + 15).attr("height", height+15);
                 })
 
@@ -562,7 +561,7 @@ nodeRect
         .attr("class", "tooltip-node-text")
         .attr("x","5")
         .attr("y",".5em")
-        .attr("font-size","14")
+        .attr("font-size","15")
         .attr("font-family","sans-serif")
         .attr("font-weight","normal")
         .attr("stroke","none")
@@ -660,14 +659,23 @@ nodeRect
   });
 
 
+// darken node when hovered over
+nodeRect
+  .on("mouseover", function(event) {
+    d3.select(this).attr("opacity","1");
+  })		
+  .on("mouseout", function(event) {
+    d3.select(this).attr("opacity",".6");
+  });
 
 
+// bring hovered node to surface when hovered over
 svg.selectAll(".node")
     .on("mouseover", function(event) {
         d3.select(this).raise();
     })
 
-
+// put a colored box around the word that was selected in the chart, which serves as the origin point of the word-level Sankey
 if (sankeyType === "word") {
   node
     .attr("stroke", (d,i) => {

@@ -97,7 +97,9 @@ Finally, each `word-level intertext` records at least one scholarly source (some
 
 #### Data Extraction and Transformation with Python
 
-Every time the website is deployed (usually by an update on GitHub), a data loader written in Python performs an API call from nodegoat to fetch the current database model. It then extracts the nodegoat IDs for each object type table and does another API call for the individual objects. It assigns the objects, under their object types, to a dictionary, and then transforms them into dataframes, unpacking the highly nested information of the nodegoat JSON objects:
+Every time the website is deployed (usually by an update on GitHub), a data loader written in Python performs an API call from nodegoat to fetch the current database model. It then extracts the nodegoat IDs for each object type table and does another API call for the individual objects. It assigns the objects, under their object types, to a dictionary, and then transforms them into dataframes, unpacking the highly nested information of the nodegoat JSON objects.
+
+<details><summary>Click here to see the function that performs the extraction.</summary>
 
 ```python
 # Create table dataframes
@@ -112,7 +114,14 @@ def table_to_df(table, cols_dict):
             id_val = list(val.keys())[0]
             if val[id_val] == "refid":
                 try:
-                    tdict[str(key)] = obj_defs[str(id_val)]["object_definition_ref_object_id"]
+                    refval = obj_defs[str(id_val)]["object_definition_ref_object_id"]
+                    if isinstance(refval, list):
+                        for i, newval in enumerate(refval):
+                            if isinstance(newval, str) and len(newval.split("_")) == 2:
+                                splitval = newval.split("_")
+                                refval[i] = {'refid': splitval[0], 
+                                             'refval': splitval[1]}
+                    tdict[str(key)] = refval
                 except:
                     tdict[str(key)] = None
             elif val[id_val] == "objval":
@@ -121,12 +130,16 @@ def table_to_df(table, cols_dict):
                 except:
                     tdict[str(key)] = None
         dictlist.append(tdict)
-    df = pd.DataFrame.from_dict(dictlist)
+    df = pd.DataFrame.from_dict(dictlist).copy()
+
+    # catch any exceptions that didn't store empty value as None
+    df = df.astype(object)
+    df = df.where(~df.isna(), None)
 
     # convert numeric IDs to string and remove any trailing decimals
     for col in df:
         if col[-3:] == "_id":
-            df[col] = df[col].astype(str)
+            df[col] = df[col].apply(lambda x: str(x) if x is not None else x)
     def remove_decimal(id_string):
         if isinstance(id_string, str) and id_string[-2:] == ".0":
             return id_string[:-2]
@@ -134,13 +147,14 @@ def table_to_df(table, cols_dict):
     for col in df:
         if col[-3:] == "_id":
             df[col] = df[col].apply(remove_decimal)
-
+    
     return df
 ```
+</details>
 
-It joins the disparate metrical data into a single dataframe and then returns it to a single restructured JSON object; and it converts each of the other dataframes to a JSON object, which are collectively stored in an array. These are all saved to files that are automatically committed to GitHub.
+The data loader then joins the disparate metrical data into a single dataframe and then returns it to a single restructured JSON object; and it converts each of the other dataframes to a JSON object, which are collectively stored in an array. These are all saved to files that are automatically committed to GitHub.
 
-The same Python data loader also creates network nodes and edges from the data in order to enable visualization of the intertexts as [Sankey diagrams](https://en.wikipedia.org/wiki/Sankey_diagram). (I chose these over traditional network graphs since the sequential nature of an intertextual network makes it well-suited to visualizing as a flow-path.) While part of the network creation is done automatically by the d3 Sankey module, the initial preparation of nodes and edges is performed in the data loader; further filtering, when necessary, is done on the fly based on the user's selections.
+The same Python data loader also creates network nodes and edges from the data in order to enable visualization of the intertexts as [Sankey diagrams](https://en.wikipedia.org/wiki/Sankey_diagram). (I chose these over traditional [network graphs](https://guides.library.yale.edu/dh/graphs) since the sequential nature of an intertextual network makes it well-suited to visualizing as a flow-path.) While part of the network creation is done automatically by the d3 Sankey module, the initial preparation of nodes and edges is performed in the data loader; further filtering, when necessary, is done on the fly based on the user's selections.
 
 <p><details>
 <summary>Click to view the two custom functions for this stage.</summary>
@@ -258,7 +272,7 @@ The remainder of the code is written in JavaScript, within an Observable Framewo
 <details>
 <summary>Click to view the code for the Author, Work, and Work Section selectors</summary>
 
-N.B. I have removed indications of separate code blocks from the following.
+N.B. I have removed indications of separate code blocks from the following, although Observable Framework requires each dropdown to be created in a separate block in order to use the information from the previous dropdown.
 
 ```js run=false
 // Create authors dropdown
@@ -385,7 +399,10 @@ if (endLine >= startLine) {
 
 </details>
 
-Once the passage is chosen, the script gathers any `word instance` that falls within the selected lines and then filters the `word level intertext` objects for those that include the relevant words as an intertext target. These are considered &ldquo;direct intertexts&rdquo;. It then collects any intertexts where the *source* of a direct intertext is the target, and so on; all of these are considered &ldquo;indirect intertexts&rdquo;. An empty grid is generated with `Plot.cell`, using the number of selected lines for its height and the relevant meter's maximum length for its width. Each cell of the grid is populated with the relevant word and intertext counts for that line and metrical position:
+Once the passage is chosen, the script gathers any `word instance` that falls within the selected lines and then filters the `word level intertext` objects for those that include the relevant words as an intertext target. These are considered &ldquo;direct intertexts&rdquo;. It then collects any intertexts where the *source* of a direct intertext is the target, and so on; all of these are considered &ldquo;indirect intertexts&rdquo;. An empty grid is generated with [`Plot.cell`](https://observablehq.com/plot/marks/cell), using the number of selected lines for its height and the relevant meter&rsquo;s maximum length for its width. Each cell of the grid is populated with the relevant word and intertext counts for that line and metrical position.
+
+<p>
+<details><summary>Click to view the code for building the grid.</summary>
 
 ```js run=false
 const intertextsArrComplete = [];
@@ -417,9 +434,12 @@ for (let line in lineArr) {
 const intertextsArr = intertextsArrComplete.filter(pos => pos.word); // only include cells that have a word assigned to them
 ```
 
+</details>
+</p>
+
 #### Visualization
 
-The main visualization is intended to resemble the layout of the poem, for purposes of familiarity and visual analysis. It shows the density of intertexts that stand behind each word of the poem. While the accuracy of the display is naturally conditional on the contents of the database, it will ultimately allow users to ask questions such as "where in these lines are intertexts concentrated?" Instructions for reading the chart &mdash; including reminders of the data's fallability &mdash; are presented alongside.
+The main visualization is intended to resemble the layout of the poem, for purposes of familiarity and visual analysis. It shows the density of intertexts that stand behind each word of the poem. While the accuracy of the display is naturally conditional on the contents of the database, it will ultimately allow users to ask questions such as &ldquo;where in these lines are intertexts concentrated?&rdquo; Instructions for reading the chart &mdash; including reminders of the data's fallability &mdash; are presented alongside.
 
 Also displayed on the main page are two Sankey diagrams &mdash; one shown by default, as soon as a passage is selected, and one shown once the user selects a word in the &ldquo;poetry&rdquo; visualization. These both show the intertextual "family tree": one showing the texts that stand behind the selected passage, and the other showing the individual words in other poems that have intertextual connections with a single, selected word. The first of these is a filtered version of the diagram that can be viewed on the [Full Intertext Diagram](./sankey) page. All the Sankey diagrams have popups to provide the user with additional information.
 
@@ -428,7 +448,9 @@ The colors (which distinguish between authors in the passage-level and full inte
 
 ## Next Steps
 
-In addition to continuing database input, the code needs to be tweaked in order to handle anonymous works, extranumerical lines (such as 845a, which would come between 845 and 846), and alternative readings. A few additional potential long-term developments are:
+In addition to continuing database input, the code needs to be tweaked in order to handle anonymous works, extranumerical lines (such as 845a, which would come between 845 and 846), and alternative readings. (The first of these is the most important.)
+
+Beyond those crucial improvements, a few additional potential long-term developments are:
 
 - an option to view only direct intertext density
 - an option to view &ldquo;descendant&rdquo; intertexts instead of &ldquo;ancestor&rdquo; intertexts in the density display
@@ -466,7 +488,7 @@ In learning how to use Framework and setting up my site, I encountered a few sna
 // ...
 ```
 
-3. Third, when using GitHub Actions and a deploy.yml script for an automated deploy, any API keys need to be added to both Observable Framework secrets *and* GitHub Secrets, as well as adding them in the build step of the `deploy.yml` script:
+3. Third, when using GitHub Actions and a `deploy.yml` script for an automated deploy, any API keys need to be added to both Observable Framework secrets *and* GitHub Secrets, as well as adding them in the build step of the `deploy.yml` script:
 
 ```yaml
 - run: npm run build
@@ -474,7 +496,7 @@ In learning how to use Framework and setting up my site, I encountered a few sna
     NODEGOAT_API_TOKEN: ${{ secrets.NODEGOAT_API_TOKEN }}
 ```
 
-4. Fourth, I needed my data loader to produce multiple files, not just the one it's intended to produce at the end, due to needing to limit my API calls (I have enough tables to retrieve from nodegoat that I can only call the full set of them once every fifteen minutes). This was in itself not a problem, but the files weren't storing themselves successfully on GitHub. I ultimately discovered ([with the aid of ChatGPT to get the exact correct format](https://chatgpt.com/share/67dc1153-1adc-800d-9680-c00477d2fa85)) that I needed to add yet another step to my `deploy.yml` script; and I also need to add a GitHub token to both the build step and the new commit/push step, so that this portion of the script looked as follows:
+4. Fourth, I needed my data loader to produce multiple files, not just the one it&rsquo;s intended to produce at the end, due to needing to limit my API calls (I have enough tables to retrieve from nodegoat that I can only call the full set of them once every fifteen minutes). This was in itself not a problem, but the files weren't storing themselves successfully on GitHub. I ultimately discovered ([with the aid of ChatGPT to get the exact correct format](https://chatgpt.com/share/67dc1153-1adc-800d-9680-c00477d2fa85)) that I needed to add yet another step to my `deploy.yml` script; and I also needed to add a GitHub token to both the build step and the new commit/push step, so that this portion of the script looked as follows:
 
 ```yaml
 - run: npm run build
