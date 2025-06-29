@@ -12,11 +12,12 @@ Mouse over a node to see the work and section that it represents. Mouse over a l
 
 <div style="font-size:smaller;">
 
+If you&rsquo;re interested in finding a particular author, the simplest approach is to search for their name using 'Find' in your web browser. (Within a given row, authors are alphabetized, but a given author may appear in multiple rows.)
+
 A subset of this diagram is shown on the main page for the currently-selected portion of a work.
 
 *Some additional future work:*
 - *making the nodes repositionable*
-- *highlighting the entire set of flows connected to the currently-selected node*
 
 </div>
 <hr>

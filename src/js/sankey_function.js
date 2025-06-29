@@ -659,20 +659,25 @@ nodeRect
   });
 
 
-// darken node when hovered over
+// darken node and connected links when hovered over
 nodeRect
-  .on("mouseover", function(event) {
+  .on("mouseover", function(e, d) {
     d3.select(this).attr("opacity","1");
+    svg.selectAll(`.link .source_${d.id}, .link .target_${d.id}`).attr("stroke-opacity", "1");
   })		
-  .on("mouseout", function(event) {
+  .on("mouseout", function(event, d) {
     d3.select(this).attr("opacity",".6");
+    svg.selectAll(`.link .source_${d.id}, .link .target_${d.id}`).attr("stroke-opacity", "0.5");
   });
 
 
-// bring hovered node to surface when hovered over
+// bring hovered node and its connected links to surface when hovered over
 svg.selectAll(".node")
-    .on("mouseover", function(event) {
+    .on("mouseover", function(event, d) {
         d3.select(this).raise();
+        // if (sankeyType === "passage") {
+          d3.selectAll(`.link .source_${d.id}, .link .target_${d.id}`).each(function() {d3.select(this.parentNode).raise()});
+        // }
     })
 
 // put a colored box around the word that was selected in the chart, which serves as the origin point of the word-level Sankey
