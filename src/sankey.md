@@ -21,11 +21,12 @@ A subset of this diagram is shown on the main page for the currently-selected po
 </div>
 <hr>
 
-<div>
+<div style="max-width: none;">
 
 ```js
 display(chart)
 ```
+
 </div>
 
 ```js

@@ -8,37 +8,27 @@ toc: false
 
 **Developed by:** [Darcy Krasne](http://www.darcykrasne.com/)
 
-A project to visualize intertexts in Latin poetry using [nodegoat](https://nodegoat.net/), [Observable Framework](https://observablehq.com/framework/), [Python](https://www.python.org/), [JavaScript](https://en.wikipedia.org/wiki/JavaScript), and [D3.js](https://d3js.org/). ([See the about page](./about) for further details, or [view the code on GitHub](https://github.com/dkrasne/visualizing_intertextuality).)
+[See the About page](./about) for an explanation of this project.
 
 *N.B. As Observable is phasing out its cloud hosting, this site will be migrating to http://dkrasne.github.io/visualizing_intertextuality. Please take note of the new address.*
 
 ## Select passage to view
 
-<div class="tip">Currently there is a limited set of intertexts in the database. Choose Valerius Flaccus, <i>Argonautica</i>, Book 1, lines 1&ndash;4 or Book 2, lines 475&ndash;476 to see what the display looks like. You can also <a href="./sankey">view this diagram</a> to get a rough idea of what the full network of intertexts currently looks like.</div>
+<div class="tip">Currently there is a limited set of intertexts in the database. Choose Valerius Flaccus, <i>Argonautica</i>, Book 1, lines 1&ndash;4 or Book 2, lines 475&ndash;476 to see the display of some richly intertextual passages. You can also <a href="./sankey">view this diagram</a> to see the complete network of intertexts currently in the database.</div>
 
 <!-- Author, Work, and Work Section Selectors -->
 
 <div class="grid grid-cols-3">
-	<div class="card">
-		${authorPicker}
-	</div>
-	<div class="card">
-		${workPicker}
-	</div>
-	<div class="card">
-		${workSegPicker}
-	</div>
+	<div class="card">${authorPicker}</div>
+	<div class="card">${workPicker}</div>
+	<div class="card">${workSegPicker}</div>
 </div>
 
 <!-- Starting and Ending Line Selectors -->
 
 <div class="grid grid-cols-2">
-<div class="card">
-${lineMinPicker}
-</div>
-<div class="card">
-${lineMaxPicker}
-</div>
+	<div class="card">${lineMinPicker}</div>
+	<div class="card">${lineMaxPicker}</div>
 </div>
 
 ## Visualizations
@@ -77,9 +67,9 @@ html`
 		
 		<p style="font-size:smaller;"><b>Direct intertexts</b> are those where a scholar has suggested a direct link between the present word and a word in an earlier text. <b>Indirect intertexts</b> are intertexts at further remove (i.e., where a direct or indirect intertext refers to another, still earlier, passage). Currently, the project does not include intratexts (allusions to other passages within the same text).</p>
 
-		<p style="font-size:smaller;"><b>Two caveats:</b> absence of a word does not necessarily mean that there are no intertexts, just that they are not yet in the database; and lines appear in numeric order, even if editors agree that they should be transposed.</p>
-
 		<p style="font-size:smaller;">A <b>missing</b> word (represented as a gap) is not currently in the database. A word shown with <b>zero total intertexts</b> is either in the database only as the ancestor of another word, or has not yet been assigned to any intertextual relationships.</p>
+
+		<p style="font-size:smaller;"><b>Two caveats:</b> absence of a word does not necessarily mean that there are no intertexts, just that they are not yet in the database; and lines appear in numeric order, even if editors agree that they should be transposed.</p>
 
 		<p style="font-size:smaller;">For a fuller explanation of the data and its representation, see <a href="./about">the About page</a>.</p>
 	</div>
@@ -91,7 +81,7 @@ html`
 			display(html`
 			<h4>The intertextual ancestry of the selected passage</h4>
 			<p style="font-size:smaller;">Mouse over a node to see the work and section that it represents. Mouse over a linking flow path to see the word(s) it represents.</p>
-			<p style="font-size:smaller;">A full explanation of how to read this visualization (and of its current limitations) can be found on <a href="./sankey">the Full Intertext Diagram page</a>.</p>
+			<p style="font-size:smaller;">A full explanation of how to read this visualization can be found on <a href="./sankey">the Full Intertext Diagram page</a>.</p>
 			${display(sectionSankey)}`)
 		}
 	</div>
@@ -115,13 +105,13 @@ html`
 
 <hr>
 
-```js
+<!-- ```js
 if (!plotDisplay) {display(html`<p></p>`)}
 else {
 	display(html`<p>The selected datapoint, which will serve as the starting point of the generated network (this will eventually not be displayed):</p>`)
 	if (plotCurrSelect) {display(plotCurrSelect)} else {display(html`<p><i>No current selection in plot.</i></p>`)}
 	}
-```
+``` -->
 
 <hr>
 
