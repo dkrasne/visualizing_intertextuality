@@ -4,22 +4,34 @@ title: Full Intertext Diagram
 
 # Full Intertext Diagram
 
-The following diagram shows the connections between all intertexts currently in the database.
+The following diagram shows the connections between all intertexts currently in the database; a subset of this diagram is shown on the main page for the selected portion of a work.
 
 Each rectangular node represents one section of a work (a `work segment`, as defined on <a href="./about#database-design">the About page</a>). A flow path linking two nodes represents words that have been identified as intertexts between the source text (higher up) and the target text (lower down); its width shows (in relative terms) *how many* words are borrowed.
 
 Mouse over a node to see the work and section that it represents. Mouse over a linking flow path to see the words it represents.
 
+<hr>
+
+Tick the following box to sort the nodes (within a given row) by author and work; authors may still appear in multiple rows. If you leave the box <b>unticked</b>, the nodes will be placed in their optimal position as determined by the flow path.
+
+```js
+const authorSort = view(Inputs.toggle({label: html`Sort nodes by author?`}));
+```
+
+In either case, if you&rsquo;re interested in finding a particular author, the simplest approach is to search for their name using 'Find' in your web browser.
+
+<hr>
+
 <div style="font-size:smaller;">
-
-If you&rsquo;re interested in finding a particular author, the simplest approach is to search for their name using 'Find' in your web browser. (Within a given row, authors are alphabetized, but a given author may appear in multiple rows.)
-
-A subset of this diagram is shown on the main page for the currently-selected portion of a work.
 
 *Some additional future work:*
 - *making the nodes repositionable*
+- *filtering to only show selected author(s) and work(s)* <!-- use Inputs.table() to assist with this. https://observablehq.com/framework/inputs/table -->
 
 </div>
+
+
+
 <hr>
 
 <div style="max-width: none;">
@@ -66,7 +78,10 @@ const links = [];
 
 const chart = SankeyChart({nodes: nodes, links: links, lookupIDTable: lookupIDTable},
 {
-    nodeGroup: d => d.author,
+    nodeGroup: d => {
+      if (!d.author) {return lookupIDTable.get(d.id).workID} // this should enable coloring of anonymous works by the work itself
+      return d.author
+      },
     nodeLabel: d => {
         //chartNodes.push(d);
                     let nodesFilter = nodes.filter(node => node.id === d.id);
@@ -75,7 +90,7 @@ const chart = SankeyChart({nodes: nodes, links: links, lookupIDTable: lookupIDTa
                     return lookupIDTable.get(nodeAuthorID);
                     },
     nodeTitle: null,
-    nodeSort: (a,b) => {
+    nodeSort: !authorSort ? undefined : function(a,b) {
 				let nodeA = sankeyData.nodes.find(work => work.name === a.id);
 				let nodeB = sankeyData.nodes.find(work => work.name === b.id);
 				// Sort so that authors go A-Z left-to-right (= bottom-to-top); d3.descending returns -1, 0, or 1

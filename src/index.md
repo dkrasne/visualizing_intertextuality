@@ -809,7 +809,10 @@ const links = [];
 const sectionSankey = nodes.length > 0 && links.length > 0 ? 
 	SankeyChart({nodes: nodes, links: links, lookupIDTable: lookupIDTable},
 		{
-			nodeGroup: d => d.author,
+			nodeGroup: d => {
+				if (!d.author) {return lookupIDTable.get(d.id).workID} // this should enable coloring of anonymous works by the work itself
+				return d.author
+				},
 			nodeLabel: d => {
 							let nodesFilter = nodes.filter(node => node.id === d.id);
 							let nodeAuthorID;

@@ -54,7 +54,7 @@ function createLookupIDTable(nodegoatTables) {
         } else {
             section_string = '';
         }
-        let def = {'work': work, 'section': section_string, 'authorID': authorID, 'meterID': meterID};
+        let def = {'work': work, 'section': section_string, 'authorID': authorID, 'meterID': meterID, 'workID': workID};
         lookupIDTable.set(key, def);
     }
 
