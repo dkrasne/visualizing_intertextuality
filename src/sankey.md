@@ -1,35 +1,23 @@
 ---
 title: Full Intertext Diagram
+toc: false
 ---
 
 # Full Intertext Diagram
 
-The following diagram shows the connections between all intertexts currently in the database; a subset of this diagram is shown on the main page for the selected portion of a work.
+The diagram on this page shows the connections between all intertexts currently in the database; a subset of this diagram is shown on the main page for the selected portion of a work.
 
-Each rectangular node represents one section of a work (a `work segment`, as defined on <a href="./about#database-design">the About page</a>). A flow path linking two nodes represents words that have been identified as intertexts between the source text (higher up) and the target text (lower down); its width shows (in relative terms) *how many* words are borrowed.
+Each rectangular node represents one section of a work (a `work segment`, as defined on [the About page](./about#database-design)). A flow path linking two nodes represents words that have been identified as intertexts between the source text (higher up) and the target text (lower down); its width shows (in relative terms) *how many* words are borrowed.
 
-Mouse over a node to see the work and section that it represents. Mouse over a linking flow path to see the words it represents.
+## How to use this visualization
 
-<hr>
+Mouse over a node to see the work and section that it represents. Mouse over a linking flow path to see the words it represents. (N.B. If the link you want to see information for is covered by other links, you can mouse over either of the two nodes attached to it in order to raise it to the surface.)
 
-Tick the following box to sort the nodes (within a given row) by author and work; authors may still appear in multiple rows. If you leave the box <b>unticked</b>, the nodes will be placed in their optimal position as determined by the flow path.
+Tick the following box to sort the nodes (within a given row) alphabetically by author and work; authors may still appear in multiple rows. If you leave the box **unticked**, the nodes will be placed in their optimal position as determined by the flow paths (which makes the overall diagram less messy but also potentially less intuitive).
 
 ```js
 const authorSort = view(Inputs.toggle({label: html`Sort nodes by author?`}));
 ```
-
-In either case, if you&rsquo;re interested in finding a particular author, the simplest approach is to search for their name using 'Find' in your web browser.
-
-<hr>
-
-<div style="font-size:smaller;">
-
-*Some additional future work:*
-- *making the nodes repositionable*
-- *filtering to only show selected author(s) and work(s)* <!-- use Inputs.table() to assist with this. https://observablehq.com/framework/inputs/table -->
-
-</div>
-
 
 
 <hr>
@@ -79,18 +67,20 @@ const links = [];
 const chart = SankeyChart({nodes: nodes, links: links, lookupIDTable: lookupIDTable},
 {
     nodeGroup: d => {
-      if (!d.author) {return lookupIDTable.get(d.id).workID} // this should enable coloring of anonymous works by the work itself
-      return d.author
+        if (!d.author) {return lookupIDTable.get(d.id).workID} // this should enable coloring of anonymous works by the work itself
+        return d.author
       },
     nodeLabel: d => {
         //chartNodes.push(d);
-                    let nodesFilter = nodes.filter(node => node.id === d.id);
-                    let nodeAuthorID;
-                    for (let n in nodesFilter) {nodeAuthorID = nodesFilter[n].author}
-                    return lookupIDTable.get(nodeAuthorID);
-                    },
+        let nodesFilter = nodes.filter(node => node.id === d.id);
+        let nodeAuthorID;
+        for (let n in nodesFilter) {nodeAuthorID = nodesFilter[n].author}
+        return lookupIDTable.get(nodeAuthorID);
+      },
     nodeTitle: null,
-    nodeSort: !authorSort ? undefined : function(a,b) {
+    nodeSort: !authorSort ? 
+      undefined : 
+      function(a,b) {
 				let nodeA = sankeyData.nodes.find(work => work.name === a.id);
 				let nodeB = sankeyData.nodes.find(work => work.name === b.id);
 				// Sort so that authors go A-Z left-to-right (= bottom-to-top); d3.descending returns -1, 0, or 1
@@ -101,7 +91,7 @@ const chart = SankeyChart({nodes: nodes, links: links, lookupIDTable: lookupIDTa
 				if (authorComp !== 0) return authorComp; // if the authors aren't the same, don't go any further in sorting
 				if (workComp !== 0) return workComp;
 				return workSegComp; // sort by work section
-    },
+      },
     align: "center",
     //colors: d3.schemeSpectral[11], // should be able to create a bigger range by bringing colorcet colors in via Python
     colors: authorColors,
@@ -112,6 +102,17 @@ const chart = SankeyChart({nodes: nodes, links: links, lookupIDTable: lookupIDTa
 })
 
 ```
+
+<hr>
+
+<div style="font-size:smaller;">
+
+*Some additional future work:*
+- *making the nodes repositionable*
+- *filtering to only show selected author(s) and work(s)* <!-- use Inputs.table() to assist with this. https://observablehq.com/framework/inputs/table -->
+
+</div>
+
 
 <hr>
 

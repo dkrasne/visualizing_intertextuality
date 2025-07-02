@@ -80,7 +80,7 @@ html`
 		${
 			display(html`
 			<h4>The intertextual ancestry of the selected passage</h4>
-			<p style="font-size:smaller;">Mouse over a node to see the work and section that it represents. Mouse over a linking flow path to see the word(s) it represents.</p>
+			<p style="font-size:smaller;">Mouse over a rectangular node to see the work and section that it represents. Mouse over a linking flow path to see the word(s) it represents.</p>
 			<p style="font-size:smaller;">A full explanation of how to read this visualization can be found on <a href="./sankey">the Full Intertext Diagram page</a>.</p>
 			${display(sectionSankey)}`)
 		}
@@ -664,7 +664,7 @@ const plotCurrSelect = !plotDisplay ? null : Generators.input(plotDisplay);
 
 // Get the IDs of all words involved in intertexts in the currently-selected passage
 let passageWordIntxts = wordsFiltered.length > 0 ? 
-		Array.from(new Set(wordsFiltered.map(word => word.directIntertextIDs.concat(word.indirectIntertextIDs)).flat())) : 
+		Array.from(new Set(wordsFiltered.concat(removedMonosyllables).map(word => word.directIntertextIDs.concat(word.indirectIntertextIDs)).flat())) : 
 		[];
 
 // Filter the full table of intertexts to just those that include the relevant words
@@ -837,7 +837,7 @@ const sectionSankey = nodes.length > 0 && links.length > 0 ?
 			linkColor: "source",
 			linkTitle: null
 		}) :
-	null
+	undefined
 
 ```
 
@@ -868,7 +868,7 @@ const wordSankey = wordIntxtNodes.length > 0 && wordIntxtEdges.length > 0 ?
 			}
 			// by author, then work, then work section, then line
 		}) :
-	null
+	undefined
 
 ```
 
