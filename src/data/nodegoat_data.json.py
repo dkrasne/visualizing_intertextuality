@@ -119,6 +119,14 @@ for objtype in obj_list:
             meter_table = objtype["objects"]
             tables_dict["meter_table"] = meter_table
             break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 23001:
+            metrical_scheme_table = objtype["objects"]
+            tables_dict["metrical_scheme_table"] = metrical_scheme_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 23002:
+            metrical_scheme_component_table = objtype["objects"]
+            tables_dict["metrical_scheme_component_table"] = metrical_scheme_component_table
+            break
         elif objtype["objects"][id_num]["object"]["type_id"] == 21880:
             meter_pos_len_table = objtype["objects"]
             tables_dict["meter_pos_len_table"] = meter_pos_len_table
@@ -246,9 +254,17 @@ lemma_cols = {"lemma": {"67440": "objval"},
               }
 meter_cols = {"meter_name": {"67527": "objval"},
               "max_line_beats": {"67528": "objval"},
-              "recur_line_pattern": {"67529": "objval"},
-              #"ok_word_pos": {"67530": "refid"},
               "equiv_uris": {"70955": "objval"}}
+metrical_scheme_cols = {
+    "meter_scheme_name": {"71705": "objval"},
+    "recur_line_pattern": {"71707": "objval"},
+    "equiv_uris": {"71711": "objval"}
+}
+metrical_scheme_component_cols = {
+    "metrical_scheme_id": {"71708": "refid"},
+    "line_meter_id": {"71709": "refid"},
+    "unit_line": {"71710": "objval"}
+}
 meter_pos_len_cols = {"meter_id": {"67535": "refid"},
                       "position_id": {"67536": "refid"},
                       "max_length": {"67537": "objval"},
@@ -278,6 +294,8 @@ collection_df = table_to_df(collection_table,collection_cols)
 work_seg_df = table_to_df(work_seg_table,work_seg_cols)
 lemma_df = table_to_df(lemma_table,lemma_cols)
 meter_df = table_to_df(meter_table,meter_cols)
+metrical_scheme_df = table_to_df(metrical_scheme_table,metrical_scheme_cols)
+metrical_scheme_component_df = table_to_df(metrical_scheme_component_table,metrical_scheme_component_cols)
 meter_pos_len_df = table_to_df(meter_pos_len_table,meter_pos_len_cols)
 scholar_df = table_to_df(scholar_table,scholar_cols)
 publication_df = table_to_df(publication_table,publication_cols)
@@ -317,30 +335,86 @@ authorship_prob_class_df = pd.DataFrame.from_dict(authorship_prob_class_list)
 
 ############ Join tables and make JSON objects###########
 
-# Meter + position + length extended dataframe
-meter_df.index = meter_df.obj_id
-meter_df_ext = pd.merge(pd.merge(meter_df.drop("obj_id", axis=1), 
-                                 meter_pos_len_df, how="left", left_index=True, right_on="meter_id"), 
-                                 position_class_df, how="left", left_on="position_id", right_on="position_id").rename(columns={"obj_id": "meter_pos_len_id"})
+# Metrical scheme + meter + position + length extended dataframe
+meter_super_df = metrical_scheme_df.rename(columns={"obj_id": "metrical_scheme_id"}) \
+    .merge(metrical_scheme_component_df.rename(columns={"obj_id": "metrical_scheme_component_id"}), on="metrical_scheme_id", how="left", validate="1:m")
+meter_super_df = meter_super_df.drop("equiv_uris", axis=1) \
+    .merge(meter_df.drop("equiv_uris", axis=1), how="left", left_on="line_meter_id", right_on="obj_id").drop("obj_id", axis=1)
+meter_super_df = meter_super_df \
+    .merge(meter_pos_len_df.drop("unit_line", axis=1), how="left", left_on="line_meter_id", right_on="meter_id").drop("meter_id", axis=1) \
+    .merge(position_class_df, how="left", left_on="position_id", right_on="position_id").rename(columns={"obj_id": "meter_pos_len_id"})
 
 meters_dict = {}
-meter_names = list(meter_df_ext["meter_name"].unique())
-for meter in meter_names:
-    meter_dict = {}
-    meter_pos_len_list = []
-    meter_df_ext_sub = meter_df_ext.query(f"meter_name == '{meter}'").sort_values("position").reset_index()
-    for i in range(len(meter_df_ext_sub)):
-        pos_dict = {}
-        pos_dict["position"] = meter_df_ext_sub.loc[i, "position"]
-        pos_dict["pos_len"] = int(meter_df_ext_sub.loc[i, "max_length"]) # use int() to convert from np.int64
-        pos_dict["meter_pos_len_id"] = meter_df_ext_sub.loc[i, "meter_pos_len_id"]
-        pos_dict["unit_line"] = int(meter_df_ext_sub.loc[i, "unit_line"]) # use int() to convert from np.int64
-        meter_pos_len_list.append(pos_dict)
-    meter_dict["meter_id"] = meter_df_ext_sub["meter_id"].unique()[0]
-    meter_dict["max_line_beats"] = int(meter_df_ext_sub["max_line_beats"].unique()[0]) # use int() to convert from np.int64
-    meter_dict["recur_line_pattern"] = int(meter_df_ext_sub["recur_line_pattern"].unique()[0]) # use int() to convert from np.int64
-    meter_dict['positions'] = meter_pos_len_list
-    meters_dict[meter] = meter_dict
+meter_scheme_names = list(meter_super_df["meter_scheme_name"].unique())
+meter_names = list(meter_super_df["meter_name"].unique())
+
+for meter_scheme in meter_scheme_names:
+    meter_scheme_dict = {}
+    meter_scheme_info = metrical_scheme_df.query("meter_scheme_name == @meter_scheme").reset_index(drop=True)
+    metrical_scheme_id = meter_scheme_info.at[0,"obj_id"]
+    recur_line_pattern = meter_scheme_info.at[0, "recur_line_pattern"]
+
+    meter_sub_df = meter_super_df.query("metrical_scheme_id == @metrical_scheme_id")
+    max_line_beats = meter_sub_df.max_line_beats.max()
+
+    meter_scheme_dict["metrical_scheme_id"] = metrical_scheme_id
+    meter_scheme_dict["max_line_beats"] = max_line_beats
+    meter_scheme_dict["recur_line_pattern"] = recur_line_pattern
+    meter_scheme_dict["components"] = []
+
+    line_meter_ids = meter_sub_df.line_meter_id.unique()
+
+    for meter_id in line_meter_ids:
+        meter_sub_dict = {}
+        meter_sub_df2 = meter_sub_df.query("line_meter_id == @meter_id").sort_values("position").reset_index(drop=True)
+        meter_name = meter_sub_df2.at[0, "meter_name"]
+        unit_line = meter_sub_df2.at[0, "unit_line"]
+        meter_sub_dict["unit_line"] = unit_line
+        meter_sub_dict["meter_id"] = meter_id
+        meter_sub_dict["meter_name"] = meter_name
+
+        meter_sub_dict["positions"] = []
+        try:
+            for j in range(len(meter_sub_df2)):
+                pos_dict = {}
+                pos_dict["position"] = meter_sub_df2.loc[j, "position"]
+                pos_dict["pos_len"] = int(meter_sub_df2.loc[j, "max_length"])
+                pos_dict["meter_pos_len_id"] = meter_sub_df2.loc[j, "meter_pos_len_id"]
+                meter_sub_dict["positions"].append(pos_dict)
+        except:
+            continue
+
+        meter_scheme_dict["components"].append(meter_sub_dict)
+
+    meters_dict[meter_scheme] = meter_scheme_dict
+
+
+# meter_df.index = meter_df.obj_id
+# meter_df_ext = pd.merge(pd.merge(meter_df.drop("obj_id", axis=1), 
+#                                  meter_pos_len_df, how="left", left_index=True, right_on="meter_id"), 
+#                                  position_class_df, how="left", left_on="position_id", right_on="position_id").rename(columns={"obj_id": "meter_pos_len_id"})
+
+# meters_dict = {}
+# meter_names = list(meter_df_ext["meter_name"].unique())
+# for meter in meter_names:
+#     meter_dict = {}
+#     meter_pos_len_list = []
+#     meter_df_ext_sub = meter_df_ext.query(f"meter_name == '{meter}'").sort_values("position").reset_index()
+#     for i in range(len(meter_df_ext_sub)):
+#         pos_dict = {}
+#         pos_dict["position"] = meter_df_ext_sub.loc[i, "position"]
+#         try:
+#             pos_dict["pos_len"] = int(meter_df_ext_sub.loc[i, "max_length"]) # use int() to convert from np.int64
+#         except:
+#             continue
+#         pos_dict["meter_pos_len_id"] = meter_df_ext_sub.loc[i, "meter_pos_len_id"]
+#         pos_dict["unit_line"] = int(meter_df_ext_sub.loc[i, "unit_line"]) # use int() to convert from np.int64
+#         meter_pos_len_list.append(pos_dict)
+#     meter_dict["meter_id"] = meter_df_ext_sub["meter_id"].unique()[0]
+#     meter_dict["max_line_beats"] = int(meter_df_ext_sub["max_line_beats"].unique()[0]) # use int() to convert from np.int64
+#     meter_dict["recur_line_pattern"] = int(meter_df_ext_sub["recur_line_pattern"].unique()[0]) # use int() to convert from np.int64
+#     meter_dict['positions'] = meter_pos_len_list
+#     meters_dict[meter] = meter_dict
 
 # write meters dictionary to JSON file
 with open(scriptdir+"/meters.json", "w") as meters_json:

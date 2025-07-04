@@ -2,7 +2,7 @@ import * as d3 from "npm:d3";
 
 //import {FileAttachment} from "npm:@observablehq/stdlib";
 
-const proseID = "20849306";
+const proseID = "21025561";
 
 function createLookupIDTable(nodegoatTables) {
     const lookupIDTable = new Map();

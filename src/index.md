@@ -334,12 +334,17 @@ const meterID = workSegVars.workSegMeterID;
 let positions;
 let meterLen;
 let linePattern;
+let schemeNumLines;
 
-for (let meter in meters) {
-	if (meters[meter].meter_id === meterID) {
-		positions = meters[meter].positions;
-		meterLen = meters[meter].max_line_beats;
-		linePattern = meters[meter].recur_line_pattern;
+for (let m in meters) {
+    let meterScheme = meters[m];
+	if (meterScheme.metrical_scheme_id === meterID) {
+        for (let n in meterScheme.components){
+            let lineMeter = meterScheme.components[n];
+            positions = n == 0 ? lineMeter.positions : positions.concat(lineMeter.positions);
+            }
+		meterLen = meterScheme.max_line_beats;
+		linePattern = meterScheme.recur_line_pattern ? meterScheme.recur_line_pattern : schemeNumLines = meterScheme.components.length;
 	}
 }
 
@@ -347,31 +352,17 @@ const meterPosArr = d3.range(1, meterLen+1);
 let linePatternArr = d3.range(1,linePattern+1);
 
 let i = 1;
-if (linePattern === 1) {		// for stichic meters
 	for (let pos in positions) {
+        if (positions[pos].position === "1a") {i = 1}
 		const posBeats = positions[pos].pos_len;
 		positions[pos].gridNums = [];
+        let lineMeter = nodegoatTables.meter_pos_len_table.filter(mpos => mpos.obj_id === positions[pos].meter_pos_len_id)[0].meter_id;
+        positions[pos].lineMeter = lineMeter;
 		for (let j = 0; j < posBeats; j++) {
 			positions[pos].gridNums.push(i);
-			i += 1;
+            i += 1;
 		}
 	}
-} else {	// for stanzaic meters
-	for (let line in linePatternArr){
-		let currPatternLine = linePatternArr[line];
-		i = 1;
-		for (let pos in positions) {
-			if (positions[pos].unit_line === currPatternLine) {
-				const posBeats = positions[pos].pos_len;
-				positions[pos].gridNums = [];
-				for (let j = 0; j < posBeats; j++) {
-					positions[pos].gridNums.push(i);
-					i += 1;
-				}
-			}
-		}
-	}
-}
 
 ```
 
@@ -509,13 +500,18 @@ for (let word in wordsFiltered) {
 const intertextsArrComplete = [];
 
 for (let line in lineArr) {
+    let lineMeter;
+    if (wordsFiltered.filter(word => word.line_num === lineArr[line]).length > 0) {
+        let wordStart = wordsFiltered.filter(word => word.line_num === lineArr[line])[0].start_pos_id;
+        lineMeter = nodegoatTables.meter_pos_len_table.filter(pos => pos.obj_id === wordStart)[0].meter_id;
+        }
 	for (let i in meterPosArr) {
 		let intertextObj = {};
 		intertextObj.lineNum = lineArr[line];
 		intertextObj.linePos = meterPosArr[i];
 		intertextObj.intxtCnt = 0;
 		for (let posn in positions) {
-			if (positions[posn].gridNums.includes(meterPosArr[i])) {
+			if (positions[posn].gridNums.includes(meterPosArr[i]) && positions[posn].lineMeter === lineMeter) {
 				intertextObj.linePosID = positions[posn].meter_pos_len_id;
 				break;
 			}
@@ -556,8 +552,8 @@ if (intertextsArr.length > 0) {
 let gridX;
 
 for (let meter in meters) {
-	if (meters[meter].meter_id === meterID) {
-		gridX = meters[meter].max_line_beats
+	if (meters[meter].metrical_scheme_id === meterID) {
+		gridX = meters[meter].max_line_beats;
 	}
 }
 
