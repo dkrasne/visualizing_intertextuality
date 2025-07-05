@@ -10,7 +10,11 @@ toc: false
 
 [See the About page](./about) for an explanation of this project.
 
-*N.B. As Observable is phasing out its cloud hosting, this site will be migrating to http://dkrasne.github.io/visualizing_intertextuality. Please take note of the new address.*
+*N.B. As Observable is phasing out its cloud hosting, this site has relocated to http://dkrasne.github.io/visualizing_intertextuality. Please take note of the new address.*
+
+<!-- Probably make a 'Statistics' or 'Fun facts' box here, to the right, or on the About page -->
+
+Number of words of Latin poetry (or its antecedents) currently in the database: **${nodegoatTables.word_instance_table.length}**
 
 ## Select passage to view
 

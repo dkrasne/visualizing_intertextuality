@@ -83,15 +83,15 @@ The choice of [Observable Framework](https://observablehq.com/framework/) for ho
 There is currently no database of intertexts. Some benchmark datasets exist for the purpose of testing and training tools designed for detecting intertexts, notably [Dexter *et al.* (2024)](#dexter2024), who provide a flat CSV file with 945 parallels (some comprised of multiple words) between the first book of Valerius Flaccus&rsquo; *Argonautica* and four other epics (one of which is approximately contemporary with the *Argonautica*, and three of which are earlier) that are recorded in three specific commentaries. This database, therefore, will itself provide a valuable resource and is accordingly designed with an eye both to future developments of the present project and to reuse by other scholars: not all of the entered data is used in the project as it currently stands. (It is important to note that one significant difference between this project&rsquo;s selection of intertexts and [Dexter *et al.* (2024)](#dexter2024)&rsquo;s approach is that this project only includes parallels specifically identified as probable points of allusion, whereas they also include parallel *uses* of words, such as those where a commentator identifies another word-use that shares a similar unusual meaning.)
 
 <figure>
-<a href="https://pratt.darcykrasne.com/Portfolio/viz_intxt/nodegoat_model_2025-6-15.png"><img src="./images/nodegoat_model_2025-6-15.png" style="max-width: 100%;" alt="A representation of a database, showing objects connected by lines"></a>
+<a href="https://www.darcykrasne.com/digital_humanities/viz_intxt/nodegoat_model_2025-7-5.png"><img src="./images/nodegoat_model_2025-7-5.png" style="max-width: 100%;" alt="A representation of a database, showing objects connected by lines"></a>
 <figcaption>
-The database model, as of 15 June 2025.
+The database model, as of 5 July 2025.
 </figcaption>
 </figure>
 
-The critical core tables are `word instance`, `word-level intertext`, `word-level intertext (grouping)`, `author`, `work`, `work segment`, `meter`, and `meter position length`. Each `word instance` object represents a single word in a single line of a single poem; each `word-level intertext` object comprises a source word and a target word. Since intertexts are often made up of several words, a `word-level intertext (grouping)` object clusters these intertext pairings together, taking advantage of nodegoat&rsquo;s [&ldquo;multiple&rdquo; option](https://nodegoat.net/documentation.s/52/object-type). Words are not assigned directly to works, but to work segments. While that choice is due to ensuring that the database is in first normal form, the way the work segment is determined is due not just to conventional poetic divisions (such as books) but also to meter, because the basis of the intertextual density display is a grid whose width is determined by the meter of the piece. As many works are polymetric, the meter is assigned to the work segment, which can represent anything from an entire work (in the case of, e.g., an epyllion) to a single poem within a multi-book work (e.g., one of Statius&rsquo;s *Silvae*) or a passage of a drama (e.g., a section of a choral passage in a Senecan tragedy). A `word instance` is placed within a `work segment` by line number and by location within the line, based not on word order or syllable count but on metrical *sedes* (placement). (This decision was made both to accommodate textual variation and to enable the placement of words within the grid.) The placement is defined by the word&rsquo;s beginning and ending `meter position length` objects, which in turn specify the maximum number of beats that can be assigned to a given metrical position (as well as specifying which line of a stanza the position belongs to, for stichic meters): these ultimately govern the appearance of the word in the grid, but they also offer the future possibility of comparing the metrical placement of intertexts. (I am not going into detail here on some decisions regarding the calculation of metrical &ldquo;length&rdquo; or the properties of database objects because I hope to publish some of that information in due course; however, it will ultimately be available in some form.)
+The critical core tables are `word instance`, `word-level intertext`, `word-level intertext (grouping)`, `author`, `work`, `work segment`, `meter (line)`, `metrical scheme`, and `meter position length`. Each `word instance` object represents a single word in a single line of a single poem; each `word-level intertext` object comprises a source word and a target word. Since intertexts are often made up of several words, a `word-level intertext (grouping)` object clusters these intertext pairings together, taking advantage of nodegoat&rsquo;s [&ldquo;multiple&rdquo; option](https://nodegoat.net/documentation.s/52/object-type). Words are not assigned directly to works, but to work segments. While that choice is due to ensuring that the database is in first normal form, the way the work segment is determined is due not just to conventional poetic divisions (such as books) but also to meter, because the basis of the intertextual density display is a grid whose width is determined by the meter of the piece. As many works are polymetric, the meter is assigned to the work segment, which can represent anything from an entire work (in the case of, e.g., an epyllion) to a single poem within a multi-book work (e.g., one of Statius&rsquo;s *Silvae*) or a passage of a drama (e.g., a section of a choral passage in a Senecan tragedy). A `word instance` is placed within a `work segment` by line number and by location within the line, based not on word order or syllable count but on metrical *sedes* (placement). (This decision was made both to accommodate textual variation and to enable the placement of words within the grid.) The placement is defined by the word&rsquo;s beginning and ending `meter position length` objects, which in turn specify the maximum number of beats that can be assigned to a given metrical position (as well as specifying which line of a stanza the position belongs to, for stichic meters): these ultimately govern the appearance of the word in the grid, but they also offer the future possibility of comparing the metrical placement of intertexts. (I am not going into detail here on some decisions regarding the calculation of metrical &ldquo;length&rdquo; or the properties of database objects because I hope to publish some of that information in due course; however, it will ultimately be available in some form.)
 
-While the project overall is strictly concerned with Latin poetry, Greek texts also need to be included within the database due to Latin poetry&rsquo;s clear intertextual engagement with them. Accordingly, each author has a language property that specifies them as either a Greek or Latin author. While this does not allow for the possibility of bilingual authors, our surviving texts do not really compass this scenario, or do so insufficiently to justify putting the language label with works instead of authors. ([The Late Antique poet Claudian is one such counterexample](https://antigonejournal.com/2024/12/claudians-gigantomachia/), but he is so late that his works are unlikely to serve as the *source* of any intertexts in the database; and this is the only situation in which a Greek text can enter the database.) Prose texts are also included in the database, but they cannot be selected in the interface.
+While the project overall is strictly concerned with Latin poetry, Greek texts also need to be included within the database due to Latin poetry&rsquo;s clear intertextual engagement with them. Accordingly, each author has a language property that specifies them as either a Greek or Latin author. While this does not allow for the possibility of bilingual authors, our surviving texts do not really compass this scenario, or do so insufficiently to justify putting the language label with works instead of authors. ([The Late Antique poet Claudian is one such counterexample](https://antigonejournal.com/2024/12/claudians-gigantomachia/), but he is so late that his works are unlikely to serve as the *source* of any intertexts in the database; and this is the only situation in which a Greek text can enter the database.) Prose texts are also included in the database, but they, like Greek authors, cannot be selected in the interface.
 
 Finally, each `word-level intertext` records at least one scholarly source (sometimes the original publication proposing the intertext, and sometimes a commentary), which are collectively stored in a `publication` table. (It is also possible to record an ancient work as the scholarly source, since occasionally the explicit recognition of an intertext goes back to a grammarian of antiquity.) This information is not currently displayed in any fashion, but it will eventually be shown when a passage is selected.
 
@@ -409,33 +409,93 @@ Once the passage is chosen, the script gathers any `word instance` that falls wi
 <details><summary>Click to view the code for building the grid.</summary>
 
 ```js run=false
-const intertextsArrComplete = [];
+// Define grid width based on the selection's meter.
 
-for (let line in lineArr) {
-	for (let i in meterPosArr) {
-		let intertextObj = {};
-		intertextObj.lineNum = lineArr[line];
-		intertextObj.linePos = meterPosArr[i];
-		intertextObj.intxtCnt = 0;
-		for (let posn in positions) {
-			if (positions[posn].gridNums.includes(meterPosArr[i])) {
-				intertextObj.linePosID = positions[posn].meter_pos_len_id;
-				break;
-			}
-		}
-		for (let word in wordsFiltered) {
-			if (wordsFiltered[word].line_num === intertextObj.lineNum && wordsFiltered[word].posIDs.includes(intertextObj.linePosID)) {
-				intertextObj.wordObj = wordsFiltered[word];
-				intertextObj.intxtCnt = wordsFiltered[word].directIntertexts + wordsFiltered[word].indirectIntertexts;
-				intertextObj.word = wordsFiltered[word].word;
-			}
-		}
-		
-		intertextsArrComplete.push(intertextObj);
+let gridX;
+
+for (let meter in meters) {
+	if (meters[meter].metrical_scheme_id === meterID) {
+		gridX = meters[meter].max_line_beats;
 	}
 }
 
-const intertextsArr = intertextsArrComplete.filter(pos => pos.word); // only include cells that have a word assigned to them
+// Define grid height based on number of lines.
+
+const gridY = (lineRange.lastLine - lineRange.firstLine) + 1;  // I may need to modify this to accomodate passages with extra lines
+
+const cellSize = 20;
+const gridHeight = gridY * cellSize;
+const gridWidth = gridX * cellSize;
+
+// Create plot, conditional on the existence of intertexts
+
+// set tick range; increase step every ten (max) intertexts
+let step;
+if (d3.max(intxtCnts)%10 === 0) {
+	step = d3.max(intxtCnts)/10;
+}
+else {
+	step = Math.floor(d3.max(intxtCnts)/10) + 1;
+};
+let tickRange = d3.range(Math.min(...intxtCnts), Math.max(...intxtCnts)+1, step);
+
+const plotDisplay = intertextsArr.every(intxt => intxt.intxtCnt === 0) ? null : Plot.plot({
+	grid: true,
+	x: {
+		label: null, 
+		domain: d3.range(1,gridX+1),
+		padding: 0,
+		axis: null,
+		},
+	y: {
+		label: 'Line', 
+		domain: d3.range(lineRange.firstLine, lineRange.lastLine +1),
+		tickSize: 0,
+		},
+	color: {scheme: "Greens", 
+		legend: true, 
+		label: "Total Intertexts (direct & indirect)",
+		ticks: tickRange,
+		tickFormat: d => Math.floor(d),
+		},
+	marks: [
+		Plot.cell(intertextsArr, {
+			x: "linePos",
+			y: "lineNum",
+			fill: d => d.wordObj.directIntertexts + d.wordObj.indirectIntertexts,
+			tip: {format: {
+				word: true,
+				x: false,
+				y: false,
+				lineNum: true,
+				fill: false
+			}},
+			channels: {
+				title: d => `${d.wordObj.word} (line ${d.lineNum})\n# direct intertexts: ${d.wordObj.directIntertexts}\n# indirect intertexts: ${d.wordObj.indirectIntertexts}`,
+				word: d => d.wordObj.word,
+				lineNum: {
+					value: "lineNum",
+					label: "line"
+				},
+				dirIntxt: {
+					value: d => d.wordObj.directIntertexts,
+					label: "# direct intertexts"
+				},
+				indIntxt: {
+					value: d => d.wordObj.indirectIntertexts,
+					label: "# inherited intertexts"
+				},
+			},
+		})
+	],
+	style: {fontSize: "12pt"},
+	width: gridWidth + 120,
+	height: gridHeight + 50,
+	marginTop: 20,
+	marginRight: 50,
+	marginBottom: 30,
+	marginLeft: 70
+});
 ```
 
 </details>
