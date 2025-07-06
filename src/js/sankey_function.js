@@ -588,7 +588,7 @@ nodeRect
             .attr("dy","1em")
             .text(workSection);
     } else if (sankeyType === "word") {
-      console.log(thisNode);
+      //console.log(thisNode);
       let thisWord = lookupIDTable.get(thisNode.id);
       let author = lookupIDTable.get(thisWord.authorID);
       let work = lookupIDTable.get(thisWord.workID);

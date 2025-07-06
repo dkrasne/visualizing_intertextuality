@@ -827,7 +827,7 @@ const sectionSankey = nodes.length > 0 && links.length > 0 ?
 				let authorComp = d3.descending(lookupIDTable.get(nodeA.author), lookupIDTable.get(nodeB.author));
 				// Within authors, sort so that all work sections are in order by work
 				let workComp = d3.descending(lookupIDTable.get(nodeA.work), lookupIDTable.get(nodeB.work));
-				let workSegComp = d3.descending(lookupIDTable.get(a.id).section,lookupIDTable.get(b.id).section);
+				let workSegComp = lookupIDTable.get(b.id).section.localeCompare(lookupIDTable.get(a.id).section, undefined, {numeric: true});
 				if (authorComp !== 0) return authorComp; // if the authors aren't the same, don't go any further in sorting
 				if (workComp !== 0) return workComp;
 				return workSegComp; // sort by work section
@@ -859,7 +859,8 @@ const wordSankey = wordIntxtNodes.length > 0 && wordIntxtEdges.length > 0 ?
 				let nodeB = lookupIDTable.get(b.id);
 				let authorComp = d3.descending(lookupIDTable.get(nodeA.authorID),lookupIDTable.get(nodeB.authorID));
 				let workComp = d3.descending(lookupIDTable.get(nodeA.workID),lookupIDTable.get(nodeB.workID));
-				let workSegComp = d3.descending(lookupIDTable.get(nodeA.workSegID),lookupIDTable.get(nodeB.workSegID));
+				let workSegComp = lookupIDTable.get(nodeB.workSegID).section.localeCompare(lookupIDTable.get(nodeA.workSegID).section, undefined, {numeric: true});
+				//let workSegComp = d3.descending(lookupIDTable.get(nodeA.workSegID).section,lookupIDTable.get(nodeB.workSegID).section);
 				let lineComp = d3.descending(nodeA.lineNum,nodeB.lineNum);
 				if (authorComp !== 0) {return authorComp;}
 				else if (workComp !== 0) {return workComp;}

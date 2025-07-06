@@ -370,7 +370,7 @@ for meter_scheme in meter_scheme_names:
         meter_sub_df2 = meter_sub_df.query("line_meter_id == @meter_id").sort_values("position").reset_index(drop=True)
         meter_name = meter_sub_df2.at[0, "meter_name"]
         unit_line = meter_sub_df2.at[0, "unit_line"]
-        meter_sub_dict["unit_line"] = unit_line
+        meter_sub_dict["unit_line"] = unit_line     # if I need to turn single-value lists into non-lists, this is the place to do it
         meter_sub_dict["meter_id"] = meter_id
         meter_sub_dict["meter_name"] = meter_name
 
