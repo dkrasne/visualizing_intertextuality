@@ -1,5 +1,6 @@
 ---
 title: Full Intertext Diagram
+theme: [wide, air]
 toc: false
 ---
 

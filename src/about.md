@@ -1,5 +1,6 @@
 ---
 title: About the Project
+theme: [wide, air]
 ---
 
 # Visualizing Intertextuality
@@ -593,7 +594,7 @@ The colors (which distinguish between authors in the passage-level and full inte
 
 ## Next Steps
 
-In addition to continuing database input, the code needs to be tweaked in order to handle anonymous works, extranumerical lines (such as 845a, which would come between 845 and 846), and alternative readings. (The first of these is the most important.) A &ldquo;bibliography&rdquo; of the sources that document the displayed intertexts also needs to be added.
+In addition to continuing database input, the code needs to be tweaked in order to handle anonymous works, extranumerical lines (such as 845a, which would come between 845 and 846), and alternative readings. (The first of these is the most important.)
 
 Beyond those crucial improvements, a few additional potential long-term developments are:
 
