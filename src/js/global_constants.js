@@ -33,7 +33,7 @@ function createLookupIDTable(nodegoatTables) {
     for (let i in nodegoatTables.work_table) {
         let item = nodegoatTables.work_table[i];
         let key = item.obj_id;
-        let def = item.title;
+        let def = {'workTitle': item.title, 'authorID': item.author_id};
         lookupIDTable.set(key, def);
     }
 
@@ -45,7 +45,7 @@ function createLookupIDTable(nodegoatTables) {
         let workID = String(item.work_id);
         let meterID = String(item.meter_id);
         let authorID = nodegoatTables.work_table.find(work => work.obj_id === workID).author_id;
-        let work = lookupIDTable.get(workID);
+        let work = lookupIDTable.get(workID).workTitle;
         let section_string;
         if (section && subsec) {
             section_string = `${section}, ${subsec}`;
@@ -63,6 +63,30 @@ function createLookupIDTable(nodegoatTables) {
         let key = item.match_type_id;
         let def = item.match_type;
         lookupIDTable.set(key, def);
+    }
+
+    // for (let i in nodegoatTables.sources_table) {
+    //     let item = nodegoatTables.sources_table[i];
+    //     let sourceType = item.source_type_id;
+    //     let key = item.source_id;
+    //     let author 
+    // }
+    for (let i in nodegoatTables.scholar_table) {
+        let item = nodegoatTables.scholar_table[i];
+        let key = item.obj_id;
+        let def = `${item.surname}, ${item.forenames}`;
+        lookupIDTable.set(key, def);
+    }
+
+    for (let i in nodegoatTables.publication_table) {
+        let item = nodegoatTables.publication_table[i];
+        let key = item.obj_id;
+        let def = {authorIDs: item.author_ids}
+        if (item.article_chapter_title) {def['articleChapterTitle'] = item.article_chapter_title}
+        if (item.book_journal_title) {def['bookJournalTitle'] = item.book_journal_title}
+        if (item.publication_date) {def['pubDate'] = item.publication_date} else {def['pubDate'] = 'forthcoming'}
+        if (item.issue_number) {def['issueNumber'] = item.issue_number}
+        lookupIDTable.set(key, def)
     }
 
     return lookupIDTable;

@@ -109,6 +109,20 @@ html`
 
 <hr>
 
+<div>
+
+## References
+
+To view the references for all the passage&rsquo;s intertexts, tick the following box; otherwise, only references for a selected word will be displayed.
+
+```js
+const refAll = view(Inputs.toggle({label: "View all?"}))
+```
+
+<ul style="max-width:none" id="references">
+</ul>
+</div>
+
 <!-- ```js
 if (!plotDisplay) {display(html`<p></p>`)}
 else {
@@ -672,7 +686,8 @@ const intertextsTableCopy = JSON.parse(JSON.stringify(intertextsTable));
 let passageIntxts = intertextsTableCopy.filter(intxt => passageWordIntxts.includes(intxt.source_word_id) || passageWordIntxts.includes(intxt.target_word_id));
 
 // Get the IDs for those intertexts, both the word-level intertext IDs and the word-level intertext group IDs
-let intxtIDs = passageIntxts.map(intxt => [intxt.intxt_grp_id, intxt.intxt_id]).flat().filter(id => id !== null);
+const intxtIDs = passageIntxts.map(intxt => [intxt.intxt_grp_id, intxt.intxt_id]).flat().filter(id => id !== null);
+const passageIntxtIDs = passageIntxts.map(intxt => intxt.intxt_id);
 
 // FILTER SANKEY DATA //
 
@@ -706,6 +721,8 @@ const sankeyFilteredNodes = sankeyData.nodes.filter(node => sankeyFilteredEdges.
 const ancestorIntertexts = [];
 const descendantIntertexts = [];
 
+const wordSankeyIntxtIDs = [];
+
 let currWordId;
 let ancestorWordIDs = [];
 let descendantWordIDs = [];
@@ -722,6 +739,7 @@ if (plotCurrSelect) {
 			if (currWordId === intxt.target_word_id) {
 				ancestorIntertexts.push(intxt);
 				ancestorWordIDs.push(intxt.source_word_id);
+				wordSankeyIntxtIDs.push(intxt.intxt_id);
 			}
 		}
 	}
@@ -732,6 +750,7 @@ if (plotCurrSelect) {
 			if (currWordId === intxt.source_word_id) {
 				descendantIntertexts.push(intxt);
 				descendantWordIDs.push(intxt.target_word_id);
+				wordSankeyIntxtIDs.push(intxt.intxt_id);
 			}
 		}
 	}
@@ -873,7 +892,100 @@ const wordSankey = wordIntxtNodes.length > 0 && wordIntxtEdges.length > 0 ?
 
 ```
 
+<!-- Create references list -->
 
+```js
+let refChoice = refAll ? passageIntxtIDs.concat(wordSankeyIntxtIDs) : wordSankeyIntxtIDs;
+let intxtIdSet = new Set(refChoice);
+let sourcesFiltered = nodegoatTables.sources_table.filter(intxt => intxtIdSet.has(intxt.obj_id))
+let sourcesFilteredIDs = Array.from(new Set(sourcesFiltered.map(item => item.source_id)))
+//console.log(lookupIDTable.get(sourcesFilteredIDs[0]))
+
+const sourcesArray = []
+
+for (let i in sourcesFilteredIDs) {
+	let sourceID = sourcesFilteredIDs[i];
+	let sourceDict = {};
+
+	let source = sourcesFiltered.filter(source => source.source_id === sourceID);
+
+	let sourceLocs = source.map(source => source.source_location);
+	sourceLocs = Array.from(new Set(sourceLocs));
+
+	sourceDict['sourceID'] = sourceID;
+	sourceDict['sourceLocs'] = sourceLocs.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+
+	sourcesArray.push(sourceDict);
+
+}
+
+// console.log(sourcesArray);
+// console.log(lookupIDTable.get("20308257"))
+
+const pubList = []
+
+for (let i in sourcesFilteredIDs) {
+	let pub = lookupIDTable.get(sourcesFilteredIDs[i]);
+	let pubString = '';
+	
+	// add logic in here to deal with possibility that source is an ancient text -- will need to change the list that this is drawing on to include source type
+
+	if (pub.authorID) {
+		let author = lookupIDTable.get(pub.authorID); 
+		pubString = author;
+		let workTitle = pub.workTitle;
+		pubString += `, <i>${workTitle}</i>`
+	}
+
+	else {
+	// add author(s), separated by comma if more than one
+	for (let i in pub.authorIDs) {
+		pubString += i > 0 ? ', ' : '';
+		let author = lookupIDTable.get(pub.authorIDs[i]);
+		pubString += author;
+	}
+
+	// add publication date
+	pubString += ` (${pub.pubDate}) `;
+
+	// add article/chapter title if there is one
+	pubString += pub.articleChapterTitle ? `&ldquo;${pub.articleChapterTitle},&rdquo; ` : ''
+	
+	// add book/journal title
+	pubString += `<i>${pub.bookJournalTitle}</i>`
+
+	// add journal issue number if there is one
+	pubString += pub.issueNumber ? ` ${pub.issueNumber}` : ''
+}
+
+	// get citation locations for source and add them
+	let sourceLocs = sourcesArray.filter(source => source.sourceID === sourcesFilteredIDs[i])[0].sourceLocs.filter(loc => loc !== '');
+	sourceLocs = sourceLocs.length > 0 ? sourceLocs.join(', ') : ''
+	pubString += sourceLocs ? `, ${sourceLocs}.` : '.'
+
+	pubList.push(pubString);
+
+	
+}
+
+
+// const htmlTest = pubList.sort().map(item => html`<li>${item}</li>`);
+
+// let textString = "<i>this is italics</i> and this is not <b>but this is bold</b> &ldquo;&rdquo;"
+```
+
+```js
+const refDiv = d3.select("ul#references");
+
+refDiv.selectAll("li").data(pubList.sort()).join("li").join("text").html(d => d);
+
+```
+
+<!--
+```js
+display(html`<ul>${htmlTest}</ul>`)
+```
+-->
 
 
 # Sandbox

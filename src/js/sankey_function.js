@@ -582,7 +582,7 @@ nodeRect
             // .attr("x","5")
             // .attr("dy","1em")
             .attr("font-style","italic")
-            .text(lookupIDTable.get(workID));
+            .text(lookupIDTable.get(workID).workTitle);
         tooltipNodesText.append("tspan")
             .attr("x","5")
             .attr("dy","1em")
@@ -591,7 +591,7 @@ nodeRect
       //console.log(thisNode);
       let thisWord = lookupIDTable.get(thisNode.id);
       let author = lookupIDTable.get(thisWord.authorID);
-      let work = lookupIDTable.get(thisWord.workID);
+      let work = lookupIDTable.get(thisWord.workID).workTitle;
       let workSeg = lookupIDTable.get(thisWord.workSegID).section ? lookupIDTable.get(thisWord.workSegID).section : '';
       let proseCheck = lookupIDTable.get(thisWord.workSegID).meterID === proseID ? true : false;
       let linePrefix = proseCheck ? '\u00a7' : 'line';

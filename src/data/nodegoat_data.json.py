@@ -182,6 +182,8 @@ def table_to_df(table, cols_dict):
                                 splitval = newval.split("_")
                                 refval[i] = {'refid': splitval[0], 
                                              'refval': splitval[1]}
+                            elif isinstance(newval, int):
+                                refval[i] = str(newval)
                     tdict[str(key)] = refval
                 except:
                     tdict[str(key)] = None
@@ -271,7 +273,7 @@ meter_pos_len_cols = {"meter_id": {"67535": "refid"},
                       #"unit_line": {"68127": "objval"}
                       }
 ### The rest aren't necessary for the actual visualization ###
-publication_cols = {"author_id": {"67416": "refid"},
+publication_cols = {"author_ids": {"67416": "refid"},
                     "publication_date": {"67417": "objval"},
                     "article_chapter_title": {"67418": "objval"},
                     "book_journal_title": {"67419": "objval"},
@@ -433,6 +435,26 @@ for i, df in enumerate(df_list):
     df_name = tables_list[i]
     new_dict = df.to_dict(orient='records')
     tables_df_to_dict[df_name] = new_dict
+
+sources_table = []
+for obj_id in word_lvl_intxt_table:
+    intxt_sources = word_lvl_intxt_table[obj_id]['object']['object_sources']
+    if isinstance(intxt_sources, dict):
+        for source_type_id in intxt_sources.keys():
+            for source in intxt_sources[source_type_id]:
+                sources_dict = {}
+                sources_dict['obj_id'] = obj_id
+                sources_dict['source_type_id'] = source_type_id
+                source_id = source['object_source_ref_object_id']
+                sources_dict['source_id'] = str(source_id)
+                source_location = source['object_source_link']
+                sources_dict['source_location'] = source_location
+                sources_table.append(sources_dict)
+    # else:
+    #     sources_dict = {'obj_id': obj_id, 'source_type_id': None, 'source_id': None}
+    #     sources_table.append(sources_dict)
+
+tables_df_to_dict['sources_table'] = sources_table
 
 with open(scriptdir+"/nodegoat_tables.json", "w") as table_json:
     json.dump(tables_df_to_dict, table_json)
