@@ -961,7 +961,7 @@ for (let i in sourcesFilteredIDs) {
 	// get citation locations for source and add them
 	let sourceLocs = sourcesArray.filter(source => source.sourceID === sourcesFilteredIDs[i])[0].sourceLocs.filter(loc => loc !== '');
 	sourceLocs = sourceLocs.length > 0 ? sourceLocs.join(', ') : ''
-	pubString += sourceLocs ? `, ${sourceLocs}.` : '.'
+	pubString += sourceLocs ? `: ${sourceLocs}.` : '.'
 
 	pubList.push(pubString);
 
