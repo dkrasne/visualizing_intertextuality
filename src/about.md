@@ -6,7 +6,7 @@ theme: [wide, air]
 # Visualizing Intertextuality
 ## About the Project
 
-This is a project to visualize intertexts in Latin poetry using [nodegoat](https://nodegoat.net/), [Observable Framework](https://observablehq.com/framework/), [Python](https://www.python.org/), [JavaScript](https://en.wikipedia.org/wiki/JavaScript), and [D3.js](https://d3js.org/). The project is explained in detail below, in terms that should be equally accessible to Latin poetry scholars with no background in coding and Digital Humanities experts&mdash;including those with no background in Latin&mdash;although some portions of the discussion are directed more towards one group or the other. (Interested parties can also [view the code on GitHub](https://github.com/dkrasne/visualizing_intertextuality).)
+This is a project to visualize intertexts and intertextual relationships in Latin poetry. The project is explained in detail below, in terms that should be equally accessible to Latin poetry scholars with no background in coding and Digital Humanities experts&mdash;including those with no background in Latin&mdash;although some portions of the discussion are directed more towards one group or the other. (Interested parties can also [view the code on GitHub](https://github.com/dkrasne/visualizing_intertextuality).)
 
 ## Background: What is Intertextuality?
 
@@ -71,7 +71,7 @@ One need not understand Latin to see the words shared between the lines of poetr
 
 ## Considerations and Tools
 
-This project asks how intertextuality can be displayed and comprehended through a visual, rather than textual, medium. The goal is to conceptualize and develop alternative methods of visualizing the intertextual richness and complexity of a given passage, starting from the assumption that such a visualization requires two different dimensions: one that shows the density of intertexts within a given passage, and one that shows the referential network arising around the passage. The structure of the data and its output should enable analytical approaches and questions, and the tools have been selected with these considerations in mind.
+This project asks how intertextuality can be displayed and comprehended through a visual, rather than textual, medium. The goal is to conceptualize and develop alternative methods of visualizing the intertextual richness and complexity of a given passage, starting from the assumption that such a visualization requires two different dimensions: one that shows the density of intertexts within a given passage, and one that shows the referential network arising around the passage. The structure of the data and its output should enable analytical approaches and questions, and the tools&mdash; [nodegoat](https://nodegoat.net/), [Observable Framework](https://observablehq.com/framework/), [Python](https://www.python.org/), [JavaScript](https://en.wikipedia.org/wiki/JavaScript), and [D3.js](https://d3js.org/)&mdash;have been selected with these considerations in mind.
 
 The data is stored in a [nodegoat](https://nodegoat.net/) [object-relational database](https://en.wikipedia.org/wiki/Object%E2%80%93relational_database). nodegoat was chosen for several reasons, including its humanities-oriented design, its ease of use, and its ability to expose the data as Linked Open Data. (While the open-source graph database [neo4j](https://neo4j.com/) was considered as an alternative option due to the intrinsic interconnectivity of intertextuality, the *relationship* and *structure* of that interconnectivity are also critical.) Use of nodegoat also avoids the need to host and serve the data, and it provides an API for access.
 
@@ -90,7 +90,7 @@ The database model, as of 5 July 2025.
 </figcaption>
 </figure>
 
-The critical core tables are `word instance`, `word-level intertext`, `word-level intertext (grouping)`, `author`, `work`, `work segment`, `meter (line)`, `metrical scheme`, and `meter position length`. Each `word instance` object represents a single word in a single line of a single poem; each `word-level intertext` object comprises a source word and a target word. Since intertexts are often made up of several words, a `word-level intertext (grouping)` object clusters these intertext pairings together, taking advantage of nodegoat&rsquo;s [&ldquo;multiple&rdquo; option](https://nodegoat.net/documentation.s/52/object-type). Words are not assigned directly to works, but to work segments. While that choice is due to ensuring that the database is in first normal form, the way the work segment is determined is due not just to conventional poetic divisions (such as books) but also to meter, because the basis of the intertextual density display is a grid whose width is determined by the meter of the piece. As many works are polymetric, the meter is assigned to the work segment, which can represent anything from an entire work (in the case of, e.g., an epyllion) to a single poem within a multi-book work (e.g., one of Statius&rsquo;s *Silvae*) or a passage of a drama (e.g., a section of a choral passage in a Senecan tragedy). A `word instance` is placed within a `work segment` by line number and by location within the line, based not on word order or syllable count but on metrical *sedes* (placement). (This decision was made both to accommodate textual variation and to enable the placement of words within the grid.) The placement is defined by the word&rsquo;s beginning and ending `meter position length` objects, which in turn specify the maximum number of beats that can be assigned to a given metrical position (as well as specifying which line of a stanza the position belongs to, for stichic meters): these ultimately govern the appearance of the word in the grid, but they also offer the future possibility of comparing the metrical placement of intertexts. (I am not going into detail here on some decisions regarding the calculation of metrical &ldquo;length&rdquo; or the properties of database objects because I hope to publish some of that information in due course; however, it will ultimately be available in some form.)
+The critical core tables are `word instance`, `word-level intertext`, `word-level intertext (grouping)`, `author`, `work`, `work segment`, `meter (line)`, `metrical scheme`, and `meter position length`. Each `word instance` object represents a single word in a single line of a single poem; each `word-level intertext` object comprises a source word and a target word. Since intertexts are often made up of several words, a `word-level intertext (grouping)` object clusters these intertext pairings together, taking advantage of nodegoat&rsquo;s [&ldquo;multiple&rdquo; option](https://nodegoat.net/documentation.s/52/object-type). Words are not assigned directly to works, but to work segments. The way the work segment is determined is due not just to conventional poetic divisions (such as books) but also to meter, because the basis of the intertextual density display is a grid whose width is determined by the meter of the piece. As many works are polymetric, the meter is assigned to the work segment, which can represent anything from an entire work (in the case of, e.g., an epyllion) to a single poem within a multi-book work (e.g., one of Statius&rsquo;s *Silvae*) or a passage of a drama (e.g., a section of a choral passage in a Senecan tragedy). A `word instance` is placed within a `work segment` by line number and by location within the line, based not on word order or syllable count but on metrical *sedes* (placement). (This decision was made both to accommodate textual variation and to enable the placement of words within the grid.) The placement is defined by the word&rsquo;s beginning and ending `meter position length` objects, which in turn specify the maximum number of beats that can be assigned to a given metrical position (as well as specifying which line of a stanza the position belongs to, for stichic meters): these ultimately govern the appearance of the word in the grid, but they also offer the future possibility of comparing the metrical placement of intertexts. (I am not going into detail here on some decisions regarding the calculation of metrical &ldquo;length&rdquo; or the properties of database objects because I hope to publish some of that information in due course; however, it will ultimately be available in some form.)
 
 While the project overall is strictly concerned with Latin poetry, Greek texts also need to be included within the database due to Latin poetry&rsquo;s clear intertextual engagement with them. Accordingly, each author has a language property that specifies them as either a Greek or Latin author. While this does not allow for the possibility of bilingual authors, our surviving texts do not really compass this scenario, or do so insufficiently to justify putting the language label with works instead of authors. ([The Late Antique poet Claudian is one such counterexample](https://antigonejournal.com/2024/12/claudians-gigantomachia/), but he is so late that his works are unlikely to serve as the *source* of any intertexts in the database; and this is the only situation in which a Greek text can enter the database.) Prose texts are also included in the database, but they, like Greek authors, cannot be selected in the interface.
 
@@ -126,6 +126,8 @@ def table_to_df(table, cols_dict):
                                 splitval = newval.split("_")
                                 refval[i] = {'refid': splitval[0], 
                                              'refval': splitval[1]}
+                            elif isinstance(newval, int):
+                                refval[i] = str(newval)
                     tdict[str(key)] = refval
                 except:
                     tdict[str(key)] = None
@@ -285,14 +287,20 @@ N.B. I have removed indications of separate code blocks from the following, alth
 const authorList = [];
 const authorTable = nodegoatTables.author_table;
 
-for (let author in authorTable) {
-	if (authorTable[author].language === "Latin") {
-		const authorSet = [authorTable[author].author_name, authorTable[author].obj_id];
+let workSegFilter = nodegoatTables.work_seg_table.filter(workSeg => workSeg.meter_id !== proseID).map(workSeg => workSeg.work_id);
+let workFilter = nodegoatTables.work_table.filter(work => workSegFilter.includes(work.obj_id)).map(work => work.author_id);
+
+let authorFilter = nodegoatTables.author_table.filter(author => workFilter.includes(author.obj_id));
+
+for (let author in authorFilter) {
+	if (authorFilter[author].language === "Latin") {
+		const authorSet = [authorFilter[author].author_name, authorFilter[author].obj_id];
 		authorList.push(authorSet);
+		authorList.sort((a,b) => d3.ascending(a[0], b[0]));
 	}
 }
 
-const authorPicker = Inputs.select(new Map([[null,null]].concat(authorList)), {label: "Select author:", value: null, sort: true});
+const authorPicker = Inputs.select(new Map([[null,null]].concat(authorList)), {label: "Select author:", value: null, sort: false});
 const authorID = view(authorPicker);
 
 
@@ -305,10 +313,11 @@ for (let work in workTable) {
 	if (workTable[work].author_id === authorID) {
 		const workSet = [workTable[work].title, workTable[work].obj_id]
 		workList.push(workSet);
+		workList.sort((a,b) => d3.ascending(a[0], b[0]));
 	}
 }
 
-const workPicker = Inputs.select(new Map([[null, null]].concat(workList)), {label: "Select work:", value: null, sort: true});
+const workPicker = Inputs.select(new Map([[null, null]].concat(workList)), {label: "Select work:", value: null, sort: false});
 const workID = view(workPicker);
 
 
@@ -329,11 +338,12 @@ for (let workSeg in workSegTable) {
 	
 	if (workSegTable[workSeg].work_id === workID) {
 		const workSegSet = [workSegName, workSegTable[workSeg].obj_id];
-		workSegList.push(workSegSet);
+		workSegList.push(workSegSet)
+		workSegList.sort((a,b) => a[0].localeCompare(b[0], undefined, {numeric: true}));
 	}
 }
 
-const workSegPicker = Inputs.select(new Map([[null, null]].concat(workSegList)), {label: "Select work section:", value: null, sort: true});
+const workSegPicker = Inputs.select(new Map([[null, null]].concat(workSegList)), {label: "Select work section:", value: null, sort: false});
 const workSegID = view(workSegPicker);
 ```
 

@@ -113,14 +113,20 @@ html`
 
 ## References
 
-To view the references for all the passage&rsquo;s intertexts, tick the following box; otherwise, only references for a selected word will be displayed.
+*To view the references for all the passage&rsquo;s intertexts, tick the following box; otherwise, only references for a selected word&rsquo;s intertextual lineage will be displayed.*
 
 ```js
 const refAll = view(Inputs.toggle({label: "View all?"}))
 ```
 
 <ul style="max-width:none" id="references">
+<!-- the references list will show up here -->
 </ul>
+
+<p style="font-size: smaller">
+N.B. Every intertext in the database has <b>at least one</b> publication entered as a source. Many other, unlisted publications may record the same intertext; there is no effort at completion.
+</p>
+
 </div>
 
 <!-- ```js
@@ -199,13 +205,14 @@ for (let author in authorFilter) {
 	if (authorFilter[author].language === "Latin") {
 		const authorSet = [authorFilter[author].author_name, authorFilter[author].obj_id];
 		authorList.push(authorSet);
+		authorList.sort((a,b) => d3.ascending(a[0], b[0]));
 	}
 }
 
 // Add catch-all for anonymous authors -- but something like this may actually need to happen in the data-loader phase.
 // authorList.push(["Anonymous works", "000"]);
 
-const authorPicker = Inputs.select(new Map([[null,null]].concat(authorList)), {label: "Select author:", value: null, sort: true});
+const authorPicker = Inputs.select(new Map([[null,null]].concat(authorList)), {label: "Select author:", value: null, sort: false});
 const authorID = view(authorPicker);
 ```
 
@@ -219,10 +226,11 @@ for (let work in workTable) {
 	if (workTable[work].author_id === authorID) {
 		const workSet = [workTable[work].title, workTable[work].obj_id]
 		workList.push(workSet);
+		workList.sort((a,b) => d3.ascending(a[0], b[0]));
 	}
 }
 
-const workPicker = Inputs.select(new Map([[null, null]].concat(workList)), {label: "Select work:", value: null, sort: true});
+const workPicker = Inputs.select(new Map([[null, null]].concat(workList)), {label: "Select work:", value: null, sort: false});
 const workID = view(workPicker);
 ```
 
@@ -244,11 +252,12 @@ for (let workSeg in workSegTable) {
 	
 	if (workSegTable[workSeg].work_id === workID) {
 		const workSegSet = [workSegName, workSegTable[workSeg].obj_id];
-		workSegList.push(workSegSet);
+		workSegList.push(workSegSet)
+		workSegList.sort((a,b) => a[0].localeCompare(b[0], undefined, {numeric: true}));
 	}
 }
 
-const workSegPicker = Inputs.select(new Map([[null, null]].concat(workSegList)), {label: "Select work section:", value: null, sort: true});
+const workSegPicker = Inputs.select(new Map([[null, null]].concat(workSegList)), {label: "Select work section:", value: null, sort: false});
 const workSegID = view(workSegPicker);
 ```
 
@@ -845,7 +854,7 @@ const sectionSankey = nodes.length > 0 && links.length > 0 ?
 				// Sort so that authors go A-Z left-to-right (= bottom-to-top); d3.descending returns -1, 0, or 1
 				let authorComp = d3.descending(lookupIDTable.get(nodeA.author), lookupIDTable.get(nodeB.author));
 				// Within authors, sort so that all work sections are in order by work
-				let workComp = d3.descending(lookupIDTable.get(nodeA.work), lookupIDTable.get(nodeB.work));
+				let workComp = d3.descending(lookupIDTable.get(nodeA.work).workTitle, lookupIDTable.get(nodeB.work).workTitle);
 				let workSegComp = lookupIDTable.get(b.id).section.localeCompare(lookupIDTable.get(a.id).section, undefined, {numeric: true});
 				if (authorComp !== 0) return authorComp; // if the authors aren't the same, don't go any further in sorting
 				if (workComp !== 0) return workComp;
@@ -927,9 +936,8 @@ const pubList = []
 for (let i in sourcesFilteredIDs) {
 	let pub = lookupIDTable.get(sourcesFilteredIDs[i]);
 	let pubString = '';
-	
-	// add logic in here to deal with possibility that source is an ancient text -- will need to change the list that this is drawing on to include source type
 
+	// ancient sources
 	if (pub.authorID) {
 		let author = lookupIDTable.get(pub.authorID); 
 		pubString = author;
@@ -937,6 +945,7 @@ for (let i in sourcesFilteredIDs) {
 		pubString += `, <i>${workTitle}</i>`
 	}
 
+	// modern sources
 	else {
 	// add author(s), separated by comma if more than one
 	for (let i in pub.authorIDs) {
@@ -981,11 +990,11 @@ refDiv.selectAll("li").data(pubList.sort()).join("li").join("text").html(d => d)
 
 ```
 
-<!--
+<!-- 
 ```js
 display(html`<ul>${htmlTest}</ul>`)
 ```
--->
+ -->
 
 
 # Sandbox
