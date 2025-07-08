@@ -189,12 +189,7 @@ const lookupIDTable = createLookupIDTable(nodegoatTables);
 const authorList = [];
 const authorTable = nodegoatTables.author_table;
 
-/* If there are any surviving bilingual poets, there may need to be a second filtering step at the works table. */
-
 // filter to authors that have written poetry in plottable meters
-
-//let proseID = "20849306";
-
 let workSegFilter = nodegoatTables.work_seg_table.filter(workSeg => workSeg.meter_id !== proseID).map(workSeg => workSeg.work_id);
 let workFilter = nodegoatTables.work_table.filter(work => workSegFilter.includes(work.obj_id)).map(work => work.author_id);
 
@@ -205,12 +200,13 @@ for (let author in authorFilter) {
 	if (authorFilter[author].language === "Latin") {
 		const authorSet = [authorFilter[author].author_name, authorFilter[author].obj_id];
 		authorList.push(authorSet);
-		authorList.sort((a,b) => d3.ascending(a[0], b[0]));
 	}
 }
 
-// Add catch-all for anonymous authors -- but something like this may actually need to happen in the data-loader phase.
-// authorList.push(["Anonymous works", "000"]);
+// Add catch-all for works without an assigned author
+authorList.push(["Anonymous works", "000"]);
+
+authorList.sort((a,b) => d3.ascending(a[0], b[0]));
 
 const authorPicker = Inputs.select(new Map([[null,null]].concat(authorList)), {label: "Select author:", value: null, sort: false});
 const authorID = view(authorPicker);
@@ -223,12 +219,25 @@ const workList = [];
 const workTable = nodegoatTables.work_table;
 
 for (let work in workTable) {
-	if (workTable[work].author_id === authorID) {
+
+	if ((workTable[work].author_id === authorID && workTable[work].author_id) || (authorID === "000" && !workTable[work].author_id)) {
 		const workSet = [workTable[work].title, workTable[work].obj_id]
 		workList.push(workSet);
-		workList.sort((a,b) => d3.ascending(a[0], b[0]));
 	}
+	
+	// if an anonymous work is traditionally (but probably incorrectly) attributed to an author, also add it to their list of works, but with the title in brackets
+	else if (workTable[work].authorship_prob_ids) {
+		let altAuthorPossibilities = workTable[work].authorship_prob_ids.filter(problem => problem.refid === "21843").map(alt => alt.refval);
+		
+		if (altAuthorPossibilities.includes(authorID)) {
+			const workSet = [`[${workTable[work].title}]`, workTable[work].obj_id]
+			workList.push(workSet);
+		}
+	}
+
 }
+
+workList.sort((a,b) => d3.ascending(a[0], b[0]));
 
 const workPicker = Inputs.select(new Map([[null, null]].concat(workList)), {label: "Select work:", value: null, sort: false});
 const workID = view(workPicker);
@@ -253,9 +262,10 @@ for (let workSeg in workSegTable) {
 	if (workSegTable[workSeg].work_id === workID) {
 		const workSegSet = [workSegName, workSegTable[workSeg].obj_id];
 		workSegList.push(workSegSet)
-		workSegList.sort((a,b) => a[0].localeCompare(b[0], undefined, {numeric: true}));
 	}
 }
+
+workSegList.sort((a,b) => a[0].localeCompare(b[0], undefined, {numeric: true}));
 
 const workSegPicker = Inputs.select(new Map([[null, null]].concat(workSegList)), {label: "Select work section:", value: null, sort: false});
 const workSegID = view(workSegPicker);
@@ -852,7 +862,15 @@ const sectionSankey = nodes.length > 0 && links.length > 0 ?
 				let nodeA = sankeyData.nodes.find(work => work.name === a.id);
 				let nodeB = sankeyData.nodes.find(work => work.name === b.id);
 				// Sort so that authors go A-Z left-to-right (= bottom-to-top); d3.descending returns -1, 0, or 1
-				let authorComp = d3.descending(lookupIDTable.get(nodeA.author), lookupIDTable.get(nodeB.author));
+				let authorA = nodeA.author ? lookupIDTable.get(nodeA.author) : "anonymous";
+		        let authorB = nodeB.author ? lookupIDTable.get(nodeB.author) : "anonymous";
+				if (authorA === "anonymous") {
+					authorA += d3.descending(lookupIDTable.get(nodeA.work).workTitle)
+				}
+				if (authorB === "anonymous") {
+					authorB += d3.descending(lookupIDTable.get(nodeB.work).workTitle)
+				}
+				let authorComp = d3.descending(authorA.toLowerCase(), authorB.toLowerCase());
 				// Within authors, sort so that all work sections are in order by work
 				let workComp = d3.descending(lookupIDTable.get(nodeA.work).workTitle, lookupIDTable.get(nodeB.work).workTitle);
 				let workSegComp = lookupIDTable.get(b.id).section.localeCompare(lookupIDTable.get(a.id).section, undefined, {numeric: true});

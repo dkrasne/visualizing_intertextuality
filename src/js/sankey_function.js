@@ -342,13 +342,13 @@ const tooltipLinksBox = tooltipLinks
               let sourceAuthor = lookupIDTable.get(sourceNode).authorID;
               let targetAuthor = lookupIDTable.get(targetNode).authorID;
               
-              textLinesSource.push(`${lookupIDTable.get(sourceAuthor)}, `);
+              sourceAuthor ? textLinesSource.push(`${lookupIDTable.get(sourceAuthor)}, `) : textLinesSource.push("");
               textLinesSource.push(`${lookupIDTable.get(sourceNode).work}`);
-              textLinesSource.push(`, ${lookupIDTable.get(sourceNode).section}`);
+              lookupIDTable.get(sourceNode).section ? textLinesSource.push(`, ${lookupIDTable.get(sourceNode).section}`) : textLinesSource.push("");
               let firstLineLen = textLinesSource.length;  // set the number of elements that will be in the first line of text (i.e., author, work, section)
-              textLinesTarget.push(`${lookupIDTable.get(targetAuthor)}, `);
+              targetAuthor ? textLinesTarget.push(`${lookupIDTable.get(targetAuthor)}, `) : textLinesTarget.push("");
               textLinesTarget.push(`${lookupIDTable.get(targetNode).work}`);
-              textLinesTarget.push(`, ${lookupIDTable.get(targetNode).section}`);
+              lookupIDTable.get(targetNode).section ? textLinesTarget.push(`, ${lookupIDTable.get(targetNode).section}`) : textLinesTarget.push("");
 
               // push the line and words of that line into text array
               for (let line of sourceLineNums) {
@@ -387,6 +387,8 @@ const tooltipLinksBox = tooltipLinks
                   } else if (i == 1) { // using loose equality b/c i is apparently a text representation of the number
                     textrow
                       .attr("font-style", "italic");  // italicize title, which is the second element of the array
+                    !sourceAuthor && arr === textLinesSource ? textrow.attr("dy","1em") : null;
+                    !targetAuthor && arr === textLinesTarget ? textrow.attr("dy","1em").attr("x",5) : null;
                   } else if (i >= firstLineLen) { // once we're past the elements of the first line, make an indented new line for each element
                     textrow
                       .attr("x", indent)
@@ -427,9 +429,11 @@ const tooltipLinksBox = tooltipLinks
  
  let titleTextList = [];
  node.each((d,i) => {
+    if (Tl[i]) {
     let titleText = Tl[i];
     titleText = titleText.split(" ");
-    titleTextList.push(titleText);
+    titleTextList.push(titleText);}
+    else {titleTextList.push(["anonymous",`(${lookupIDTable.get(d.id).work})`])}  // deal with anonymous works
  })
 
 node.append("text")
@@ -572,16 +576,20 @@ nodeRect
     if (sankeyType === "passage") {
 
       let authorID = thisNode.author;
+      let authorName = authorID ? lookupIDTable.get(authorID) : "";
+      let authorText = authorName ? `${authorName}, ` : "";
+      
       let workID = thisNode.work;
       let workSection = lookupIDTable.get(thisNode.id).section;
 
         tooltipNodesText.append("tspan")
             .attr("dy","1em")
-            .text(`${lookupIDTable.get(authorID)}, `)
+            .text(authorText)
         tooltipNodesText.append("tspan")
             // .attr("x","5")
             // .attr("dy","1em")
             .attr("font-style","italic")
+            .attr("dy", `${!authorID ? "1em" : 0}`)
             .text(lookupIDTable.get(workID).workTitle);
         tooltipNodesText.append("tspan")
             .attr("x","5")
@@ -590,18 +598,20 @@ nodeRect
     } else if (sankeyType === "word") {
       //console.log(thisNode);
       let thisWord = lookupIDTable.get(thisNode.id);
-      let author = lookupIDTable.get(thisWord.authorID);
+      let author = thisWord.authorID ? lookupIDTable.get(thisWord.authorID) : "";
       let work = lookupIDTable.get(thisWord.workID).workTitle;
       let workSeg = lookupIDTable.get(thisWord.workSegID).section ? lookupIDTable.get(thisWord.workSegID).section : '';
       let proseCheck = lookupIDTable.get(thisWord.workSegID).meterID === proseID ? true : false;
       let linePrefix = proseCheck ? '\u00a7' : 'line';
 
+      let authorText = author ? `${author}, ` : "";
       tooltipNodesText.append("tspan")
         .attr("dy", "1em")
-        .text(`${author}, `);
+        .text(authorText);
       tooltipNodesText.append("tspan")
         // .attr("x", "5")
         // .attr("dy", "1em")
+        .attr("dy", `${!author ? "1em" : 0}`)
         .attr("font-style", "italic")
         .text(work);
       

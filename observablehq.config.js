@@ -14,15 +14,18 @@ export default {
   // The pages and sections in the sidebar. If you don’t specify this option,
   // all pages will be listed in alphabetical order. Listing pages explicitly
   // lets you organize them into sections and have unlisted pages.
-  // pages: [
-  //   {
-  //     name: "Examples",
-  //     pages: [
-  //       {name: "Dashboard", path: "/example-dashboard"},
-  //       {name: "Report", path: "/example-report"}
-  //     ]
-  //   }
-  // ],
+  pages: [
+    {
+      name: "", // this puts a bold header at the head of the section
+      pages: [
+        {name: "Main Page", path: "/"},
+        {name: "About the Project", path: "/about"},
+        {name: "Full Intertext Diagram", path: "/sankey"},
+        {name: "Thanks and Acknowledgements", path: "/thanks"},
+        {name: "Frequently Asked Questions", path: "/faq"},
+      ]
+    },
+  ],
 
   // Content to add to the head of the page, e.g. for a favicon:
   head: '<link rel="icon" href="observable.png" type="image/png" sizes="32x32">',
@@ -38,7 +41,6 @@ export default {
   // toc: true, // whether to show the table of contents
   // pager: true, // whether to show previous & next links in the footer
   output: "dist", // path to the output root for build
-  // output: "docs", // recommended for GitHub pages.
   // search: true, // activate search
   // linkify: true, // convert URLs in Markdown to links
   // typographer: false, // smart quotes and other typographic improvements

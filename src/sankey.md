@@ -85,10 +85,18 @@ const chart = SankeyChart({nodes: nodes, links: links, lookupIDTable: lookupIDTa
 				let nodeA = sankeyData.nodes.find(work => work.name === a.id);
 				let nodeB = sankeyData.nodes.find(work => work.name === b.id);
 				// Sort so that authors go A-Z left-to-right (= bottom-to-top); d3.descending returns -1, 0, or 1
-				let authorComp = d3.descending(lookupIDTable.get(nodeA.author), lookupIDTable.get(nodeB.author));
+        // anonymous works should be ordered under "anonymous" plus their title
+        let authorA = nodeA.author ? lookupIDTable.get(nodeA.author) : "anonymous";
+        let authorB = nodeB.author ? lookupIDTable.get(nodeB.author) : "anonymous";
+        if (authorA === "anonymous") {
+					authorA += d3.descending(lookupIDTable.get(nodeA.work).workTitle)
+				}
+				if (authorB === "anonymous") {
+					authorB += d3.descending(lookupIDTable.get(nodeB.work).workTitle)
+				}
+				let authorComp = d3.descending(authorA.toLowerCase(), authorB.toLowerCase()); // d3 sort is case sensitive
 				// Within authors, sort so that all work sections are in order by work
 				let workComp = d3.descending(lookupIDTable.get(nodeA.work).workTitle, lookupIDTable.get(nodeB.work).workTitle);
-//				let workSegComp = d3.descending(lookupIDTable.get(a.id).section,lookupIDTable.get(b.id).section);
         let workSegComp = lookupIDTable.get(b.id).section.localeCompare(lookupIDTable.get(a.id).section, undefined, {numeric:true});
 				if (authorComp !== 0) return authorComp; // if the authors aren't the same, don't go any further in sorting
 				if (workComp !== 0) return workComp;
@@ -161,7 +169,7 @@ const sankeyData = FileAttachment("data/sankey_data.json").json()
 <!-- Import modules and constants -->
 
 ```js
-import {createLookupIDTable, authorColors} from './js/global_constants.js';
+import {createLookupIDTable, nodeSortAuthor, authorColors} from './js/global_constants.js';
 import {SankeyChart} from './js/sankey_function.js';
 ```
 
