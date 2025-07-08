@@ -53,7 +53,7 @@ html`
 <div class="grid grid-cols-2">
 	<div class="card" style="background-color:${bgColor}; padding: 20px 20px 0 20px;">
 
-		<h2 style="padding-bottom: 10px; font-size:large;">${passageDetails.authorName}, <i>${passageDetails.workTitle}</i>, ${passageDetails.workSegName}: lines ${lineRange.firstLine}&ndash;${lineRange.lastLine}</h2>
+		<h2 style="padding-bottom: 10px; font-size:large;">${passageDetails.authorName ? `${passageDetails.authorName}, `: ""}<i>${passageDetails.workTitle}</i>${passageDetails.workSegName ? `, ${passageDetails.workSegName}` : ""}: lines ${lineRange.firstLine}&ndash;${lineRange.lastLine}</h2>
 
 		${plotDisplay}
 
@@ -283,6 +283,7 @@ for (let author in authorTable) {
 for (let work in workTable) {
 	if (workTable[work].obj_id === workID) {
 		passageDetails.workTitle = workTable[work].title;
+		if (workTable[work].author_id !== authorID) {passageDetails.authorName = "";}
 	}
 }
 
