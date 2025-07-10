@@ -124,7 +124,7 @@ const refAll = view(Inputs.toggle({label: "View all?"}))
 </ul>
 
 <p style="font-size: smaller">
-N.B. Every intertext in the database has <b>at least one</b> publication entered as a source. Many other, unlisted publications may record the same intertext; there is no effort at completion.
+N.B. Every intertext in the database has <b>at least one</b> publication entered as a source. Many other, unlisted publications may record the same intertext; there is no attempt at completion, nor any effort to cite the *first* publication to record a given intertext.
 </p>
 
 </div>
