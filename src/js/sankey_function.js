@@ -328,8 +328,8 @@ const tooltipLinksBox = tooltipLinks
               for (let id of targetWordIDs) {targetWords.push(lookupIDTable.get(id));}
 
               // sort words by line number, then by starting position in line
-              sourceWords.sort((a,b) => d3.ascending(a.lineNum, b.lineNum) || d3.ascending(a.startPos, b.startPos));
-              targetWords.sort((a,b) => d3.ascending(a.lineNum, b.lineNum) || d3.ascending(a.startPos, b.startPos));
+              sourceWords.sort((a,b) => a.lineNum.localeCompare(b.lineNum, undefined, {numeric: true}) || d3.ascending(a.startPos, b.startPos));
+              targetWords.sort((a,b) => a.lineNum.localeCompare(b.lineNum, undefined, {numeric: true}) || d3.ascending(a.startPos, b.startPos));
               
               // get a list of the line numbers
               let sourceLineNums = new Set(sourceWords.map(word => word.lineNum));
@@ -621,7 +621,7 @@ nodeRect
         .text(workSeg);
       
       tooltipNodesText.append("tspan")
-        .text(` (${linePrefix} ${thisNode.line_num})`);
+        .text(` (${linePrefix} ${thisNode.line_num}${thisNode.line_num_modifier ? thisNode.line_num_modifier : ''})`);
           
     }
 

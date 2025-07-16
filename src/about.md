@@ -96,6 +96,8 @@ While the project overall is strictly concerned with Latin poetry, Greek texts a
 
 Finally, each `word-level intertext` records at least one scholarly source (sometimes the original publication proposing the intertext, and sometimes a commentary), which are collectively stored in a `publication` table. (It is also possible to record an ancient work as the scholarly source, since occasionally the explicit recognition of an intertext goes back to a grammarian of antiquity.) This information is not currently displayed in any fashion, but it will eventually be shown when a passage is selected.
 
+Some additional information about particulars of the database and project can be found on the [Frequently Asked Questions page](./faq).
+
 ### Data Pipeline
 
 *Non-coders may wish to [skip this part](#visualizations)!*
@@ -161,7 +163,7 @@ def table_to_df(table, cols_dict):
 
 The data loader then joins the disparate metrical data into a single dataframe and then returns it to a single restructured JSON object; and it converts each of the other dataframes to a JSON object, which are collectively stored in an array. These are all saved to files that are automatically committed to GitHub.
 
-The same Python data loader also creates network nodes and edges from the data in order to enable visualization of the intertexts as [Sankey diagrams](https://en.wikipedia.org/wiki/Sankey_diagram). (I chose these over traditional [network graphs](https://guides.library.yale.edu/dh/graphs) since the sequential nature of an intertextual network makes it well-suited to visualizing as a flow-path.) While part of the network creation is done automatically by the d3 Sankey module, the initial preparation of nodes and edges is performed in the data loader; further filtering, when necessary, is done on the fly based on the user's selections.
+The same Python data loader also creates network nodes and edges from the data in order to enable visualization of the intertexts as [Sankey diagrams](https://en.wikipedia.org/wiki/Sankey_diagram). (I chose these over traditional [network graphs](https://guides.library.yale.edu/dh/graphs) since the sequential nature of an intertextual network makes it well-suited to visualizing as a flow-path.) While part of the network creation is done automatically by the d3 Sankey module, the initial preparation of nodes and edges is performed in the data loader; further filtering, when necessary, is done on the fly based on the user&rsquo;s selections.
 
 <p><details>
 <summary>Click to view the two custom functions for this stage.</summary>
@@ -451,11 +453,27 @@ for (let meter in meters) {
 
 // Define grid height based on number of lines.
 
-const gridY = (lineRange.lastLine - lineRange.firstLine) + 1;  // I may need to modify this to accomodate passages with extra lines
+let gridYInterim = (lineRange.lastLine - lineRange.firstLine) + 1;
+let extraLineSet;
+
+// make a set of any extranumerical lines
+
+if (wordsFiltered.filter(word => word.line_num_modifier).length > 0) {
+	extraLineSet = new Set(
+		wordsFiltered.filter(word => word.line_num_modifier)
+					.map(word => ({lineNum: word.line_num, lineNumMod: word.line_num_modifier, lineNumString: `${word.line_num}${word.line_num_modifier}`}))
+	);
+	gridYInterim += extraLineSet.size;	// if there are extranumerical lines, increase the height multiplier accordingly, so that cells remain square
+}
+
+const extraLines = extraLineSet ? Array.from(extraLineSet) : [];
+
+const gridY = gridYInterim;
 
 const cellSize = 20;
 const gridHeight = gridY * cellSize;
 const gridWidth = gridX * cellSize;
+
 
 // Create plot, conditional on the existence of intertexts
 
@@ -469,6 +487,18 @@ else {
 };
 let tickRange = d3.range(Math.min(...intxtCnts), Math.max(...intxtCnts)+1, step);
 
+let lineVals = d3.range(lineRange.firstLine, lineRange.lastLine +1);
+
+// if there are extranumerical lines, insert them into the line values array
+
+for (let line of extraLines) {
+	let insertAfter = line.lineNum;
+	let insertAfterIndex = lineVals.indexOf(insertAfter) + 1;
+	let insertString = line.lineNumString;
+	lineVals.splice(insertAfterIndex, 0, insertString);
+}
+
+
 const plotDisplay = intertextsArr.every(intxt => intxt.intxtCnt === 0) ? null : Plot.plot({
 	grid: true,
 	x: {
@@ -479,7 +509,8 @@ const plotDisplay = intertextsArr.every(intxt => intxt.intxtCnt === 0) ? null : 
 		},
 	y: {
 		label: 'Line', 
-		domain: d3.range(lineRange.firstLine, lineRange.lastLine +1),
+		// domain: d3.range(lineRange.firstLine, lineRange.lastLine +1),
+		domain: lineVals,
 		tickSize: 0,
 		},
 	color: {scheme: "Greens", 
@@ -550,24 +581,28 @@ if (plotCurrSelect) {
 	
 	currWordId = plotCurrSelect.wordObj.obj_id;	// set current word ID to the selected word
 
+	let intertextsTableExtended = intertextsTable.concat(intertextsModTable);
+
 	// create functions for getting a word's immediate ancestors or descendants
 	function getWordAncestors(currWordId){
-		for (let i in intertextsTable) {
-			let intxt = intertextsTable[i];
+		for (let i in intertextsTableExtended) {
+			let intxt = intertextsTableExtended[i];
 			// for each intertext in the intertexts table, if its target ID matches the focus word (either the selected word or one of its ancestors), add it to the list of ancestor intertexts and add its source to the list of words to be processed.
 			if (currWordId === intxt.target_word_id) {
 				ancestorIntertexts.push(intxt);
 				ancestorWordIDs.push(intxt.source_word_id);
+				wordSankeyIntxtIDs.push(intxt.intxt_id);
 			}
 		}
 	}
 	function getWordDescendants(currWordId){
-		for (let i in intertextsTable) {
-			let intxt = intertextsTable[i];
+		for (let i in intertextsTableExtended) {
+			let intxt = intertextsTableExtended[i];
 			// for each intertext in the intertexts table, if its source ID matches the focus word (either the selected word or one of its descendants), add it to the list of descendant intertexts and add its target to the list of words to be processed.
 			if (currWordId === intxt.source_word_id) {
 				descendantIntertexts.push(intxt);
 				descendantWordIDs.push(intxt.target_word_id);
+				wordSankeyIntxtIDs.push(intxt.intxt_id);
 			}
 		}
 	}
@@ -623,9 +658,9 @@ The colors (which distinguish between authors in the passage-level and full inte
 
 ## Next Steps
 
-In addition to continuing database input, the code needs to be tweaked in order to handle extranumerical lines (such as 845a, which would come between 845 and 846) and alternate readings.
+The main focus for the near future is on entering additional intertexts into the database. Once sufficient intertexts have been entered, work can begin on the creation of analytical tools, enabling researchers to ask and answer questions about the data.
 
-Beyond those crucial improvements, a few additional potential long-term developments are:
+A few additional, potential, long-term developments are:
 
 - an option to view only direct intertext density
 - an option to view &ldquo;descendant&rdquo; intertexts instead of &ldquo;ancestor&rdquo; intertexts in the density display

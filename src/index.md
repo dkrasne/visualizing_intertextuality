@@ -1,6 +1,6 @@
 ---
 title: Visualizing Intertextuality
-theme: [wide, air]
+theme: [air, wide]
 toc: false
 ---
 
@@ -54,6 +54,17 @@ html`
 	<div class="card" style="background-color:${bgColor}; padding: 20px 20px 0 20px;">
 
 		<h2 style="padding-bottom: 10px; font-size:large;">${passageDetails.authorName ? `${passageDetails.authorName}, `: ""}<i>${passageDetails.workTitle}</i>${passageDetails.workSegName ? `, ${passageDetails.workSegName}` : ""}: lines ${lineRange.firstLine}&ndash;${lineRange.lastLine}</h2>
+
+		${readingWords.selected.length > 0 ? // show reading alternatives, if they exist for the passage
+			display(
+				html`
+				<p>Choose the reading(s) that will appear in the specified line(s):</p>
+				${altWordSelectorSet}
+				<hr>
+				`
+			) : null
+		}
+
 
 		${plotDisplay}
 
@@ -146,7 +157,7 @@ else {
 <!-- Load data -->
 
 ```js
-import {createLookupIDTable, authorColors, proseID} from './js/global_constants.js';
+import {createLookupIDTable, authorColors, proseID, deepCopy} from './js/global_constants.js';
 import {SankeyChart} from './js/sankey_function.js';
 ```
 
@@ -165,6 +176,10 @@ const meters = FileAttachment("data/meters.json").json()
 ```js
 // Attach full list of intertexts (used for network and Sankey charts)
 const intertextsTable = FileAttachment("data/intxts_full.json").json()
+```
+```js
+// Attach list of modified intertexts for alternative textual readings
+const intertextsModTable = FileAttachment("data/intxts_full_modified.json").json()
 ```
 ```js
 // Attach networkx graph json
@@ -404,6 +419,116 @@ let i = 1;
 
 ```
 
+<!-- Prepare alternate word selectors -->
+
+```js
+const textProbTable = nodegoatTables.textual_prob_table;
+const altReadTable = nodegoatTables.alternate_reading_table;
+
+const textProbs = textProbTable.filter(textProb => textProb.work_segment_id === workSegID && textProb.line_num >= lineRange.firstLine && textProb.line_num <= lineRange.lastLine);
+let textProbIDs = textProbs.map(textProb => textProb.obj_id);
+
+const altWords = [];
+const altWordSelectors = {};
+
+if (textProbIDs.length > 0) {
+	for (let id of textProbIDs) {
+		let possReadings = altReadTable.filter(reading => reading.textual_prob_id === id);
+
+		let textProb = textProbs.filter(prob => prob.obj_id === id)[0];
+
+		for (let reading of possReadings) {
+			let wordList = JSON.parse(JSON.stringify(reading.word_inst_ids));
+			for (let i in wordList) {
+				wordList[i] = lookupIDTable.get(wordList[i]);
+			}
+			wordList.sort((a,b) => d3.sort(a.startPos, b.startPos));
+			let wordListString = wordList.map(word => word.word).join(", ");
+
+			let startPosFirst = wordList.map(word => word.startPos)[0];
+			let endPosLast = wordList.map(word => word.endPos)[wordList.length - 1];
+
+			textProb["posRange"] = [startPosFirst, endPosLast];
+
+			let altWordObj = {textProbID: id, readingID: reading.obj_id, wordIDs: reading.word_inst_ids, words: wordListString, line: textProb.line_num, default: reading.default_reading, active: false};
+
+			reading.default_reading ? altWords.splice(0, 0, altWordObj) : altWords.push(altWordObj);
+		}
+
+		altWordSelectors[id] = Inputs.select(
+			new Map(altWords.map(reading => [reading.words, reading.readingID])),
+			{value: altWords.filter(reading => reading.default)[0].readingID,
+				label: `line ${textProb.line_num}, positions ${textProb.posRange[0]} to ${textProb.posRange[1]}`, 
+				sort: true	// if I don't sort, the default reading will be at the top of the list, but the rest won't be alphabetized
+			}
+		);
+	}
+}
+
+const altWordSelectorSet = Inputs.form(altWordSelectors);
+const altWordSelections = view(altWordSelectorSet);
+
+```
+
+```js
+// the result of the selections will be a dictionary where the key is the textual problem ID and the value is the alternate reading option ID. These are both contained within the objects of the altWords array.
+
+// for the selected reading in each selector, set the `active` property of that reading to `true`.
+
+altWords.forEach(word => {
+	if (Object.values(altWordSelections).includes(word.readingID)) {
+		return word.active = true
+	} else {
+		return word.active = false}
+	})
+
+
+// anything else involving the active altWords readings needs to be INSIDE THIS CELL
+
+// create an object with the array of possible readings, and the array of chosen readings
+const readingWords = {
+	possible: altWords.flatMap(reading => reading.wordIDs), 
+	selected: altWords.filter(reading => reading.active).flatMap(reading => reading.wordIDs)
+	};
+
+const intxtModsTable = nodegoatTables.word_lvl_intxt_mod_table;
+
+const intxtMods = [];
+
+for (let wordID of readingWords.selected) { // for every word that has changed
+	let intxtModsFilter = intxtModsTable.filter(intxt => intxt.wd_sub_id === wordID); // get all intexts that have that word as a substitute word
+	if (intxtModsFilter.length > 0) {
+		for (let intxtMod of intxtModsFilter){	// for every one of those modified intertexts
+			// the old intertext is the one that the modifier will modify
+			let oldIntxt = nodegoatTables.word_lvl_intxt_table.filter(oldIntxt => oldIntxt.obj_id === intxtMod.wd_lvl_intxt_id)[0];
+			// make a clone of it
+			let newIntxt = JSON.parse(JSON.stringify(oldIntxt));
+			// give the modified intertext a new object ID
+			newIntxt.obj_id = intxtMod.obj_id;
+			// substitute the relevant word of the modified intertext
+			for (let key in newIntxt) {
+				if ((key === 'source_word_id' || key === 'target_word_id') && newIntxt[key] === intxtMod.wd_to_replace_id) {
+
+					newIntxt[key] = intxtMod.wd_sub_id;
+				}
+			}
+			// adjust the match types, as necessary
+			for (let matchType of intxtMod.match_type_remove_ids) {
+				if (newIntxt.match_type_ids.includes(matchType)) {
+					let i = newIntxt.match_type_ids.indexOf(matchType);
+					newIntxt.match_type_ids.splice(i, 1);
+				}
+			}
+			for (let matchType of intxtMod.match_type_add_ids) {
+				newIntxt.match_type_ids.push(matchType);
+			}
+
+			if (nodegoatTables.word_lvl_intxt_table.filter(intxt => intxt.obj_id === newIntxt.obj_id).length === 0){nodegoatTables.word_lvl_intxt_table.push(newIntxt)};
+		}
+	}
+}
+```
+
 <!-- Prepare intertexts for display -->
 
 ```js
@@ -414,7 +539,11 @@ const wordInstArr = [];
 
 for (let inst in wordInstTable) {
 	if (wordInstTable[inst].work_segment_id === workSegID) {
-		wordInstArr.push(wordInstTable[inst])
+		// add all words in the work segment that *either* aren't in a textual problem spot at all *or* are the selected words for the textual problem
+		if (!readingWords.possible.includes(wordInstTable[inst].obj_id) || readingWords.selected.includes(wordInstTable[inst].obj_id))
+		{
+			wordInstArr.push(wordInstTable[inst])
+		}
 	}
 }
 
@@ -536,6 +665,7 @@ for (let word in wordsFiltered) {
 }
 	
 const intertextsArrComplete = [];
+const extraNumericalLineWords = [];
 
 for (let line in lineArr) {
     let lineMeter;
@@ -556,9 +686,18 @@ for (let line in lineArr) {
 		}
 		for (let word in wordsFiltered) {
 			if (wordsFiltered[word].line_num === intertextObj.lineNum && wordsFiltered[word].posIDs.includes(intertextObj.linePosID)) {
-				intertextObj.wordObj = wordsFiltered[word];
-				intertextObj.intxtCnt = wordsFiltered[word].directIntertexts + wordsFiltered[word].indirectIntertexts;
-				intertextObj.word = wordsFiltered[word].word;
+				if (!wordsFiltered[word].line_num_modifier) {
+					intertextObj.wordObj = wordsFiltered[word];
+					intertextObj.intxtCnt = wordsFiltered[word].directIntertexts + wordsFiltered[word].indirectIntertexts;
+					intertextObj.word = wordsFiltered[word].word;
+				} else {	// make a separate object for words in an extranumerical line, otherwise they overwrite the same positions in the regular line
+					let extraIntertextObj = JSON.parse(JSON.stringify(intertextObj));
+					extraIntertextObj.lineNum = `${wordsFiltered[word].line_num}${wordsFiltered[word].line_num_modifier}`;
+					extraIntertextObj.wordObj = wordsFiltered[word];
+					extraIntertextObj.intxtCnt = wordsFiltered[word].directIntertexts + wordsFiltered[word].indirectIntertexts;
+					extraIntertextObj.word = wordsFiltered[word].word;
+					extraNumericalLineWords.push(extraIntertextObj);
+				}
 			}
 		}
 		
@@ -566,7 +705,8 @@ for (let line in lineArr) {
 	}
 }
 
-const intertextsArr = intertextsArrComplete.filter(pos => pos.word); // only include cells that have a word assigned to them
+const intertextsArr = intertextsArrComplete.filter(pos => pos.word)	// only include cells that have a word assigned to them
+											.concat(extraNumericalLineWords);	// add cells from extranumerical line array
 
 // Get final intertext counts, in order to set tick range
 
@@ -597,7 +737,22 @@ for (let meter in meters) {
 
 // Define grid height based on number of lines.
 
-const gridY = (lineRange.lastLine - lineRange.firstLine) + 1;  // I may need to modify this to accomodate passages with extra lines
+let gridYInterim = (lineRange.lastLine - lineRange.firstLine) + 1;
+let extraLineSet;
+
+// make a set of any extranumerical lines
+
+if (wordsFiltered.filter(word => word.line_num_modifier).length > 0) {
+	extraLineSet = new Set(
+		wordsFiltered.filter(word => word.line_num_modifier)
+					.map(word => ({lineNum: word.line_num, lineNumMod: word.line_num_modifier, lineNumString: `${word.line_num}${word.line_num_modifier}`}))
+	);
+	gridYInterim += extraLineSet.size;	// if there are extranumerical lines, increase the height multiplier accordingly, so that cells remain square
+}
+
+const extraLines = extraLineSet ? Array.from(extraLineSet) : [];
+
+const gridY = gridYInterim;
 
 const cellSize = 20;
 const gridHeight = gridY * cellSize;
@@ -623,6 +778,18 @@ else {
 };
 let tickRange = d3.range(Math.min(...intxtCnts), Math.max(...intxtCnts)+1, step);
 
+let lineVals = d3.range(lineRange.firstLine, lineRange.lastLine +1);
+
+// if there are extranumerical lines, insert them into the line values array
+
+for (let line of extraLines) {
+	let insertAfter = line.lineNum;
+	let insertAfterIndex = lineVals.indexOf(insertAfter) + 1;
+	let insertString = line.lineNumString;
+	lineVals.splice(insertAfterIndex, 0, insertString);
+}
+
+
 const plotDisplay = intertextsArr.every(intxt => intxt.intxtCnt === 0) ? null : Plot.plot({
 	grid: true,
 	x: {
@@ -633,7 +800,8 @@ const plotDisplay = intertextsArr.every(intxt => intxt.intxtCnt === 0) ? null : 
 		},
 	y: {
 		label: 'Line', 
-		domain: d3.range(lineRange.firstLine, lineRange.lastLine +1),
+		// domain: d3.range(lineRange.firstLine, lineRange.lastLine +1),
+		domain: lineVals,
 		tickSize: 0,
 		},
 	color: {scheme: "Greens", 
@@ -697,23 +865,52 @@ const plotCurrSelect = !plotDisplay ? null : Generators.input(plotDisplay);
 
 
 // Get the IDs of all words involved in intertexts in the currently-selected passage
+
 let passageWordIntxts = wordsFiltered.length > 0 ? 
 		Array.from(new Set(wordsFiltered.concat(removedMonosyllables).map(word => word.directIntertextIDs.concat(word.indirectIntertextIDs)).flat())) : 
 		[];
 
 // Filter the full table of intertexts to just those that include the relevant words
-const intertextsTableCopy = JSON.parse(JSON.stringify(intertextsTable));
+const intertextsTableCopy = deepCopy(intertextsTable).concat(deepCopy(intertextsModTable));
 let passageIntxts = intertextsTableCopy.filter(intxt => passageWordIntxts.includes(intxt.source_word_id) || passageWordIntxts.includes(intxt.target_word_id));
 
 // Get the IDs for those intertexts, both the word-level intertext IDs and the word-level intertext group IDs
 const intxtIDs = passageIntxts.map(intxt => [intxt.intxt_grp_id, intxt.intxt_id]).flat().filter(id => id !== null);
 const passageIntxtIDs = passageIntxts.map(intxt => intxt.intxt_id);
 
+
 // FILTER SANKEY DATA //
 
 // Filter the work-segment edges based on those intertexts
-let sankeyEdges = JSON.parse(JSON.stringify(sankeyData.edges)); // prevents the filtering from affecting the actual data
-let sankeyFilteredEdgesArr =  sankeyEdges.filter(edge => intxtIDs.includes(edge.id));
+let sankeyEdges = deepCopy(sankeyData.edges); // prevents the filtering from affecting the actual data
+
+let sankeyFilteredEdgesArr = sankeyEdges.filter(edge => intxtIDs.includes(edge.id));
+
+// If any intertext words are in a textual problem, then adjust Sankey based on the selected word(s).
+// THIS WILL NEED TO BE MODIFIED FURTHER IF/WHEN THERE ARE REPLACEMENT WORDS POINTING TO A DIFFERENT PASSAGE
+// ALTERNATIVELY, AT THAT POINT I SHOULD SHIFT THE SANKEY BUILDING FROM THE PYTHON DATALOADER INTO A JS FUNCTION
+for (let edge of sankeyFilteredEdgesArr) {
+	for (let wordSet of ["source_words", "target_words"]) {
+		for (let i in edge[wordSet]) {
+			let focusWord = edge[wordSet][i]
+			if (readingWords.possible.includes(focusWord)) {
+				let altWordsFocus = altWords.filter(reading => reading.wordIDs.includes(focusWord))[0];
+				if (altWordsFocus.active == false) {
+					let oldWords = altWordsFocus.wordIDs;
+					let altWordsReplacement = altWords.filter(reading => reading.active == true)[0];
+					let newWords = altWordsReplacement.wordIDs;
+					for (let word of oldWords) {
+						let iWord = edge[wordSet].indexOf(word);
+						edge[wordSet].splice(iWord, 1);
+					}
+					for (let word of newWords) {
+						edge[wordSet].push(word);
+					}
+				}
+			}
+		}
+	}
+}
 
 // Remove words from those edges that aren't included in the current selection (target words should only be words in the selected passage, and source words should only be those that the current passage has intertexts with)
 for (let i in sankeyFilteredEdgesArr) {
@@ -751,10 +948,12 @@ if (plotCurrSelect) {
 	
 	currWordId = plotCurrSelect.wordObj.obj_id;	// set current word ID to the selected word
 
+	let intertextsTableExtended = intertextsTable.concat(intertextsModTable);
+
 	// create functions for getting a word's immediate ancestors or descendants
 	function getWordAncestors(currWordId){
-		for (let i in intertextsTable) {
-			let intxt = intertextsTable[i];
+		for (let i in intertextsTableExtended) {
+			let intxt = intertextsTableExtended[i];
 			// for each intertext in the intertexts table, if its target ID matches the focus word (either the selected word or one of its ancestors), add it to the list of ancestor intertexts and add its source to the list of words to be processed.
 			if (currWordId === intxt.target_word_id) {
 				ancestorIntertexts.push(intxt);
@@ -764,8 +963,8 @@ if (plotCurrSelect) {
 		}
 	}
 	function getWordDescendants(currWordId){
-		for (let i in intertextsTable) {
-			let intxt = intertextsTable[i];
+		for (let i in intertextsTableExtended) {
+			let intxt = intertextsTableExtended[i];
 			// for each intertext in the intertexts table, if its source ID matches the focus word (either the selected word or one of its descendants), add it to the list of descendant intertexts and add its target to the list of words to be processed.
 			if (currWordId === intxt.source_word_id) {
 				descendantIntertexts.push(intxt);
@@ -1089,18 +1288,6 @@ intertextsTable
 <hr>
 
 ## Data Checks
-
-`nodegoatModel`:
-
-```js
-nodegoatModel
-```
-
-`nodegoatTables`:
-
-```js
-nodegoatTables
-```
 
 `positions` (metrical positions):
 

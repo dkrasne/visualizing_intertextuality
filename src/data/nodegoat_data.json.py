@@ -5,6 +5,7 @@ import os
 import requests
 import pandas as pd
 import networkx as nx
+import copy
 
 # set parameters
 api_token = os.getenv("NODEGOAT_API_TOKEN")
@@ -155,6 +156,18 @@ for objtype in obj_list:
             authorship_prob_class_table = objtype["objects"]
             tables_dict["authorship_prob_class_table"] = authorship_prob_class_table
             break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 23064:
+            textual_prob_table = objtype["objects"]
+            tables_dict["textual_prob_table"] = textual_prob_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 23065:
+            alternate_reading_table = objtype["objects"]
+            tables_dict["alternate_reading_table"] = alternate_reading_table
+            break
+        elif objtype["objects"][id_num]["object"]["type_id"] == 23066:
+            word_lvl_intxt_mod_table = objtype["objects"]
+            tables_dict["word_lvl_intxt_mod_table"] = word_lvl_intxt_mod_table
+            break
         else:
             pass
         # end of inner for loop
@@ -272,7 +285,7 @@ meter_pos_len_cols = {"meter_id": {"67535": "refid"},
                       "max_length": {"67537": "objval"},
                       #"unit_line": {"68127": "objval"}
                       }
-### The rest aren't necessary for the actual visualization ###
+### The next three aren't necessary for the actual visualization ###
 publication_cols = {"author_ids": {"67416": "refid"},
                     "publication_date": {"67417": "objval"},
                     "article_chapter_title": {"67418": "objval"},
@@ -286,6 +299,26 @@ pleiades_cols = {"pleiades_uri": {"67426": "objval"},
                  "PID": {"67431": "objval"},
                  # in future, may add latitude and longitude from sub-object, but that would require additional logic
                  }
+###
+textual_prob_cols = {
+    "work_segment_id": {"71932": "refid"},
+    "line_num": {"71933": "objval"},
+    "line_num_modifier": {"71934": "objval"},
+    "start_pos_id": {"71935": "refid"},
+    "stop_pos_id": {"71936": "refid"}
+}
+alternate_reading_cols = {
+    "textual_prob_id": {"71937": "refid"},
+    "word_inst_ids": {"71938": "refid"},
+    "default_reading": {"71939": "objval"}
+}
+wd_lvl_intxt_mod_cols = {
+    "wd_lvl_intxt_id": {"71940": "refid"},
+    "wd_to_replace_id": {"71941": "refid"},
+    "wd_sub_id": {"71942": "refid"},
+    "match_type_remove_ids": {"71943": "refid"},
+    "match_type_add_ids": {"71944": "refid"}
+}
 
 # Convert tables to dataframes based on specified columns
 word_instance_df = table_to_df(word_instance_table, wd_inst_cols)
@@ -303,6 +336,9 @@ meter_pos_len_df = table_to_df(meter_pos_len_table,meter_pos_len_cols)
 scholar_df = table_to_df(scholar_table,scholar_cols)
 publication_df = table_to_df(publication_table,publication_cols)
 pleiades_df = table_to_df(pleiades_table,pleiades_cols)
+textual_prob_df = table_to_df(textual_prob_table,textual_prob_cols)
+alternate_reading_df = table_to_df(alternate_reading_table,alternate_reading_cols)
+word_lvl_intxt_mod_df = table_to_df(word_lvl_intxt_mod_table,wd_lvl_intxt_mod_cols)
 
 # For `word instance` df, make sure that elided_monosyllable is either False or True, not None:
 word_instance_df['elided_monosyllable'] = word_instance_df['elided_monosyllable'].apply(lambda x: False if x is None else x)
@@ -437,19 +473,20 @@ for i, df in enumerate(df_list):
     tables_df_to_dict[df_name] = new_dict
 
 sources_table = []
-for obj_id in word_lvl_intxt_table:
-    intxt_sources = word_lvl_intxt_table[obj_id]['object']['object_sources']
-    if isinstance(intxt_sources, dict):
-        for source_type_id in intxt_sources.keys():
-            for source in intxt_sources[source_type_id]:
-                sources_dict = {}
-                sources_dict['obj_id'] = obj_id
-                sources_dict['source_type_id'] = source_type_id
-                source_id = source['object_source_ref_object_id']
-                sources_dict['source_id'] = str(source_id)
-                source_location = source['object_source_link']
-                sources_dict['source_location'] = source_location
-                sources_table.append(sources_dict)
+for table in [word_lvl_intxt_table, word_lvl_intxt_mod_table]:
+    for obj_id in table:
+        intxt_sources = table[obj_id]['object']['object_sources']
+        if isinstance(intxt_sources, dict):
+            for source_type_id in intxt_sources.keys():
+                for source in intxt_sources[source_type_id]:
+                    sources_dict = {}
+                    sources_dict['obj_id'] = obj_id
+                    sources_dict['source_type_id'] = source_type_id
+                    source_id = source['object_source_ref_object_id']
+                    sources_dict['source_id'] = str(source_id)
+                    source_location = source['object_source_link']
+                    sources_dict['source_location'] = source_location
+                    sources_table.append(sources_dict)
     # else:
     #     sources_dict = {'obj_id': obj_id, 'source_type_id': None, 'source_id': None}
     #     sources_table.append(sources_dict)
@@ -470,14 +507,13 @@ intxt_grp_list = []
 def build_intxt_dict(intxt_ids):
     for intxt in intxt_ids:
         intxt_id = str(intxt)
-        for row2 in word_lvl_intxt_df[word_lvl_intxt_df.obj_id == intxt_id].iterrows():
+        for i, row2 in word_lvl_intxt_df[word_lvl_intxt_df.obj_id == intxt_id].iterrows():
             row_dict = {}
             if intxt_id in grp_intxts_list:
                 row_dict["intxt_grp_id"] = intxt_grp_id
             else:
                 row_dict["intxt_grp_id"] = None
             row_dict["intxt_id"] = intxt_id
-            row2 = row2[1]
             source_id = row2.source_word_id
             target_id = row2.target_word_id
             if isinstance(row2.match_type_ids, list):
@@ -509,17 +545,54 @@ def build_intxt_dict(intxt_ids):
             row_dict["match_type_ids"] = match_type_ids
             intxt_grp_list.append(row_dict)
 
-for row in word_lvl_intxt_grp_df.iterrows():
-    row = row[1]
+for i, row in word_lvl_intxt_grp_df.iterrows():
     intxt_grp_id = row.obj_id
     intxt_ids = row.word_intxt_ids
     build_intxt_dict(intxt_ids)
+
+# do the same for intertexts not included in a group
 build_intxt_dict([intxt for intxt in word_lvl_intxt_df.obj_id if intxt not in grp_intxts_list])
 
 intxt_full_df = pd.DataFrame.from_dict(intxt_grp_list)
 
 with open(scriptdir+"/intxts_full.json", "w") as intxts_full:
     json.dump(intxt_grp_list, intxts_full)
+
+# make a list of full intertexts modified based on potential word substitutions due to alternate readings
+
+intxts_to_modify_df = intxt_full_df.query(f"intxt_id in {word_lvl_intxt_mod_df['wd_lvl_intxt_id'].to_list()}").copy().reset_index(drop=True)
+intxt_full_mod = []
+
+for i, row in intxts_to_modify_df.iterrows(): # take each original full intertext that needs to be modified
+    intxt_mod_subset = word_lvl_intxt_mod_df.query("wd_lvl_intxt_id == @row.intxt_id")  # get possible modifications for the current original itnertext
+    for j, row2 in intxt_mod_subset.iterrows():
+        new_intxt_full = copy.deepcopy({key: val for key, val in row.items()})  # new deep copy dictionary of unmodified full intertext
+        new_intxt_full['intxt_id'] = row2['obj_id']
+        for st in ['source','target']:
+            if row[f'{st}_word_id'] == row2['wd_to_replace_id']:
+                new_intxt_full[f'{st}_word_id'] = row2['wd_sub_id']
+                new_word = word_instance_df.query(f"obj_id == '{row2["wd_sub_id"]}'").reset_index(drop=True)
+                new_intxt_full[f'{st}_line_num'] = new_word.loc[0, 'line_num']
+                new_workseg = new_word.loc[0, "work_segment_id"]
+                if row[f'{st}_work_seg_id'] != new_workseg:
+                    new_intxt_full[f'{st}_work_seg_id'] = new_workseg
+                    new_work = work_seg_df.query("obj_id == @new_workseg").reset_index(drop=True).loc[0, "work_id"]
+                    new_intxt_full[f'{st}_work_id'] = new_work
+                    new_author = work_df.query("obj_id == @new_work").reset_index(drop=True).loc[0, "author_id"]
+                    new_intxt_full[f'{st}_author_id'] = new_author
+        for id in row2.match_type_remove_ids:
+            new_intxt_full['match_type_ids'].remove(id)
+        for id in row2.match_type_add_ids:
+            new_intxt_full['match_type_ids'].append(id)
+        new_intxt_full['original_id'] = row.intxt_id
+        new_intxt_full['original_grp_id'] = row.intxt_grp_id
+        if new_intxt_full['source_work_seg_id'] != row['source_work_seg_id'] or new_intxt_full['target_work_seg_id'] != row['target_work_seg_id']:
+            new_intxt_full['intxt_grp_id'] = None
+
+        intxt_full_mod.append(new_intxt_full)
+
+with open(scriptdir+"/intxts_full_modified.json", "w") as intxts_full_mod_file:
+    json.dump(intxt_full_mod, intxts_full_mod_file)
 
 
 ######### CREATE AND EXPORT NETWORK ####################
