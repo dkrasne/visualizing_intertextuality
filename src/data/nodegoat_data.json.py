@@ -570,8 +570,9 @@ for i, row in intxts_to_modify_df.iterrows(): # take each original full intertex
         new_intxt_full['intxt_id'] = row2['obj_id']
         for st in ['source','target']:
             if row[f'{st}_word_id'] == row2['wd_to_replace_id']:
-                new_intxt_full[f'{st}_word_id'] = row2['wd_sub_id']
-                new_word = word_instance_df.query(f"obj_id == '{row2["wd_sub_id"]}'").reset_index(drop=True)
+                wd_sub_id = row2['wd_sub_id']
+                new_intxt_full[f'{st}_word_id'] = wd_sub_id
+                new_word = word_instance_df.query(f"obj_id == '{wd_sub_id}'").reset_index(drop=True)
                 new_intxt_full[f'{st}_line_num'] = new_word.loc[0, 'line_num']
                 new_workseg = new_word.loc[0, "work_segment_id"]
                 if row[f'{st}_work_seg_id'] != new_workseg:
