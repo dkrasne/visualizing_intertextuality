@@ -53,7 +53,7 @@ html`
 <div class="grid grid-cols-2">
 	<div class="card" style="background-color:${bgColor}; padding: 20px 20px 0 20px;">
 
-		<h2 style="padding-bottom: 10px; font-size:large;">${passageDetails.authorName ? `${passageDetails.authorName}, `: ""}<i>${passageDetails.workTitle}</i>${passageDetails.workSegName ? `, ${passageDetails.workSegName}` : ""}: lines ${lineRange.firstLine}&ndash;${lineRange.lastLine}</h2>
+		<h2 style="padding-bottom: 10px; font-size:large;">${passageDetails.authorName ? `${passageDetails.authorName}, `: ""}<i>${passageDetails.workTitle}</i>${passageDetails.workSegName ? `, ${passageDetails.workSegName}` : ""}: ${lineRange.firstLine.toString() === lineRange.lastLine.toString() ? `line ${lineRange.firstLine}` : html`lines ${lineRange.firstLine}&ndash;${lineRange.lastLine}`}</h2>
 
 		${readingWords.selected.length > 0 ? // show reading alternatives, if they exist for the passage
 			display(
@@ -80,9 +80,9 @@ html`
 		<h4>How to use this chart</h4>
 		<p style="font-size:smaller;">Mouse over a cell to see a popup that shows what word it represents and how many direct and indirect intertexts it has; click on a cell to freeze the popup information. Mousing over or clicking on a cell will also display a visualization below of that word&rsquo;s intertextual lineage.</p>
 		
-		<p style="font-size:smaller;"><b>Direct intertexts</b> are those where a scholar has suggested a direct link between the present word and a word in an earlier text. <b>Indirect intertexts</b> are intertexts at further remove (i.e., where a direct or indirect intertext refers to another, still earlier, passage). Currently, the project does not include intratexts (allusions to other passages within the same text).</p>
+		<p style="font-size:smaller;"><b>Direct intertexts</b> are those where a scholar has suggested a direct link between the present word and a word in an earlier text. <b>Indirect intertexts</b> are intertexts at further remove (i.e., where a direct or indirect intertext refers to another, still earlier, passage). Currently, the project does not include intratexts (allusions to other passages within the same work).</p>
 
-		<p style="font-size:smaller;">A <b>missing</b> word (represented as a gap) is not currently in the database. A word shown with <b>zero total intertexts</b> is either in the database only as the ancestor of another word, or has not yet been assigned to any intertextual relationships.</p>
+		<p style="font-size:smaller;">A <b>missing</b> word (represented as a gap) is not currently in the database. A word shown with <b>zero total intertexts</b> either is in the database only as the ancestor of another word or has not yet been assigned to any intertextual relationships.</p>
 
 		<p style="font-size:smaller;"><b>Two caveats:</b> absence of a word does not necessarily mean that there are no intertexts, just that they are not yet in the database; and lines appear in numeric order, even if editors agree that they should be transposed.</p>
 
@@ -135,7 +135,7 @@ const refAll = view(Inputs.toggle({label: "View all?"}))
 </ul>
 
 <p style="font-size: smaller">
-N.B. Every intertext in the database has <b>at least one</b> publication entered as a source. Many other, unlisted publications may record the same intertext; there is no attempt at completion, nor any effort to cite the *first* publication to record a given intertext.
+N.B. Every intertext in the database has <b>at least one</b> publication entered as a source. Many other, unlisted publications may record the same intertext, and there is no attempt to cite the <i>first</i> publication to record a given intertext.
 </p>
 
 </div>
@@ -147,8 +147,6 @@ else {
 	if (plotCurrSelect) {display(plotCurrSelect)} else {display(html`<p><i>No current selection in plot.</i></p>`)}
 	}
 ``` -->
-
-<hr>
 
 
 <!-- DATA LOADING AND MANIPULATION; VISUALIZATION CREATION -->
@@ -1160,7 +1158,7 @@ for (let i in sourcesFilteredIDs) {
 		let author = lookupIDTable.get(pub.authorID); 
 		pubString = author;
 		let workTitle = pub.workTitle;
-		pubString += `, <i>${workTitle}</i>`
+		pubString += `, <i>${workTitle}</i>`;
 	}
 
 	// modern sources
@@ -1176,19 +1174,20 @@ for (let i in sourcesFilteredIDs) {
 	pubString += ` (${pub.pubDate}) `;
 
 	// add article/chapter title if there is one
-	pubString += pub.articleChapterTitle ? `&ldquo;${pub.articleChapterTitle},&rdquo; ` : ''
+	pubString += pub.articleChapterTitle ? `&ldquo;${pub.articleChapterTitle},&rdquo; ` : '';
 	
 	// add book/journal title
-	pubString += `<i>${pub.bookJournalTitle}</i>`
+	pubString += `<i>${pub.bookJournalTitle}</i>`;
 
 	// add journal issue number if there is one
-	pubString += pub.issueNumber ? ` ${pub.issueNumber}` : ''
+	pubString += pub.issueNumber ? ` ${pub.issueNumber}` : '';
 }
 
 	// get citation locations for source and add them
 	let sourceLocs = sourcesArray.filter(source => source.sourceID === sourcesFilteredIDs[i])[0].sourceLocs.filter(loc => loc !== '');
-	sourceLocs = sourceLocs.length > 0 ? sourceLocs.join(', ') : ''
-	pubString += sourceLocs ? `: ${sourceLocs}.` : '.'
+	sourceLocs = sourceLocs.length > 0 ? sourceLocs.join(', ') : '';
+	pubString += !sourceLocs ? '' : pub.issueNumber ? ':' : ',';
+	pubString += sourceLocs ? ` ${sourceLocs}.` : '.';
 
 	pubList.push(pubString);
 
@@ -1208,11 +1207,10 @@ refDiv.selectAll("li").data(pubList.sort()).join("li").join("text").html(d => d)
 
 ```
 
+
 <!-- 
-```js
-display(html`<ul>${htmlTest}</ul>`)
-```
- -->
+
+<hr>
 
 
 # Sandbox
@@ -1327,4 +1325,4 @@ sankeyData
 ```js
 lookupIDTable
 ```
-
+ -->
