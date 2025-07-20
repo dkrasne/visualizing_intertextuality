@@ -4,9 +4,13 @@
 
  The primary intended audience is all scholars and students of Latin poetry who have an interest in intertextuality.
 
+**Who chooses the intertexts for the database?**
+
+The goal is eventually to include *all* published (and thus peer-reviewed) word-level intertexts in the database. Plausible intertexts that have not been published are not included (but can be added if they are published!). The *order* in which they are added depends on many factors, and the work is slow.
+
 **Which author do I select for poems in the *Appendix Vergiliana*, or poems with disputed authorship, like the *Hercules Oetaeus*?**
 
-All works with uncertain or disputed authorial attribution (including unattributed fragments) can be found by selecting &lsquo;Anonymous works&rsquo; in the dropdown menu for Author. However, works such as the [*Hercules Oetaeus*](https://en.wikipedia.org/wiki/Hercules_Oetaeus), which has traditionally (but probably incorrectly) been attributed to Seneca, or works such as the [*Culex*](https://en.wikipedia.org/wiki/Appendix_Vergiliana#Culex_(%22The_Gnat%22)), which is transmitted as part of the [*Appendix Vergiliana*](https://en.wikipedia.org/wiki/Appendix_Vergiliana) and was believed by ancient Roman authors to be an early work of Vergil, will *also* be found by selecting the relevant author&mdash;such works will be listed with brackets around the title. In the diagrams, they are shown without an author, or as &ldquo;anonymous&rdquo;. Conversely, poems by distinct pseudonymous (but not spurious) authors, such as [Lygdamus](https://en.wikipedia.org/wiki/Lygdamus), will be listed under the pseudonym, not under &lsquo;Anonymous works&rsquo;. For tragic fragments, attribution (or lack thereof) follows the recent [*Tragicorum Fragmenta Romanorum*](https://www.vandenhoeck-ruprecht-verlage.com/reihe-tragicorum-romanorum-fragmenta) (TrRF); other such decisions will be listed as they are made.
+All works with uncertain or disputed authorial attribution (including unattributed fragments) can be found by selecting &lsquo;Anonymous works&rsquo; in the dropdown menu for Author. However, works such as the [*Hercules Oetaeus*](https://en.wikipedia.org/wiki/Hercules_Oetaeus), which has traditionally (but probably incorrectly) been attributed to Seneca, or works such as the [*Culex*](https://en.wikipedia.org/wiki/Appendix_Vergiliana#Culex_(%22The_Gnat%22)), which is transmitted as part of the [*Appendix Vergiliana*](https://en.wikipedia.org/wiki/Appendix_Vergiliana) and was believed by ancient Roman authors to be an early work of Vergil, will *also* be found by selecting the relevant author&mdash;such works will be listed with brackets around the title. In the diagrams, they are shown without an author, or as &ldquo;anonymous&rdquo;. Conversely, poems by distinct pseudonymous (but not spurious) authors, such as [Lygdamus](https://en.wikipedia.org/wiki/Lygdamus), will be listed under the pseudonym, not under &lsquo;Anonymous works&rsquo;. For tragic fragments, attribution (or lack thereof) follows the recent [*Tragicorum Romanorum Fragmenta*](https://www.vandenhoeck-ruprecht-verlage.com/reihe-tragicorum-romanorum-fragmenta) (TrRF); other such decisions will be listed as they are made.
 
 **How do I view extranumerical lines (such as 845a, which would come between 845 and 846)?**
 
@@ -19,7 +23,3 @@ When there is a choice between readings that affects an intertext (either becaus
 **Since words are assigned to a single line, how do you handle instances of hyphenation in synapheia?**
 
 When a word is split between two lines due to synapheia (essentially, the joining of two lines into one), the word is assigned to whichever line contains more of its syllables, and the position(s) it occupies in the other line are left unassigned.
-
-**Who chooses the intertexts for the database?**
-
-The goal is eventually to include *all* published (and thus peer-reviewed) word-level intertexts in the database. Plausible intertexts that have not been published are not included (but can be added if they are published!). The *order* in which they are added depends on many factors, and the work is slow.

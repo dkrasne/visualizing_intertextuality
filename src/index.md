@@ -6,19 +6,38 @@ toc: false
 
 # Visualizing Intertextuality
 
-**Developed by:** [Darcy Krasne](http://www.darcykrasne.com/)
+## Developed by: [Darcy Krasne](http://www.darcykrasne.com/)
 
 [See the About page](./about) for an explanation of this project.
 
-*N.B. As Observable is phasing out its cloud hosting, this site has relocated to http://dkrasne.github.io/visualizing_intertextuality. Please take note of the new address.*
+Number of words of Latin poetry (or its antecedents) currently in the database: **${nodegoatTables.word_instance_table.length}**
+
+<div class="grid grid-cols-2">
+
+<div class="note" label="Want to contribute?">
+
+If you would like to contribute to user-testing of the project, you may participate by [filling out this form](https://forms.gle/8n6HHsEVt2V2BTYz5).
+
+Down the road, I will also happily solicit volunteers to assist in entering intertexts into the database, but that is not currently possible.
+
+</div>
+
+<div class="warning" label="Advisory">
+
+This site has relocated to http://dkrasne.github.io/visualizing_intertextuality. Please take note of the new address, if you are using a different one.
+
+</div>
+
+</div>
 
 <!-- Probably make a 'Statistics' or 'Fun facts' box here, to the right, or on the About page -->
 
-Number of words of Latin poetry (or its antecedents) currently in the database: **${nodegoatTables.word_instance_table.length}**
+<hr>
+
 
 ## Select passage to view
 
-<div class="tip">Currently there is a limited set of intertexts in the database. Choose Valerius Flaccus, <i>Argonautica</i>, Book 1, lines 1&ndash;4 or Book 2, lines 475&ndash;476 to see the display of some richly intertextual passages. You can also <a href="./sankey">view this diagram</a> to see the complete network of intertexts currently in the database.</div>
+<div class="tip">Currently there is a limited set of intertexts in the database. Choose Valerius Flaccus, <i>Argonautica</i>, Book 1, lines 1&ndash;4 or Book 2, lines 475&ndash;476 to see the display of some particularly rich intertextual passages. You can also <a href="./sankey">view this diagram</a> to see the complete network of intertexts currently in the database.</div>
 
 <!-- Author, Work, and Work Section Selectors -->
 

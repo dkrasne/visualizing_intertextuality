@@ -8,13 +8,13 @@ toc: false
 
 The diagram on this page shows the connections between all intertexts currently in the database; a subset of this diagram is shown on the main page for the selected portion of a work.
 
-Each rectangular node represents one section of a work (a `work segment`, as defined on [the About page](./about#database-design)). A flow path linking two nodes represents words that have been identified as intertexts between the source text (higher up) and the target text (lower down); its width shows (in relative terms) *how many* words are borrowed.
+Each rectangular node represents one section of a work (a `work segment`, as defined on [the About page](./about#database-design)). A flow path linking two nodes represents words that have been identified as intertexts between the source text (the higher node) and the target text (the lower node); its width shows (in relative terms) *how many* words are borrowed.
 
 ## How to use this visualization
 
 Mouse over a node to see the work and section that it represents. Mouse over a linking flow path to see the words it represents. (N.B. If the link you want to see information for is covered by other links, you can mouse over either of the two nodes attached to it in order to raise it to the surface.)
 
-Tick the following box to sort the nodes (within a given row) alphabetically by author and work; authors may still appear in multiple rows. If you leave the box **unticked**, the nodes will be placed in their optimal position as determined by the flow paths (which makes the overall diagram less messy but also potentially less intuitive).
+Tick the following box to sort the nodes (within a given row) alphabetically by author and work; authors may still appear in multiple rows. If you leave the box **unticked**, the nodes will be placed in their optimal position as determined by the connections between them (which makes the overall diagram less messy but also potentially less intuitive).
 
 ```js
 const authorSort = view(Inputs.toggle({label: html`Sort nodes by author?`}));
