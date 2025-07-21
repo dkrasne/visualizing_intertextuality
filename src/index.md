@@ -935,6 +935,13 @@ for (let i in sankeyFilteredEdgesArr) {
 	edge.source_words = edge.source_words.filter(wordID => passageWordIntxts.includes(wordID));
 	let wordList = wordsFiltered.map(word => word.obj_id);
 	edge.target_words = edge.target_words.filter(wordID => wordList.includes(wordID) || passageWordIntxts.includes(wordID));
+
+	// if a source word is included in the passage intertexts but isn't included via a given path, drop it from that path
+	let wordParents = [];
+	for (let word of edge.target_words) {
+		wordParents = wordParents.concat(passageIntxts.filter(intxt => intxt.target_word_id === word).map(intxt => intxt.source_word_id));
+	}
+	edge.source_words = edge.source_words.filter(wordID => wordParents.includes(wordID));
 }
 
 // Remove any edges that now have empty target-word lists
