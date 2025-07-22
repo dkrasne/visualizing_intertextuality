@@ -1190,9 +1190,9 @@ for (let i in sourcesFilteredIDs) {
 	// modern sources
 	else {
 	// add author(s), separated by comma if more than one
-	for (let i in pub.authorIDs) {
-		pubString += i > 0 ? ', ' : '';
-		let author = lookupIDTable.get(pub.authorIDs[i]);
+	for (let j in pub.authorIDs) {
+		pubString += j > 0 ? ', ' : '';
+		let author = lookupIDTable.get(pub.authorIDs[j]);
 		pubString += author;
 	}
 

@@ -48,15 +48,15 @@ jobs:
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Deploy to Observable Cloud
-        run: npm run deploy -- --message "$(git log -1 --pretty=%s)"
-        env:
-          OBSERVABLE_TOKEN: ${{ secrets.OBSERVABLE_DEPLOY_TOKEN }}
       - uses: actions/configure-pages@v4
-
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        
+      - name: Deploy to Observable Cloud
+        run: npm run deploy -- --message "$(git log -1 --pretty=%s)"
+        env:
+          OBSERVABLE_TOKEN: ${{ secrets.OBSERVABLE_DEPLOY_TOKEN }}
