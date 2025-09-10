@@ -8,7 +8,7 @@ toc: false
 
 ## Developed by: [Darcy Krasne](http://www.darcykrasne.com/)
 
-[See the About page](./about) for an explanation of this project.
+A set of tools to visualize the intensity and genealogical complexity of intertextual allusions in passages of Latin poetry. [See the About page](./about) for a detailed explanation of this project.
 
 Number of words of Latin poetry (or its antecedents) currently in the database: **${nodegoatTables.word_instance_table.length}**
 
